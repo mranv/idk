@@ -1,0 +1,733 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>设计模式 - 读书笔记 | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="文档更新说明 最后更新 2016年04月1日 首次更新 2016年03月27日  读书笔记原则单一原则 单一原则   就一个类而言,应该只有一个引起它变化的原因.[ASD]例如,一个类里面包含了复杂的逻辑和针对调用者的权限判断,这就有两个引起这个类要修改的原因了.例如一个类中包含了本身逻辑,数据处理,数据库SQL语句等,这就有了多个引起类要修改的原因了. 类如果不单一,就可能面临经常要修改的问题.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="设计模式 - 读书笔记">
+<meta property="og:url" content="http://yoursite.com/2016/03/27/2016-03-27-The-Design-Patterns-book-notes/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="文档更新说明 最后更新 2016年04月1日 首次更新 2016年03月27日  读书笔记原则单一原则 单一原则   就一个类而言,应该只有一个引起它变化的原因.[ASD]例如,一个类里面包含了复杂的逻辑和针对调用者的权限判断,这就有两个引起这个类要修改的原因了.例如一个类中包含了本身逻辑,数据处理,数据库SQL语句等,这就有了多个引起类要修改的原因了. 类如果不单一,就可能面临经常要修改的问题.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/images/decorator-uml.png">
+<meta property="og:image" content="http://yoursite.com/images/decorator-cartoon.png">
+<meta property="og:image" content="http://yoursite.com/images/proxy-uml.jpg">
+<meta property="og:image" content="http://yoursite.com/images/factory-simple-uml.bmp">
+<meta property="og:image" content="http://yoursite.com/images/factory-method-uml.bmp">
+<meta property="og:image" content="http://yoursite.com/images/Template-Method-Pattern.jpg">
+<meta property="article:published_time" content="2016-03-27T02:51:29.000Z">
+<meta property="article:modified_time" content="2016-04-12T00:54:50.000Z">
+<meta property="article:author" content="Cocos">
+<meta property="article:tag" content="可扩展">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/images/decorator-uml.png">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/03/27/2016-03-27-The-Design-Patterns-book-notes/" title="设计模式 - 读书笔记" itemprop="url">设计模式 - 读书笔记</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2016-03-27T02:51:29.000Z" itemprop="datePublished"> 发表于 2016-03-27</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0"><span class="toc-number">2.</span> <span class="toc-text">读书笔记</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E5%88%99"><span class="toc-number">2.1.</span> <span class="toc-text">原则</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%95%E4%B8%80%E5%8E%9F%E5%88%99"><span class="toc-number">2.1.1.</span> <span class="toc-text">单一原则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%8F%91-%E5%B0%81%E9%97%AD%E5%8E%9F%E5%88%99"><span class="toc-number">2.1.2.</span> <span class="toc-text">开发-封闭原则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BE%9D%E8%B5%96%E5%80%92%E8%BD%AC%E5%8E%9F%E5%88%99"><span class="toc-number">2.1.3.</span> <span class="toc-text">依赖倒转原则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%87%8C%E6%B0%8F%E4%BB%A3%E6%8D%A2%E5%8E%9F%E5%88%99"><span class="toc-number">2.1.4.</span> <span class="toc-text">里氏代换原则</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.2.</span> <span class="toc-text">模式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.2.1.</span> <span class="toc-text">装饰模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.2.2.</span> <span class="toc-text">代理模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F%E4%B8%8E%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.2.3.</span> <span class="toc-text">简单工厂模式与工厂方法模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.2.4.</span> <span class="toc-text">模板方法模式</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AF%B4%E6%98%8E"><span class="toc-number">3.</span> <span class="toc-text">说明</span></a></li></ol>
+		
+		</div>
+		
+		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
+<li>最后更新 2016年04月1日</li>
+<li>首次更新 2016年03月27日</li>
+</ul>
+<h1 id="读书笔记"><a href="#读书笔记" class="headerlink" title="读书笔记"></a>读书笔记</h1><h2 id="原则"><a href="#原则" class="headerlink" title="原则"></a>原则</h2><h3 id="单一原则"><a href="#单一原则" class="headerlink" title="单一原则"></a>单一原则</h3><blockquote>
+<p>单一原则</p>
+</blockquote>
+<ol>
+<li>就一个类而言,应该只有一个引起它变化的原因.[ASD]例如,一个类里面包含了复杂的逻辑和针对调用者的权限判断,这就有两个引起这个类要修改的原因了.例如一个类中包含了本身逻辑,数据处理,数据库SQL语句等,这就有了多个引起类要修改的原因了.</li>
+<li>类如果不单一,就可能面临经常要修改的问题.</li>
+<li>如果一个类承担的职责过多,就等于把这些职责耦合在一起,一个职责的变化可能会削弱或抑制这个类完成其他职责的能力.这种耦合会导致脆弱的设计,当变化发生时,设计会遭受到意想不到的破坏.[ASD]</li>
+<li>软件设计真正要做的许多内容,就是发现职责并把那些职责相互分离,判断是否需要分离出类来,就是如果你能够想到多于一个的动机去改变一个类,那么这个类就具有多于一个的职责.[ASD]</li>
+</ol>
+<p><strong>上面提起的职责动机数量问题其实关系到一个设计的粗细粒度问题.比如一个类负责管理用户资料,这时候你要修改头像的保存细节或者修改地址的保存方式,这都需要去修改用户资料管理的类,你总不能说把修改头像和修改地址都独立成一个类吧.粗细粒度问题,才是单一原则真正的设计难点!</strong></p>
+<h3 id="开发-封闭原则"><a href="#开发-封闭原则" class="headerlink" title="开发-封闭原则"></a>开发-封闭原则</h3><blockquote>
+<p>开发-封闭原则 </p>
+</blockquote>
+<ol>
+<li><p>无论模块是多么的’封闭’,都会存在一些无法对之封闭的变化.既然不可能完全封闭,设计人员必须对于他设计的模块应该对哪种变化封闭做出选择.他必须先猜测出最有可能发生的变化种类,然后构建抽象来隔离那些变化 [ASD]</p>
+</li>
+<li><p>在我们最初编写代码时,假设不会发生变化.当变化发生了,我们就必须立即采取行动,创建抽象来隔离以后发生同类变化. [ASD]</p>
+</li>
+<li><p>面对需求,对程序的改动是通过新增代码进行的,而不是更改现有的代码 [ASD]</p>
+</li>
+<li><p>我们希望的是在开发工作展开不久就可以知道可能发生的变化.查明可能发生的变化所需要的时间越长,要创建正 确的抽象就越困难. [ASD]</p>
+</li>
+<li><p>对于程序中的每一个部分都刻意进行抽象同样不是一个好主意.拒绝不成熟的抽象和抽象本身一样重要. [ASD]</p>
+</li>
+</ol>
+<h3 id="依赖倒转原则"><a href="#依赖倒转原则" class="headerlink" title="依赖倒转原则"></a>依赖倒转原则</h3><blockquote>
+<p>依赖倒转原则 (Dependence Inversion Principle)</p>
+</blockquote>
+<ol>
+<li>高层模块不应该依赖于低层模块,两个都应该依赖抽象.[ASD]</li>
+<li>抽象不应该依赖于细节,细节应该依赖于抽象.[ASD]</li>
+</ol>
+<p><strong>其实这个原则就是我们经常说的,针对接口编程而不针对实现编程.</strong></p>
+<h3 id="里氏代换原则"><a href="#里氏代换原则" class="headerlink" title="里氏代换原则"></a>里氏代换原则</h3><blockquote>
+<p>里氏代换原则</p>
+</blockquote>
+<ol>
+<li>子类必须能够替换掉他的父类型.</li>
+<li>程序运行时，具体的类对象可以替换抽象类型的对象，程序不会出现任何问题。</li>
+</ol>
+<p><em>在大多数情况下，这三个设计原则会同时出现，开闭原则是目标，里氏代换原则是基础，依赖倒转原则是手段，它们相辅相成，相互补充，目标一致，只是分析问题时所站角度不同而已。</em></p>
+<p>推荐阅读<br><a target="_blank" rel="noopener" href="http://blog.csdn.net/lovelion/article/details/7562783">面向对象设计原则之依赖倒转原则</a><br><a target="_blank" rel="noopener" href="http://www.cnblogs.com/shaosks/archive/2012/02/07/2341639.html">面向对象设计原则之四：依赖倒置原则</a></p>
+<h2 id="模式"><a href="#模式" class="headerlink" title="模式"></a>模式</h2><h3 id="装饰模式"><a href="#装饰模式" class="headerlink" title="装饰模式"></a>装饰模式</h3><blockquote>
+<p>装饰模式</p>
+</blockquote>
+<img src="/images/decorator-uml.png" class="" title="decorator-uml"> <img src="/images/decorator-cartoon.png" class="" title="decorator-cartoon">
+<ol>
+<li>当系统需要新功能的时候,是向旧的类中添加新的功能的代码.这些新的功能通常装饰了原有类的核心职责或主要行为.在主类中加入新的属性,新的方法和新的逻辑,会增加主类的复杂度,而这些新加入的东西仅仅是为了满足一些只在某种特定情况下才会执行的特殊行为的需要[大话].</li>
+<li>装饰模式却提供了一个非常好的解决方案,它把每个要装饰的功能放在单独的类中,并让这个类包装它所要包装的对象,因此,当需要执行特殊行为时,客户代码就可以在运行的时候根据需要有选择地,按顺序地使用装饰功能包装对象了.[DP]</li>
+</ol>
+<p><strong>个人理解:</strong></p>
+<ol>
+<li><strong>Component</strong>是类的核心功能.那些拥有共同接口的核心功能类被设计成Component的子类,称为ConcretComponent.</li>
+<li><strong>Decorator</strong>顾名思义就是起到装饰作用,类除了核心功能外可能还需要一些小细节的处理,可以放在装饰类中实现.装饰类继承自Component,可以理解成Decorator本质上也是一个Component,只是被修饰过的而已.所以一个装饰过别人的Decorator又可以被当作Component被别人再次装饰一下.</li>
+<li>每一个Decorator里面又组合了一个Component,目的就是当一个Decorator被别人装饰时,可以把它放到要装饰它的Decorator里面.比如ConcreteDecoratorB要装饰ConcreteDecoratorA.执行=&gt;ConcreteDecoratorB.setComponent(ConcreteDecoratorA)相当于把A组合到自己体内去了.</li>
+</ol>
+<p><strong>变种一下,何以把setComponent直接合并到构造方法里面,就变成了new ConcreteDecoratorB(new ConcreteDecoratorA()).另外,如果Component只有一个类或者Decorator只有一个类,可以简化一下把抽象接口去掉.</strong><br>推荐阅读:<br><a target="_blank" rel="noopener" href="http://blog.csdn.net/lenotang/article/details/2587265">装饰模式</a></p>
+<h3 id="代理模式"><a href="#代理模式" class="headerlink" title="代理模式"></a>代理模式</h3><blockquote>
+<p>代理模式</p>
+</blockquote>
+<p>代理模式应该是很常见的,以至于你都没察觉到那就是代理模式.</p>
+<img src="/images/proxy-uml.jpg" class="" title="proxy-uml">
+<p>代理模式的应用</p>
+<ol>
+<li>远程代理,也就是为一个对象在不同的地址空间提供局部代表.这样可以隐藏一个对象存在于不同地址空间的事实[DP]</li>
+<li>虚拟代理,是根据需要要创建开销很大的对象.通过它来存放实例化需要很长时间的真实对象[DP]</li>
+<li>安全代理,用来控制真实对象的访问权限[DP]</li>
+<li>智能指引,是指当调用真实的对象时,代理处理另外一些事[DP]</li>
+</ol>
+<p>上面几种说法可能不好理解,推荐阅读<br><a target="_blank" rel="noopener" href="http://www.cnblogs.com/silverLee/archive/2010/02/05/1664577.html">为什么要使用代理模式</a></p>
+<h3 id="简单工厂模式与工厂方法模式"><a href="#简单工厂模式与工厂方法模式" class="headerlink" title="简单工厂模式与工厂方法模式"></a>简单工厂模式与工厂方法模式</h3><blockquote>
+<p>简单工厂模式与工厂方法模式</p>
+</blockquote>
+<img src="/images/factory-simple-uml.bmp" class="" title="factory-simple-uml">
+<p><strong>简单工厂模式</strong>的最大优点在于工厂类中包含了必要的逻辑判断,根据客户端的选择条件动态实例化相关的类,对于客户端来说,去除了与具体产品的依赖.比如计算器,客户端传进一个’+’给工厂,工厂就会去实例化一个有加法运算功能的实例.[大话]缺陷是违背了开放—封闭原则.</p>
+<img src="/images/factory-method-uml.bmp" class="" title="factory-method-uml">
+<p>*<em>工厂方法模式(Factory Method)**定义一个用于创建对象的接口,让子类决定实例化哪一个类.工厂方法使一个类的实例化延迟到子类.[DP]遵循了开放—封闭原则.<br>工厂方法模式实现时,以上面计算器为例,客户端需要决定实例化哪一个具体工厂来实现运算类.例如客户端实例化一个减法工厂,然后就可以通过减法工厂去实例化出减法运算的对象.同时也可以发现,选择判断的问题还是存在的,也就是说,工厂方法把简单工厂的内部逻辑判断转移到了客户端代码来进行.如果想要增加功能,在简单工厂中是修改工厂类的逻辑判断代码,而在工厂方法模式中则是修改客户端实例化工厂的代码.要完全去除逻辑代码可以使用</em>反射*.</p>
+<p>推荐阅读:<br><a target="_blank" rel="noopener" href="http://lvxingzhelimin.blog.163.com/blog/static/170716550201110852956542/">三种工厂模式汇总</a></p>
+<h3 id="模板方法模式"><a href="#模板方法模式" class="headerlink" title="模板方法模式"></a>模板方法模式</h3><blockquote>
+<p>Template Method Pattern</p>
+</blockquote>
+<img src="/images/Template-Method-Pattern.jpg" class="" title="Template-Method-Pattern">
+<p>模板方法模式,定义了一个操作中的算法骨架,而将一些步骤延迟到子类中,模板方法使得子类可以不改变一个算法的结构即可重新定义该算法的某些特定步骤.[DP]<br>平时在代码中应该经常见过这个设计模式,比如排序,让你定义一个排序的对比函数.在实际开发中,如果遇到了一系列构成步骤相似的,但是有些步骤的实现可能不同的,就适用模板方法模式了.</p>
+<p>推荐阅读:<br><a target="_blank" rel="noopener" href="http://blog.csdn.net/lovelion/article/details/8299794">模板方法模式深度解析</a></p>
+<h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p>[ASD] 《敏捷软件开发:原则、模式与实践》 作者:Robert C.Martin<br>[大话] 《大话设计模式》作者:程杰<br>[DP] 《设计模式:可复用面向对象软件的基础》作者:Erich Gamm,Richard Helm,Ralph Johnson, John Vlissides</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/%E6%9E%B6%E6%9E%84%E4%B8%8E%E8%AE%BE%E8%AE%A1/">架构与设计</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/可扩展/">可扩展</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2016/03/27/2016-03-27-The-Design-Patterns-book-notes/" data-title="设计模式 - 读书笔记 | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/03/30/2016-03-30-These-days-in-the-iOS-Programming-road-through-the-pits/" title="在iOS编程路上走过的坑 - Tips">
+  <strong>上一篇：</strong><br/>
+  <span>
+  在iOS编程路上走过的坑 - Tips</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/03/25/2016-03-25-the-design-principle-and-implementation-of-extensible-account-system-2/"  title="可绑定可扩展的帐号系统设计原理及其实现(二)">
+ <strong>下一篇：</strong><br/> 
+ <span>可绑定可扩展的帐号系统设计原理及其实现(二)
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0"><span class="toc-number">2.</span> <span class="toc-text">读书笔记</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E5%88%99"><span class="toc-number">2.1.</span> <span class="toc-text">原则</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%95%E4%B8%80%E5%8E%9F%E5%88%99"><span class="toc-number">2.1.1.</span> <span class="toc-text">单一原则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%8F%91-%E5%B0%81%E9%97%AD%E5%8E%9F%E5%88%99"><span class="toc-number">2.1.2.</span> <span class="toc-text">开发-封闭原则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BE%9D%E8%B5%96%E5%80%92%E8%BD%AC%E5%8E%9F%E5%88%99"><span class="toc-number">2.1.3.</span> <span class="toc-text">依赖倒转原则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%87%8C%E6%B0%8F%E4%BB%A3%E6%8D%A2%E5%8E%9F%E5%88%99"><span class="toc-number">2.1.4.</span> <span class="toc-text">里氏代换原则</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.2.</span> <span class="toc-text">模式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.2.1.</span> <span class="toc-text">装饰模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.2.2.</span> <span class="toc-text">代理模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F%E4%B8%8E%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.2.3.</span> <span class="toc-text">简单工厂模式与工厂方法模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.2.4.</span> <span class="toc-text">模板方法模式</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AF%B4%E6%98%8E"><span class="toc-number">3.</span> <span class="toc-text">说明</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Greedy-Algorithm/" title="Greedy Algorithm">Greedy Algorithm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2020 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

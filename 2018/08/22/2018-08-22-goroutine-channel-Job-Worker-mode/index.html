@@ -1,0 +1,643 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>使用golang语言处理每分钟百万次的请求 | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="文档更新说明 最后更新 2018年08月22日 首次更新 2018年08月22日  前言　　本文参照博文我读《通过Go来处理每分钟达百万的数据请求》, 修改其中部分代码,为调度中心增加了关闭Worker单元的代码,也算是完善一下,代码重写的,不一定和原文一模一样.其他的没什么特别的.　　另外单靠这部分代码肯定是不能处理100万次请求的,需要多台机器配合. 　　 Job&#x2F;Worker模式123456">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用golang语言处理每分钟百万次的请求">
+<meta property="og:url" content="http://yoursite.com/2018/08/22/2018-08-22-goroutine-channel-Job-Worker-mode/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="文档更新说明 最后更新 2018年08月22日 首次更新 2018年08月22日  前言　　本文参照博文我读《通过Go来处理每分钟达百万的数据请求》, 修改其中部分代码,为调度中心增加了关闭Worker单元的代码,也算是完善一下,代码重写的,不一定和原文一模一样.其他的没什么特别的.　　另外单靠这部分代码肯定是不能处理100万次请求的,需要多台机器配合. 　　 Job&#x2F;Worker模式123456">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-08-22T08:22:02.000Z">
+<meta property="article:modified_time" content="2019-06-19T02:55:18.000Z">
+<meta property="article:author" content="Cocos">
+<meta property="article:tag" content="goroutine">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/08/22/2018-08-22-goroutine-channel-Job-Worker-mode/" title="使用golang语言处理每分钟百万次的请求" itemprop="url">使用golang语言处理每分钟百万次的请求</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2018-08-22T08:22:02.000Z" itemprop="datePublished"> 发表于 2018-08-22</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Job-Worker%E6%A8%A1%E5%BC%8F"><span class="toc-number">3.</span> <span class="toc-text">Job&#x2F;Worker模式</span></a></li></ol>
+		
+		</div>
+		
+		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
+<li>最后更新 2018年08月22日</li>
+<li>首次更新 2018年08月22日</li>
+</ul>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>　　本文参照博文<a target="_blank" rel="noopener" href="https://www.cnblogs.com/artong0416/p/7416766.html">我读《通过Go来处理每分钟达百万的数据请求》</a>, 修改其中部分代码,为调度中心增加了关闭Worker单元的代码,也算是完善一下,代码重写的,不一定和原文一模一样.其他的没什么特别的.<br>　　另外单靠这部分代码肯定是不能处理100万次请求的,需要多台机器配合.
+　　</p>
+<h1 id="Job-Worker模式"><a href="#Job-Worker模式" class="headerlink" title="Job/Worker模式"></a>Job/Worker模式</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;runtime&quot;</span></span><br><span class="line">	<span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义一些全局常量</span></span><br><span class="line"><span class="keyword">var</span> (</span><br><span class="line">	MaxWorker             = <span class="number">10</span></span><br><span class="line">	MaxDispatchNumControl = <span class="number">20</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// Payload 任务里面的负载</span></span><br><span class="line"><span class="keyword">type</span> Payload <span class="keyword">struct</span> &#123;</span><br><span class="line">	Num <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Job 任务结构体</span></span><br><span class="line"><span class="keyword">type</span> Job <span class="keyword">struct</span> &#123;</span><br><span class="line">	Payload Payload</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// JobQueue 定义全局Job队列, 新增加的任务就丢进该任务队列即可</span></span><br><span class="line"><span class="keyword">var</span> JobQueue <span class="keyword">chan</span> Job</span><br><span class="line"></span><br><span class="line"><span class="comment">// WorkerList 工作单元切片</span></span><br><span class="line"><span class="keyword">var</span> WorkerList []*Worker</span><br><span class="line"></span><br><span class="line"><span class="comment">//用于控制并发处理的协程数</span></span><br><span class="line"><span class="keyword">var</span> DispatchNumControl <span class="keyword">chan</span> <span class="keyword">bool</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Limit</span><span class="params">(job Job)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> &lt;-time.After(time.Millisecond * <span class="number">100</span>):</span><br><span class="line">		fmt.Println(<span class="string">&quot;我很忙&quot;</span>)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	<span class="keyword">case</span> DispatchNumControl &lt;- <span class="literal">true</span>:</span><br><span class="line">		<span class="comment">// 任务放入全局任务队列channal</span></span><br><span class="line">		JobQueue &lt;- job</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Worker 工作者单元, 用于执行Job的单元, 数量有限, 由调度中心分配</span></span><br><span class="line"><span class="keyword">type</span> Worker <span class="keyword">struct</span> &#123;</span><br><span class="line">	WorkerPool <span class="keyword">chan</span> <span class="keyword">chan</span> Job <span class="comment">//存放JobChan的池子</span></span><br><span class="line">	JobChan    <span class="keyword">chan</span> Job</span><br><span class="line">	quit       <span class="keyword">chan</span> <span class="keyword">bool</span></span><br><span class="line">	No         <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// NewWorker 创建工作单元</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewWorker</span><span class="params">(workerPool <span class="keyword">chan</span> <span class="keyword">chan</span> Job, no <span class="keyword">int</span>)</span> *<span class="title">Worker</span></span> &#123;</span><br><span class="line">	fmt.Println(<span class="string">&quot;创建了工作者&quot;</span>, no)</span><br><span class="line">	<span class="keyword">return</span> &amp;Worker&#123;</span><br><span class="line">		WorkerPool: workerPool,</span><br><span class="line">		JobChan:    <span class="built_in">make</span>(<span class="keyword">chan</span> Job),</span><br><span class="line">		quit:       <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">bool</span>),</span><br><span class="line">		No:         no,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Start 开始工作</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(w *Worker)</span> <span class="title">Start</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			<span class="comment">// 注册JobChan到工作池中,  然后开始工作循环</span></span><br><span class="line">			w.WorkerPool &lt;- w.JobChan</span><br><span class="line">			fmt.Println(<span class="string">&quot;w.WorkerPool &lt;- w.JobChan | w:&quot;</span>, w)</span><br><span class="line">			<span class="comment">//如果有工作进来就执行工作, 收到退出信号就退出</span></span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> job := &lt;-w.JobChan:</span><br><span class="line">				<span class="comment">//收到job, 开始工作</span></span><br><span class="line">				fmt.Println(<span class="string">&quot;job := &lt;-w.JobChan&quot;</span>)</span><br><span class="line">				fmt.Println(job)</span><br><span class="line">				<span class="comment">//完成之后释放控制中心额度</span></span><br><span class="line">				&lt;-DispatchNumControl</span><br><span class="line">				time.Sleep(<span class="number">5</span> * time.Second)</span><br><span class="line">			<span class="keyword">case</span> &lt;-w.quit:</span><br><span class="line">				fmt.Println(<span class="string">&quot;&lt;-w.Quit | w:&quot;</span>, w)</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Stop 暂停工作</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(w *Worker)</span> <span class="title">Stop</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		w.quit &lt;- <span class="literal">true</span></span><br><span class="line">	&#125;()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Dispatcher 调度中心, 用于创建工作单元Worker, 安排Worker执行Job</span></span><br><span class="line"><span class="keyword">type</span> Dispatcher <span class="keyword">struct</span> &#123;</span><br><span class="line">	WorkerPool  <span class="keyword">chan</span> <span class="keyword">chan</span> Job</span><br><span class="line">	MaxWorkers  <span class="keyword">int</span></span><br><span class="line">	ActiveCount <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// NewDispatcher 创建调度中心</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewDispatcher</span><span class="params">(max <span class="keyword">int</span>)</span> *<span class="title">Dispatcher</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;Dispatcher&#123;</span><br><span class="line">		WorkerPool: <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">chan</span> Job, max),</span><br><span class="line">		MaxWorkers: max,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Run 根据MaxWorkers, 创建工作者, 同时让工作者运行起来</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(d *Dispatcher)</span> <span class="title">Run</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; d.MaxWorkers; i++ &#123;</span><br><span class="line">		worker := NewWorker(d.WorkerPool, i)</span><br><span class="line">		worker.Start()</span><br><span class="line">		<span class="comment">// 将工作单元存进切片中</span></span><br><span class="line">		WorkerList[i] = worker</span><br><span class="line">		d.ActiveCount++</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">go</span> d.dispatcher()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// dispatcher 读取全局job队列, 开始分配任务</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(d *Dispatcher)</span> <span class="title">dispatcher</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> job := &lt;-JobQueue:</span><br><span class="line">			<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(job Job)</span></span> &#123;</span><br><span class="line">				<span class="comment">// 从池中找到一个空闲的JobChan, 如果没有空闲的就会堵塞</span></span><br><span class="line">				jobChan := &lt;-d.WorkerPool</span><br><span class="line">				fmt.Println(<span class="string">&quot;jobChan := &lt;-d.WorkerPool&quot;</span>)</span><br><span class="line">				<span class="comment">//把job丢给工作者</span></span><br><span class="line">				jobChan &lt;- job</span><br><span class="line"></span><br><span class="line">				<span class="comment">//每次丢进一个job给工作者之后, 就删除一个工作者, 直到工作者数量维持在5个</span></span><br><span class="line">				fmt.Println(<span class="string">&quot;d.ActiveCount: &quot;</span>, d.ActiveCount)</span><br><span class="line">				<span class="keyword">if</span> d.ActiveCount &gt; <span class="number">5</span> &#123;</span><br><span class="line">					worker := WorkerList[d.ActiveCount<span class="number">-1</span>]</span><br><span class="line">					fmt.Println(<span class="string">&quot;worker := WorkerList[d.ActiveCount-1] | worker: &quot;</span>, worker)</span><br><span class="line">					worker.Stop()</span><br><span class="line">					d.ActiveCount--</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;(job)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// AddQueue 往全局队列中添加job</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">AddQueue</span><span class="params">(n <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; n; i++ &#123;</span><br><span class="line">		job := Job&#123;Payload&#123;i&#125;&#125;</span><br><span class="line">		fmt.Println(<span class="string">&quot;JobQueue &lt;- job&quot;</span>, job)</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 只有在DispatchNumControl缓冲还未满的时候, 才能将job加入到JobQueue中</span></span><br><span class="line">		<span class="comment">// 因为一旦加入到JobQueue之后, 系统立马会将job从队头取出, 分配一个协程去单独处理后续的工作</span></span><br><span class="line">		<span class="comment">// 为了避免协程数量过多, 所以使用Lmit函数做总体控制</span></span><br><span class="line">		<span class="keyword">if</span> Limit(job) &#123;</span><br><span class="line">			fmt.Println(<span class="string">&quot;任务成功加入全局队列&quot;</span>)</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			fmt.Println(<span class="string">&quot;全局队列已满, 暂不处理任务&quot;</span>)</span><br><span class="line">			i--</span><br><span class="line">		&#125;</span><br><span class="line">		fmt.Println(<span class="string">&quot;当前协程数:&quot;</span>, runtime.NumGoroutine())</span><br><span class="line">		time.Sleep(<span class="number">200</span> * time.Millisecond)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	DispatchNumControl = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">bool</span>, MaxDispatchNumControl)</span><br><span class="line">	JobQueue = <span class="built_in">make</span>(<span class="keyword">chan</span> Job)</span><br><span class="line">	WorkerList = <span class="built_in">make</span>([]*Worker, <span class="number">10</span>)</span><br><span class="line"></span><br><span class="line">	disp := NewDispatcher(MaxWorker)</span><br><span class="line">	disp.Run()</span><br><span class="line">	time.Sleep(<span class="number">1</span> * time.Second)</span><br><span class="line"></span><br><span class="line">	AddQueue(<span class="number">100</span>)</span><br><span class="line">	fmt.Println()</span><br><span class="line">	time.Sleep(<span class="number">1000</span> * time.Second)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Golang/">Golang</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/goroutine/">goroutine</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2018/08/22/2018-08-22-goroutine-channel-Job-Worker-mode/" data-title="使用golang语言处理每分钟百万次的请求 | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2018/11/05/2018-11-05-docker-is-a-good-man/" title="Docker真是一门好技术">
+  <strong>上一篇：</strong><br/>
+  <span>
+  Docker真是一门好技术</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2018/06/27/2018-06-27-world-cup-erc721/"  title="ERC721- 世界杯">
+ <strong>下一篇：</strong><br/> 
+ <span>ERC721- 世界杯
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Job-Worker%E6%A8%A1%E5%BC%8F"><span class="toc-number">3.</span> <span class="toc-text">Job&#x2F;Worker模式</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Greedy-Algorithm/" title="Greedy Algorithm">Greedy Algorithm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2020 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

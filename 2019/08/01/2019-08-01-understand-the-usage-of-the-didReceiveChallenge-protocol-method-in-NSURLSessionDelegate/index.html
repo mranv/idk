@@ -1,0 +1,707 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>认真理解iOS开发中HTTPS协议的用法 | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="文档更新说明 最后更新 2019年08月05日 首次更新 2019年08月01日  前言　　网上有很多类似文章, 但我发现其中多少有一些致命错误和误解, 本文是我经过测试,翻看权威源码之后写出的, 尽量把程序在做什么个写明白.　　本文的主角就是下面这个方法, 他属于NSURLSessionDelegate协议的, 至于古老版本的HTTPS相关接口就不说了.(NSURLSessionTaskDele">
+<meta property="og:type" content="article">
+<meta property="og:title" content="认真理解iOS开发中HTTPS协议的用法">
+<meta property="og:url" content="http://yoursite.com/2019/08/01/2019-08-01-understand-the-usage-of-the-didReceiveChallenge-protocol-method-in-NSURLSessionDelegate/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="文档更新说明 最后更新 2019年08月05日 首次更新 2019年08月01日  前言　　网上有很多类似文章, 但我发现其中多少有一些致命错误和误解, 本文是我经过测试,翻看权威源码之后写出的, 尽量把程序在做什么个写明白.　　本文的主角就是下面这个方法, 他属于NSURLSessionDelegate协议的, 至于古老版本的HTTPS相关接口就不说了.(NSURLSessionTaskDele">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/images/charles-ssl-setting.png">
+<meta property="og:image" content="http://yoursite.com/images/charles-root-pem.jpg">
+<meta property="og:image" content="http://yoursite.com/images/charles-ca-check-successful.jpg">
+<meta property="og:image" content="http://yoursite.com/images/session_http_basic.jpg">
+<meta property="article:published_time" content="2019-08-01T10:40:57.000Z">
+<meta property="article:modified_time" content="2019-08-05T08:03:25.000Z">
+<meta property="article:author" content="Cocos">
+<meta property="article:tag" content="HTTPS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/images/charles-ssl-setting.png">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2019/08/01/2019-08-01-understand-the-usage-of-the-didReceiveChallenge-protocol-method-in-NSURLSessionDelegate/" title="认真理解iOS开发中HTTPS协议的用法" itemprop="url">认真理解iOS开发中HTTPS协议的用法</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2019-08-01T10:40:57.000Z" itemprop="datePublished"> 发表于 2019-08-01</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#TLS-Handshake"><span class="toc-number">3.</span> <span class="toc-text">TLS Handshake</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%90%86%E8%A7%A3didReceiveChallenge%E6%96%B9%E6%B3%95"><span class="toc-number">4.</span> <span class="toc-text">理解didReceiveChallenge方法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%84%E7%90%86%E6%9D%83%E5%A8%81%E6%9C%BA%E6%9E%84%E7%AD%BE%E5%8F%91%E7%9A%84%E8%AF%81%E4%B9%A6"><span class="toc-number">4.1.</span> <span class="toc-text">处理权威机构签发的证书</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%84%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%87%AA%E5%88%B6%E8%AF%81%E4%B9%A6"><span class="toc-number">4.2.</span> <span class="toc-text">处理服务器自制证书</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%84%E7%90%86TLS-Handshake%E5%8F%8C%E5%90%91%E8%AE%A4%E8%AF%81"><span class="toc-number">4.3.</span> <span class="toc-text">处理TLS Handshake双向认证</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
+<li>最后更新 2019年08月05日</li>
+<li>首次更新 2019年08月01日</li>
+</ul>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>　　网上有很多类似文章, 但我发现其中多少有一些致命错误和误解, 本文是我经过测试,翻看权威源码之后写出的, 尽量把程序在做什么个写明白.<br>　　本文的主角就是下面这个方法, 他属于NSURLSessionDelegate协议的, 至于古老版本的HTTPS相关接口就不说了.(NSURLSessionTaskDelegate有一个类似的属于task-level, 同理).
+　　</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)URLSession:(<span class="built_in">NSURLSession</span> *)session </span><br><span class="line">didReceiveChallenge:(<span class="built_in">NSURLAuthenticationChallenge</span> *)challenge </span><br><span class="line">completionHandler:(<span class="keyword">void</span> (^)(<span class="built_in">NSURLSessionAuthChallengeDisposition</span> disposition, <span class="built_in">NSURLCredential</span> *credential))completionHandler</span><br></pre></td></tr></table></figure>
+<p>　　通过实现这个方法, 我们可以实现下面的技术需求:</p>
+<ol>
+<li>验证服务器证书是否在系统信任列表中</li>
+<li>实现服务器双向认证请求</li>
+<li>验证自制HTTPS证书</li>
+</ol>
+<p>要理解这三种需求的实现, 首先要理解HTTPS和HTTP的不同之处, 即TLS协议. HTTPS协议可以简单理解为HTTP+TLS<br>, TLS协议全称Transport Layer Security, 它又分为TLS Record和TLS Handshake两部分, 我们关心的就是握手(Handshake)部分. 详细的协议内容网上有很多文章, 这里推荐一下这篇<a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000002554673">SSL/TLS原理详解</a>.</p>
+<h1 id="TLS-Handshake"><a href="#TLS-Handshake" class="headerlink" title="TLS Handshake"></a>TLS Handshake</h1><p>　　TLS Handshake负责完成一系列密钥交换, 目的就是为了让客户端和服务器能够使用同一把私钥对传输的内容进行对称加密, 从而确保两端数据的安全传输. 理解整个握手的过程, 有助于我们理解iOS中HTTPS协议的使用. 下面我就简单说一下握手的过程, 详细过程可以看到上面提到的文章.</p>
+<blockquote>
+<p>TLS Handshake:</p>
+</blockquote>
+<ol>
+<li>客户端生成随机数Client random, 声明支持的加密方式, 发送给服务端. (ClientHello)</li>
+<li>服务端确认加密方式, 生成随机数Server random, 给出服务端证书, 发送给客户端. (SeverHello, SeverHello Done)</li>
+<li>如果服务端要求双向认证,则客户端需要提供客户端证书给服务端(Client Key Exchange); 接着客户端验证服务端证书是否合法, 生成随机数Pre-Master, 并使用服务端证书中的公钥进行加密, 发送给服务端. (Certificate Verify)</li>
+<li>服务端使用自己的证书私钥, 解密客户端发送来的加密信心, 得到Per-Master</li>
+<li>客户端和服务端此时拥有三个相同的随机数, 按照相同算法生成对话私钥, 彼此互相使用对话私钥加密Finish信息互相确认私钥正确性, 握手完成.</li>
+</ol>
+<h1 id="理解didReceiveChallenge方法"><a href="#理解didReceiveChallenge方法" class="headerlink" title="理解didReceiveChallenge方法"></a>理解didReceiveChallenge方法</h1><p>　　理解TLS握手流程, 就可以知道上面提到的三点技术需求的开发时机.<code>didReceiveChallenge</code>方法提供了一个参数<code>(void (^)(NSURLSessionAuthChallengeDisposition disposition, NSURLCredential *credential))completionHandler</code>, 它是一个Block, 主要是让开发者向URLSession提供授权信息, 一共有三种:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="built_in">NS_ENUM</span>(<span class="built_in">NSInteger</span>, <span class="built_in">NSURLSessionAuthChallengeDisposition</span>) &#123;</span><br><span class="line">    <span class="comment">// 使用指定证书</span></span><br><span class="line">    <span class="built_in">NSURLSessionAuthChallengeUseCredential</span> = <span class="number">0</span>,</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 系统默认处理挑战的方式, 没有实现代理方法的时候就是这种处理方式</span></span><br><span class="line">    <span class="built_in">NSURLSessionAuthChallengePerformDefaultHandling</span> = <span class="number">1</span>,</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// TLS握手将会被取消</span></span><br><span class="line">    <span class="built_in">NSURLSessionAuthChallengeCancelAuthenticationChallenge</span> = <span class="number">2</span>,</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 拒绝本次保护空间的认证挑战, 下一个保护空间会重新认证(实际测试发现效果和NSURLSessionAuthChallengePerformDefaultHandling类似), </span></span><br><span class="line">    <span class="comment">// 要取消请直接使用NSURLSessionAuthChallengeCancelAuthenticationChallenge</span></span><br><span class="line">    <span class="built_in">NSURLSessionAuthChallengeRejectProtectionSpace</span> = <span class="number">3</span>,</span><br><span class="line">    </span><br><span class="line">&#125; <span class="built_in">NS_ENUM_AVAILABLE</span>(<span class="built_in">NSURLSESSION_AVAILABLE</span>, <span class="number">7</span>_0);</span><br></pre></td></tr></table></figure>
+
+<p>接着再看另一个参数<code>NSURLAuthenticationChallenge *challenge</code>, 它包含了本次认证挑战的基本信息, 其中我们关心的是服务端的保护空间(protectionSpace), 里面有服务端域名, 端口, TLS认证方法(authenticationMethod)等信息. 有了这些信息, 开发者才能知道当前进行的TLS Handshake需要哪些认证方式. 下面我会举一个涵盖99%场景的认证例子(NSURLAuthenticationMethodServerTrust), 也就是认证服务器证书, 来帮助大家理解.</p>
+<h2 id="处理权威机构签发的证书"><a href="#处理权威机构签发的证书" class="headerlink" title="处理权威机构签发的证书"></a>处理权威机构签发的证书</h2><p>　　对于权威机构签发的证书, 这类证书上面会声明自己是由哪一个CA机构(或CA的子机构)签发, 而对应的CA机构也有自己的CA证书, 在手机出厂之前就被安装进系统里了, 这样对于权威机构签发的服务器证书, 只要从系统里找一下服务器证书对应的CA证书, 拿CA证书的公钥解密一下服务器证书的签名, 解密出的Hash是不是和服务器携带的数据部分运算出的Hash一致, 即可证明服务器证书是合法的. 如果不实现didReceiveChallenge这个协议方法, 系统会自动帮忙处理好. 当然有兴趣也可以自己试一试, 下面是示例代码:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)URLSession:(<span class="built_in">NSURLSession</span> *)session didReceiveChallenge:(<span class="built_in">NSURLAuthenticationChallenge</span> *)challenge completionHandler:(<span class="keyword">void</span> (^)(<span class="built_in">NSURLSessionAuthChallengeDisposition</span>, <span class="built_in">NSURLCredential</span> * _Nullable))completionHandler &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 查看服务器提供的认证方式</span></span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;protectionSpace.authenticationMethod = %@&quot;</span>, challenge.protectionSpace.authenticationMethod);</span><br><span class="line">    <span class="keyword">if</span> ([challenge.protectionSpace.authenticationMethod isEqualToString:<span class="built_in">NSURLAuthenticationMethodServerTrust</span>]) &#123;</span><br><span class="line"></span><br><span class="line">	    <span class="comment">// 判断服务器的证书是否合法. (系统默认也会做这样的操作)</span></span><br><span class="line">	    SecTrustResultType result;</span><br><span class="line">	    SecTrustEvaluate(challenge.protectionSpace.serverTrust, &amp;result);</span><br><span class="line">	    </span><br><span class="line">	    <span class="keyword">if</span>(result == kSecTrustResultUnspecified || result == kSecTrustResultProceed) &#123;</span><br><span class="line">	        <span class="built_in">NSLog</span>(<span class="string">@&quot;合法&quot;</span>);</span><br><span class="line">	        completionHandler(<span class="built_in">NSURLSessionAuthChallengePerformDefaultHandling</span>, <span class="literal">nil</span>);</span><br><span class="line">	    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">	        <span class="built_in">NSLog</span>(<span class="string">@&quot;不合法&quot;</span>);</span><br><span class="line">	        completionHandler(<span class="built_in">NSURLSessionAuthChallengeCancelAuthenticationChallenge</span>, <span class="literal">nil</span>);</span><br><span class="line">	    &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 这里只处理单向认证, 其他情况不考虑</span></span><br><span class="line">    completionHandler(<span class="built_in">NSURLSessionAuthChallengeCancelAuthenticationChallenge</span>, <span class="literal">nil</span>);    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面有一个地方需要特别注意, 当证书合法时, 如果返回<code>NSURLSessionAuthChallengePerformDefaultHandling</code>, 则表示由系统处理, 此处执行<code>completionHandler(NSURLSessionAuthChallengeUseCredential, nil)</code>也是可以的, 效果和NSURLSessionAuthChallengePerformDefaultHandling一样.</p>
+<h2 id="处理服务器自制证书"><a href="#处理服务器自制证书" class="headerlink" title="处理服务器自制证书"></a>处理服务器自制证书</h2><p>　　这里分两种情况, 一种是无视服务器证书, 一种是要求服务器证书和我们APP内置证书相同时才承认.<br><strong>无视服务器证书</strong>时, 那就是不需要任何验证, 此时需要实现didReceiveChallenge方法. 因为系统默认是不会接受非权威机构的证书, 因此也不能返回<code>completionHandler(NSURLSessionAuthChallengePerformDefaultHandling, nil);</code>. <strong>比较容易混淆</strong>的地方是, 文档并没有明确说明单向认证认可服务端证书时completionHandler参数传入什么, 实际测试发现自制证书第一个参数需要传入NSURLSessionAuthChallengeUseCredential, 第二个参数传入服务端的serverTrust(AFNetworking是这样实现的), 这部分代码如下:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)URLSession:(<span class="built_in">NSURLSession</span> *)session didReceiveChallenge:(<span class="built_in">NSURLAuthenticationChallenge</span> *)challenge completionHandler:(<span class="keyword">void</span> (^)(<span class="built_in">NSURLSessionAuthChallengeDisposition</span>, <span class="built_in">NSURLCredential</span> * _Nullable))completionHandler &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 查看服务器提供的认证方式</span></span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;protectionSpace.authenticationMethod = %@&quot;</span>, challenge.protectionSpace.authenticationMethod);</span><br><span class="line">    <span class="keyword">if</span> ([challenge.protectionSpace.authenticationMethod isEqualToString:<span class="built_in">NSURLAuthenticationMethodServerTrust</span>]) &#123;</span><br><span class="line">        completionHandler(<span class="built_in">NSURLSessionAuthChallengeUseCredential</span>, challenge.protectionSpace.serverTrust);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 这里只处理单向认证, 其他情况不考虑</span></span><br><span class="line">    completionHandler(<span class="built_in">NSURLSessionAuthChallengeCancelAuthenticationChallenge</span>, <span class="literal">nil</span>);    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>绑定证书</strong>时, 也就是要求服务端证书的CA证书和APP内置CA证书相同(或服务端证书和APP内置证书相同), 原理也是一样的, 先获取服务端证书, 然后获取本地证书, 再对比一下看看是否相同即可.<br>自制证书容易, 但是去哪儿弄一个自制证书的服务器来测试呢? 这里我介绍一个小技巧, 可以使用Charles这个工具, 测试访问<code>https://www.baidu.com</code>, 把这个域名配置到Charles里,</p>
+<img src="/images/charles-ssl-setting.png" class="" width="300" height="100" title="ssl-setting">
+<p>然后手机连接Charles代理服务器(具体抓包方法谷歌找找很多教程), 接着先把Charles的CA证书导出来,</p>
+<img src="/images/charles-root-pem.jpg" class="" width="300" height="100" title="root-pem">
+<p>放进APP, 这样运行APP访问<code>https://www.baidu.com</code>的时候, Charles会把百度的证书替换成Charles自制证书, 自制证书对应CA证书就是我们导出的那个. 不过直接从Charles导出的格式是pem, 要转成der格式:</p>
+<pre><code>openssl x509 -in certificate.pem -outform der -out certificate.der</code></pre>
+<p>这部分代码如下:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)URLSession:(<span class="built_in">NSURLSession</span> *)session didReceiveChallenge:(<span class="built_in">NSURLAuthenticationChallenge</span> *)challenge completionHandler:(<span class="keyword">void</span> (^)(<span class="built_in">NSURLSessionAuthChallengeDisposition</span>, <span class="built_in">NSURLCredential</span> * _Nullable))completionHandler &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 查看服务器提供的认证方式</span></span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;protectionSpace.authenticationMethod = %@&quot;</span>, challenge.protectionSpace.authenticationMethod);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 服务器的证书</span></span><br><span class="line">    <span class="built_in">NSURLCredential</span> *serverCredential = [<span class="built_in">NSURLCredential</span> credentialForTrust:challenge.protectionSpace.serverTrust];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 本地证书</span></span><br><span class="line">    <span class="built_in">NSData</span> *certificateData = [<span class="built_in">NSData</span> dataWithContentsOfFile:[<span class="built_in">NSBundle</span>.mainBundle pathForResource:<span class="string">@&quot;certificate&quot;</span> ofType:<span class="string">@&quot;der&quot;</span>]];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 系统API是支持匹配多个证书, 这里需要用数组存放证书</span></span><br><span class="line">    <span class="built_in">NSMutableArray</span> *pinnedCertificates = [<span class="built_in">NSMutableArray</span> array];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 这里已经__bridge_transfer了, 所有权交由NSMutableArray管理, 所以不需要手动Release SecCertificateCreateWithData</span></span><br><span class="line">    [pinnedCertificates addObject:(__bridge_transfer <span class="keyword">id</span>)SecCertificateCreateWithData(<span class="literal">NULL</span>, (__bridge <span class="built_in">CFDataRef</span>)certificateData)];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 提示一下, 这里的C接口只是针对传入的serverTrust对象进行可信证书集合绑定,具体看文档</span></span><br><span class="line">    SecTrustSetAnchorCertificates(challenge.protectionSpace.serverTrust, (__bridge <span class="built_in">CFArrayRef</span>)pinnedCertificates);</span><br><span class="line"></span><br><span class="line">    SecTrustResultType result;</span><br><span class="line">    SecTrustEvaluate(challenge.protectionSpace.serverTrust, &amp;result);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span>(result == kSecTrustResultUnspecified || result == kSecTrustResultProceed) &#123;</span><br><span class="line">        <span class="comment">// 这里使用了Charles的CA证书, 检查Charles自制证书所以是合法的</span></span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;合法&quot;</span>);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 此外还可以直接检查本地APP内置证书是否和服务端证书所包含的证书链之中的一个匹配, 代码如下</span></span><br><span class="line">        <span class="built_in">CFIndex</span> certificateCount = SecTrustGetCertificateCount(challenge.protectionSpace.serverTrust);</span><br><span class="line">        <span class="built_in">NSMutableArray</span> *trustChain = [<span class="built_in">NSMutableArray</span> arrayWithCapacity:(<span class="built_in">NSUInteger</span>)certificateCount];</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (<span class="built_in">CFIndex</span> i = <span class="number">0</span>; i &lt; certificateCount; i++) &#123;</span><br><span class="line">            SecCertificateRef certificate = SecTrustGetCertificateAtIndex(challenge.protectionSpace.serverTrust, i);</span><br><span class="line">            [trustChain addObject:(__bridge_transfer <span class="built_in">NSData</span> *)SecCertificateCopyData(certificate)];</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="built_in">NSArray</span> *serverCertificates =  [<span class="built_in">NSArray</span> arrayWithArray:trustChain];</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 检查服务器证书是否包含本地证书</span></span><br><span class="line">        <span class="keyword">if</span> ([serverCertificates containsObject:certificateData]) &#123;</span><br><span class="line">            <span class="built_in">NSLog</span>(<span class="string">@&quot;服务器证书和本地证书相同&quot;</span>);</span><br><span class="line">            completionHandler(<span class="built_in">NSURLSessionAuthChallengeUseCredential</span>, serverCredential);</span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">            completionHandler(<span class="built_in">NSURLSessionAuthChallengeCancelAuthenticationChallenge</span>, <span class="literal">nil</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;不合法&quot;</span>);</span><br><span class="line">        completionHandler(<span class="built_in">NSURLSessionAuthChallengeCancelAuthenticationChallenge</span>, <span class="literal">nil</span>);</span><br><span class="line">    &#125;    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果</p>
+<img src="/images/charles-ca-check-successful.jpg" class="" width="300" height="300" title="ssl-setting">
+
+<p><strong>下面需要重点说明一个问题</strong><br>很多文章都把服务器返回状态码401和TLS混在一起讲了, 401状态码的头部信息已经是在TLS握手之后, 确认双方合法之后, 被加密传输的内容, 属于HTTP协议部分了, 所以401和HTTPS权限认证不是一回事. 不过他们在iOS中都可以通过task-level的didReceiveChallenge来完成认证.</p>
+<img src="/images/session_http_basic.jpg" class="" width="300" height="300" title="ssl-setting">
+
+
+<h2 id="处理TLS-Handshake双向认证"><a href="#处理TLS-Handshake双向认证" class="headerlink" title="处理TLS Handshake双向认证"></a>处理TLS Handshake双向认证</h2><p>　　先看一下didReceiveChallenge的文档, 说得很清楚<br>　　<br>This method is called in two situations:</p>
+<ul>
+<li>When a remote server asks for client certificates or Windows NT LAN Manager (NTLM) authentication, to allow your app to provide appropriate credentials</li>
+<li>When a session first establishes a connection to a remote server that uses SSL or TLS, to allow your app to verify the server’s certificate chain</li>
+</ul>
+<p><strong>Note</strong></p>
+<p>This method handles only the NSURLAuthenticationMethodNTLM, NSURLAuthenticationMethodNegotiate, NSURLAuthenticationMethodClientCertificate, and NSURLAuthenticationMethodServerTrust authentication types. For all other authentication schemes, the session calls only the URLSession:task:didReceiveChallenge:completionHandler: method.</p>
+<p>session-level的didReceiveChallenge方法只会在以下几种情况下被触发</p>
+<ol>
+<li>远程服务器要求客户端提供证书(双向认证)</li>
+<li>NTLM认证(微软提供的认证方式, 具体谷歌)</li>
+<li>SSL或TLS握手阶段, 允许你验证服务端证书链是否合法(上面已经介绍过)<br>其他认证状态将调用task-level的代理方法.</li>
+</ol>
+<p>具体代码和上面单向认证一样, completionHandler第二个参数传入服务端认可的证书即可.</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>　　这篇文章先是讲述了HTTPS协议的加密原理, 然后讲述了iOS开发中能够遇到的和HTTPS认证相关的场景的实现, 并给出常见认证的代码, 并解释了为什么要这么做. 其中C接口的部分代码参考AFNetworking框架, 这个框架封装了权威证书认证, 单向自制证书认证的功能, 好像缺少双向认证, 不过<code>AFSecurityPolicy</code>倒是提供了一个开发者自行订制认证逻辑的block, 可以直接实现认证逻辑block并赋值给<code>sessionDidReceiveAuthenticationChallenge</code>即可. 其他的有兴趣的可以自行查阅代码, 源码都比较简单.</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/iOS/">iOS</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/HTTPS/">HTTPS</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2019/08/01/2019-08-01-understand-the-usage-of-the-didReceiveChallenge-protocol-method-in-NSURLSessionDelegate/" data-title="认真理解iOS开发中HTTPS协议的用法 | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2019/08/22/2019-08-22-nstimer-weak-proxy/" title="实现NSTimer弱引用代理, 一劳永逸解决引用循环问题">
+  <strong>上一篇：</strong><br/>
+  <span>
+  实现NSTimer弱引用代理, 一劳永逸解决引用循环问题</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2019/07/25/2019-07-25-talking-about-design-patterns-from-cocoaLumberjack/"  title="从CocoaLumberjack的高效易扩展谈为什么要学习设计模式">
+ <strong>下一篇：</strong><br/> 
+ <span>从CocoaLumberjack的高效易扩展谈为什么要学习设计模式
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#TLS-Handshake"><span class="toc-number">3.</span> <span class="toc-text">TLS Handshake</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%90%86%E8%A7%A3didReceiveChallenge%E6%96%B9%E6%B3%95"><span class="toc-number">4.</span> <span class="toc-text">理解didReceiveChallenge方法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%84%E7%90%86%E6%9D%83%E5%A8%81%E6%9C%BA%E6%9E%84%E7%AD%BE%E5%8F%91%E7%9A%84%E8%AF%81%E4%B9%A6"><span class="toc-number">4.1.</span> <span class="toc-text">处理权威机构签发的证书</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%84%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%87%AA%E5%88%B6%E8%AF%81%E4%B9%A6"><span class="toc-number">4.2.</span> <span class="toc-text">处理服务器自制证书</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%84%E7%90%86TLS-Handshake%E5%8F%8C%E5%90%91%E8%AE%A4%E8%AF%81"><span class="toc-number">4.3.</span> <span class="toc-text">处理TLS Handshake双向认证</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Greedy-Algorithm/" title="Greedy Algorithm">Greedy Algorithm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2020 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

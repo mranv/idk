@@ -1,0 +1,789 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>在iOS编程路上走过的坑 - Tips | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="文档更新说明 第10次更新 2016年08月19日 第9次更新 2016年08月04日 第8次更新 2016年05月23日 第7次更新 2016年05月10日 第6次更新 2016年05月04日 第5次更新 2016年04月25日 第4次更新 2016年04月18日 第3次更新 2016年04月13日 第2次更新 2016年03月31日 首次更新  2016年03月30日  背景 　　记录我在iO">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在iOS编程路上走过的坑 - Tips">
+<meta property="og:url" content="http://yoursite.com/2016/03/30/2016-03-30-These-days-in-the-iOS-Programming-road-through-the-pits/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="文档更新说明 第10次更新 2016年08月19日 第9次更新 2016年08月04日 第8次更新 2016年05月23日 第7次更新 2016年05月10日 第6次更新 2016年05月04日 第5次更新 2016年04月25日 第4次更新 2016年04月18日 第3次更新 2016年04月13日 第2次更新 2016年03月31日 首次更新  2016年03月30日  背景 　　记录我在iO">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/images/contentOffect_64_1.png">
+<meta property="og:image" content="http://yoursite.com/images/contentOffect_64_2.png">
+<meta property="og:image" content="http://yoursite.com/images/contentOffect_64_3.png">
+<meta property="og:image" content="http://yoursite.com/images/Using-Custom-Buttons-and-Views-as-Navigation-Items.png">
+<meta property="og:image" content="http://yoursite.com/images/ConstraintAnimate.png">
+<meta property="og:image" content="http://yoursite.com/images/ConstraintAnimated.png">
+<meta property="og:image" content="http://yoursite.com/images/APP-Privacy-Policy.png">
+<meta property="article:published_time" content="2016-03-29T23:58:53.000Z">
+<meta property="article:modified_time" content="2016-08-19T06:19:12.000Z">
+<meta property="article:author" content="Cocos">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/images/contentOffect_64_1.png">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/03/30/2016-03-30-These-days-in-the-iOS-Programming-road-through-the-pits/" title="在iOS编程路上走过的坑 - Tips" itemprop="url">在iOS编程路上走过的坑 - Tips</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2016-03-29T23:58:53.000Z" itemprop="datePublished"> 发表于 2016-03-30</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">2.</span> <span class="toc-text">背景</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#UI%E7%9B%B8%E5%85%B3"><span class="toc-number">2.1.</span> <span class="toc-text">UI相关</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#scrollView-contentOffect%E8%8E%AB%E5%90%8D%E7%AD%89%E4%BA%8E-64"><span class="toc-number">2.1.1.</span> <span class="toc-text">scrollView.contentOffect莫名等于-64</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AE%E6%8E%A7%E5%88%B6%E5%99%A8backBarButtonItem%E6%88%96%E8%80%85leftBarButtonItem%E6%97%A0%E6%95%88"><span class="toc-number">2.1.2.</span> <span class="toc-text">设置控制器backBarButtonItem或者leftBarButtonItem无效</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8addObserver%E7%9B%91%E5%90%AC%E8%A7%86%E5%9B%BE%E7%9A%84frame%E6%97%A0%E6%95%88%E6%9E%9C"><span class="toc-number">2.1.3.</span> <span class="toc-text">使用addObserver监听视图的frame无效果</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TabBarController%E4%B8%8ENavigationController%E8%B0%81%E5%B5%8C%E5%A5%97%E8%B0%81"><span class="toc-number">2.1.4.</span> <span class="toc-text">TabBarController与NavigationController谁嵌套谁?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#iOS8%E4%B8%ADCollectionView%E5%8A%A0%E8%BD%BD%E9%80%9F%E5%BA%A6%E5%BC%82%E5%B8%B8%E6%85%A2"><span class="toc-number">2.1.5.</span> <span class="toc-text">iOS8中CollectionView加载速度异常慢</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E4%B8%AACollectionView%E5%87%BA%E7%8E%B0EXC-BAD-ACCESS"><span class="toc-number">2.1.6.</span> <span class="toc-text">多个CollectionView出现EXC_BAD_ACCESS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CollectionView%E7%9A%84Cell%E4%B8%AD%E6%B7%BB%E5%8A%A0%E6%8C%89%E9%92%AE%E6%97%A0%E6%B3%95%E5%93%8D%E5%BA%94%E4%BA%8B%E4%BB%B6"><span class="toc-number">2.1.7.</span> <span class="toc-text">CollectionView的Cell中添加按钮无法响应事件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E8%AE%BE%E7%BD%AEUIButton-titleLaebl-title%E6%97%A0%E6%95%88%E6%9E%9C"><span class="toc-number">2.1.8.</span> <span class="toc-text">代码设置UIButton.titleLaebl.title无效果</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BAScrollview%E4%B8%AD%E8%AE%BE%E7%BD%AE%E4%B8%8A%E4%B8%8B%E5%B7%A6%E5%8F%B3%E7%BA%A6%E6%9D%9F%E5%90%8E%E6%8F%90%E7%A4%BAambiguous"><span class="toc-number">2.1.9.</span> <span class="toc-text">为Scrollview中设置上下左右约束后提示ambiguous</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E8%AE%A9%E8%AE%BE%E7%BD%AE%E7%BA%A6%E6%9D%9F%E7%9A%84%E8%A7%86%E5%9B%BE%E4%BB%AC%E6%89%A7%E8%A1%8C%E5%8A%A8%E7%94%BB"><span class="toc-number">2.1.10.</span> <span class="toc-text">如何让设置约束的视图们执行动画?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%A8interface%E7%95%8C%E9%9D%A2%E9%87%8C%E6%89%BE%E4%B8%8D%E5%88%B0Cell%E8%A7%86%E5%9B%BE%E7%9A%84contentView%E5%B1%9E%E6%80%A7"><span class="toc-number">2.1.11.</span> <span class="toc-text">在interface界面里找不到Cell视图的contentView属性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%89%E6%97%B6%E5%80%99%E6%97%A0%E6%B3%95%E5%9C%A8%E5%AF%BC%E8%88%AA%E6%A0%8F%E4%B8%8A%E6%91%86%E6%94%BEBarButtonItem"><span class="toc-number">2.1.12.</span> <span class="toc-text">有时候无法在导航栏上摆放BarButtonItem</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%9C%A8interface%E7%95%8C%E9%9D%A2%E9%87%8C%E5%92%8C%E4%BB%A3%E7%A0%81%E9%87%8C%E8%AE%BE%E7%BD%AE%E5%AF%BC%E8%88%AA%E6%A0%8F%E7%9A%84%E6%A0%B7%E5%BC%8F"><span class="toc-number">2.1.13.</span> <span class="toc-text">如何在interface界面里和代码里设置导航栏的样式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E7%94%A8%E4%BB%A3%E7%A0%81%E5%86%99%E8%A7%86%E5%9B%BE%E7%9A%84%E5%AE%BD%E9%AB%98%E7%BA%A6%E6%9D%9F"><span class="toc-number">2.1.14.</span> <span class="toc-text">如何用代码写视图的宽高约束</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%A7%E6%89%BFUIImageView%E7%9A%84%E5%AD%90%E7%B1%BB-drawRect-%E6%96%B9%E6%B3%95%E4%B8%8D%E8%A2%AB%E8%B0%83%E7%94%A8"><span class="toc-number">2.1.15.</span> <span class="toc-text">继承UIImageView的子类,drawRect:方法不被调用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89toolBar%E4%B8%8A%E7%9A%84UIBarButtonItem"><span class="toc-number">2.1.16.</span> <span class="toc-text">自定义toolBar上的UIBarButtonItem</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E8%AE%A9%E9%87%8D%E5%86%99%E7%9A%84%E8%A7%86%E5%9B%BE%E5%AD%90%E7%B1%BB%E4%B9%9F%E6%94%AF%E6%8C%81%E7%9B%B4%E6%8E%A5%E5%9C%A8Xib-Storyboard%E4%B8%AD%E5%A1%AB%E5%86%99%E5%8F%82%E6%95%B0%E9%A2%84%E8%A7%88%E6%98%BE%E7%A4%BA%E6%95%88%E6%9E%9C"><span class="toc-number">2.1.17.</span> <span class="toc-text">如何让重写的视图子类也支持直接在Xib,Storyboard中填写参数预览显示效果</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E4%BC%98%E9%9B%85%E5%9C%B0%E5%BE%80TableView%E4%B8%8A%E6%B7%BB%E5%8A%A0%E6%97%A0%E7%BD%91%E7%BB%9C%E5%9B%BE%E7%89%87%E6%A0%87%E8%AE%B0%E6%88%96%E8%80%85%E5%8A%A0%E8%BD%BD%E6%8C%87%E7%A4%BA%E5%99%A8"><span class="toc-number">2.1.18.</span> <span class="toc-text">如何优雅地往TableView上添加无网络图片标记或者加载指示器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%8E%BB%E9%99%A4TableView%E4%B8%AD%E5%A4%9A%E4%BD%99%E7%9A%84%E5%88%86%E5%89%B2%E7%BA%BF"><span class="toc-number">2.1.19.</span> <span class="toc-text">如何去除TableView中多余的分割线</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A9%E4%B8%80%E4%B8%AA%E6%A8%A1%E6%80%81%E8%A7%86%E5%9B%BE%E9%80%8F%E6%98%8E%E9%83%A8%E5%88%86%E6%98%BE%E7%A4%BA%E6%88%90%E4%B8%8A%E4%B8%80%E4%B8%AA%E7%95%8C%E9%9D%A2"><span class="toc-number">2.1.20.</span> <span class="toc-text">让一个模态视图透明部分显示成上一个界面</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E7%94%A8%E7%99%BE%E5%88%86%E6%AF%94%E5%AE%9E%E7%8E%B0%E8%87%AA%E5%8A%A8%E5%B8%83%E5%B1%80"><span class="toc-number">2.1.21.</span> <span class="toc-text">多用百分比实现自动布局</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SearchBar%E5%BA%95%E9%83%A8%E6%9C%89%E4%B8%80%E6%9D%A1%E9%BB%91%E8%BE%B9"><span class="toc-number">2.1.22.</span> <span class="toc-text">SearchBar底部有一条黑边</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E5%88%B6SearchBar%E5%8F%96%E6%B6%88%E6%8C%89%E9%92%AE%E9%A2%9C%E8%89%B2-%E8%BE%93%E5%85%A5%E6%A1%86%E5%85%89%E6%A0%87%E9%A2%9C%E8%89%B2"><span class="toc-number">2.1.23.</span> <span class="toc-text">定制SearchBar取消按钮颜色,输入框光标颜色</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%9B%B8%E5%85%B3"><span class="toc-number">2.2.</span> <span class="toc-text">数据相关</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E8%87%AA%E5%B8%A6%E7%9A%84%E5%AD%97%E5%85%B8%E4%B8%8EJSON%E4%BA%92%E8%BD%AC"><span class="toc-number">2.2.1.</span> <span class="toc-text">系统自带的字典与JSON互转</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E8%B1%A1%E5%B1%9E%E6%80%A7%E4%B8%AD%E6%9C%89NSTimer%E5%AF%B9%E8%B1%A1-%E5%AF%BC%E8%87%B4%E5%AF%B9%E8%B1%A1%E6%97%A0%E6%B3%95%E8%A2%AB%E9%87%8A%E6%94%BE%E7%9A%84%E5%8F%AF%E8%83%BD%E5%8E%9F%E5%9B%A0"><span class="toc-number">2.2.2.</span> <span class="toc-text">对象属性中有NSTimer对象,导致对象无法被释放的可能原因</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88NSDate%E6%98%BE%E7%A4%BA%E7%9A%84%E6%97%A5%E6%9C%9F%E5%92%8C%E8%AE%BE%E7%BD%AE%E7%9A%84%E6%97%A5%E6%9C%9F%E4%B8%8D%E5%90%8C"><span class="toc-number">2.2.3.</span> <span class="toc-text">为什么NSDate显示的日期和设置的日期不同?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E4%BF%A1%E5%8F%B7%E9%87%8F%E8%BF%9B%E8%A1%8C%E5%BC%82%E6%AD%A5%E6%93%8D%E4%BD%9C%E5%90%8C%E6%AD%A5%E7%AD%89%E5%BE%85"><span class="toc-number">2.2.4.</span> <span class="toc-text">使用信号量进行异步操作同步等待</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8MJextension%E5%B0%86%E5%AD%97%E5%85%B8%E8%BD%AC%E6%88%90json%E5%AD%97%E7%AC%A6%E4%B8%B2%E9%9C%80%E8%A6%81%E6%B3%A8%E6%84%8F%E7%9A%84%E5%9C%B0%E6%96%B9"><span class="toc-number">2.2.5.</span> <span class="toc-text">使用MJextension将字典转成json字符串需要注意的地方</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CoreData%E6%8A%A5%E9%94%99-The-model-used-to-open-the-store-is-incompatible-with-the-one-used-to-create-the-store"><span class="toc-number">2.2.6.</span> <span class="toc-text">CoreData报错:The model used to open the store is incompatible with the one used to create the store</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96%E7%94%A8%E6%88%B7%E9%80%9A%E8%AE%AF%E5%BD%95%E4%B8%8E%E5%AE%A1%E6%A0%B8%E9%97%AE%E9%A2%98"><span class="toc-number">2.2.7.</span> <span class="toc-text">读取用户通讯录与审核问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E8%AF%BB%E5%8F%96%E6%9C%AC%E5%9C%B0json%E6%96%87%E4%BB%B6"><span class="toc-number">2.2.8.</span> <span class="toc-text">如何读取本地json文件</span></a></li></ol></li></ol></li></ol>
+		
+		</div>
+		
+		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
+<li>第10次更新 2016年08月19日</li>
+<li>第9次更新 2016年08月04日</li>
+<li>第8次更新 2016年05月23日</li>
+<li>第7次更新 2016年05月10日</li>
+<li>第6次更新 2016年05月04日</li>
+<li>第5次更新 2016年04月25日</li>
+<li>第4次更新 2016年04月18日</li>
+<li>第3次更新 2016年04月13日</li>
+<li>第2次更新 2016年03月31日</li>
+<li>首次更新  2016年03月30日</li>
+</ul>
+<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><blockquote>
+<p>　　记录我在iOS开发路上遇到的坑.</p>
+</blockquote>
+<h2 id="UI相关"><a href="#UI相关" class="headerlink" title="UI相关"></a>UI相关</h2><h3 id="scrollView-contentOffect莫名等于-64"><a href="#scrollView-contentOffect莫名等于-64" class="headerlink" title="scrollView.contentOffect莫名等于-64"></a>scrollView.contentOffect莫名等于-64</h3><blockquote>
+<p>　　当控制器的view属性是scrollView类型,或者控制器view属性的第一个子视图是scrollView类型,或者控制器view属性的第一个子视图下面的首个子视图是scrollView属性的,控制器会自动给scrollView插入一个conentOffect = -64.(其他没列举出来的情况也可能出现,具体情况具体分析.-64其实就是状态栏和导航栏的高度,没导航栏的话就只有状态栏的偏移了).<br>　　<strong>解决方案: 设置控制器automaticallyAdjustsScrollViewInsets = NO,另外如果导航栏不透明,还需要再设置extendedLayoutIncludesOpaqueBars = YES</strong></p>
+</blockquote>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//控制器view属性第一个子视图是wkWebView时</span></span><br><span class="line">[<span class="keyword">self</span>.view addSubview:<span class="keyword">self</span>.webView];</span><br></pre></td></tr></table></figure>
+<img src="/images/contentOffect_64_1.png" class="" width="150" height="150" title="contentOffect_64_1">
+<img src="/images/contentOffect_64_2.png" class="" width="150" height="150" title="contentOffect_64_2">
+
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//控制器view属性第一个子视图非scrollView类型时,控制器不会自动插入-64</span></span><br><span class="line">[<span class="keyword">self</span>.view addSubview:[[<span class="built_in">UIView</span> alloc] init]];</span><br><span class="line">[<span class="keyword">self</span>.view addSubview:<span class="keyword">self</span>.webView];</span><br></pre></td></tr></table></figure>
+<img src="/images/contentOffect_64_3.png" class="" width="150" height="150" title="contentOffect_64_3">
+
+<h3 id="设置控制器backBarButtonItem或者leftBarButtonItem无效"><a href="#设置控制器backBarButtonItem或者leftBarButtonItem无效" class="headerlink" title="设置控制器backBarButtonItem或者leftBarButtonItem无效"></a>设置控制器backBarButtonItem或者leftBarButtonItem无效</h3><blockquote>
+<p>　　被NavigationController使用push显示的控制器,在控制器里面使用self. navigationController. navigationItem. leftBarButtonItem 或者使用self. navigationController. navigationItem. backBarButtonItem 去设置顶部返回按钮的内容,结果总是不起作用,连按钮的标题的改不了.<br>　　<strong>解决方案:要在控制器内使用self.navigationItem.leftBarButtonItem才是正确的.参考下图</strong></p>
+</blockquote>
+<img src="/images/Using-Custom-Buttons-and-Views-as-Navigation-Items.png" class="" width="150" height="150" title="Using-Custom-Buttons-and-Views-as-Navigation-Items">
+
+<h3 id="使用addObserver监听视图的frame无效果"><a href="#使用addObserver监听视图的frame无效果" class="headerlink" title="使用addObserver监听视图的frame无效果"></a>使用addObserver监听视图的frame无效果</h3><blockquote>
+<p>　　A视图拥有子视图B,视图B使用约束让其与A的frame一样.使用- (void)addObserver:(NSObject <em>)anObserver forKeyPath:(NSString *)keyPath options:(NSKeyValueObservingOptions)options context:(void *)context 方法监听B的frame,然后改变A的frame,这个时候B视图虽然会随着A视图frame变化而变化,但是并不会触发监听事件- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary&lt;NSString *,id&gt; *)change context:(void *)context<br>　　*</em>解决方案:由于没有直接设置B的frame所以导致无法触发监听,可以直接监听A的frame就能触发监听事件了,另外这个坑我在实际开发中遇到,不知是不是规则如此还是另有原因**</p>
+</blockquote>
+<h3 id="TabBarController与NavigationController谁嵌套谁"><a href="#TabBarController与NavigationController谁嵌套谁" class="headerlink" title="TabBarController与NavigationController谁嵌套谁?"></a>TabBarController与NavigationController谁嵌套谁?</h3><blockquote>
+<p>　　到底是TabBarController里面的每一个tiem页面都嵌套一个NavigationController,还是NavigationController嵌套TabBarController?这个问题对于确实值得讨论,需要结合实际需求选择.选择不妥当会虽然能实现同样的功能,但是不方便代码的设计.(下面简称tab,nav)<br>　　<strong>解决方案:一个tab嵌套一个nav,nav push一个视图的时候如果将被push的视图设置为hideBottomBarOnPush的话,效果就是微信那样,圧入的视图会覆盖底部的tab按钮.而nav嵌套tab,然后push一个视图的话,不需要设置hideBottomBarOnPush效果也是微信那样.不过后者的话一会所有页面的navigationBar都是同一个.这里需要根据实际需求选择嵌套的方式.如果,不同页面有着不同的navigationBar,那就需要tab嵌套nav,相反则是nav嵌套tab.</strong></p>
+</blockquote>
+<h3 id="iOS8中CollectionView加载速度异常慢"><a href="#iOS8中CollectionView加载速度异常慢" class="headerlink" title="iOS8中CollectionView加载速度异常慢"></a>iOS8中CollectionView加载速度异常慢</h3><blockquote>
+<p>　　如果在iOS8中,CollectionView 的Cell使用特殊字体就会导致这个问题,iOS9则无异常.<br>　　<strong>解决方案:不使用特殊字体或者对字体做其他处理(暂时未使用到)</strong></p>
+</blockquote>
+<h3 id="多个CollectionView出现EXC-BAD-ACCESS"><a href="#多个CollectionView出现EXC-BAD-ACCESS" class="headerlink" title="多个CollectionView出现EXC_BAD_ACCESS"></a>多个CollectionView出现EXC_BAD_ACCESS</h3><blockquote>
+<p>　　如果界面上使用多个CollectionView,同时引用同一个CollectionView的UICollectionViewLayout,则会出现这个错误.<br>　　<strong>解决方案:为每一个CollectionView对象分配一个独立的Layout对象</strong></p>
+</blockquote>
+<h3 id="CollectionView的Cell中添加按钮无法响应事件"><a href="#CollectionView的Cell中添加按钮无法响应事件" class="headerlink" title="CollectionView的Cell中添加按钮无法响应事件"></a>CollectionView的Cell中添加按钮无法响应事件</h3><blockquote>
+<p>　　在xib文件中直接对CollectionViewCell添加一个按钮等界面元素,可能会发现,按钮无法点击,看上去Cell上的元素就像是一张图片一样,无法产生任何事件响应.<br>　　<strong>解决方案:这是因为直接添加到cell上的元素,将会被cell的contentView视图覆盖住,所以无法做任何响应.正确的做法是,任何元素都不要直接添加到cell上,而是添加到cell.contentView上</strong></p>
+</blockquote>
+<h3 id="代码设置UIButton-titleLaebl-title无效果"><a href="#代码设置UIButton-titleLaebl-title无效果" class="headerlink" title="代码设置UIButton.titleLaebl.title无效果"></a>代码设置UIButton.titleLaebl.title无效果</h3><blockquote>
+<p>　　直接在代码中设置UIButton.titleLabel.text,但是并没有任何效果.<br>　　<strong>解决方案:设置按钮上的问题,需要结合官方文档里说的.因为按钮有多种状态,比如未选中,高亮,选中等,所以需要用setTitle:forState:设置文字.另外按钮的其他属性可能也需要用类似方法设置,具体参考官方文档</strong></p>
+</blockquote>
+<h3 id="为Scrollview中设置上下左右约束后提示ambiguous"><a href="#为Scrollview中设置上下左右约束后提示ambiguous" class="headerlink" title="为Scrollview中设置上下左右约束后提示ambiguous"></a>为Scrollview中设置上下左右约束后提示ambiguous</h3><blockquote>
+<p>　　有一个View,里面有一个scrollView,scrollView里面有一个按钮,为按钮设置top,宽高,leading约束.为scrollView设置了上下左右的约束后,仍然Xcode提示ScrollView has ambiguous scrollable content height.原因就是UIScrollView有一个contentSize属性.虽然按钮设置了宽,高,top,leading约束,但是仍然无法让系统确定contentSize的尺寸.<br>　　<strong>解决方案:scrollView里的元素的约束必须全面,这样scrollView才能确定contentSize的尺寸.例如scrollView里面的元素必须设置上下左右宽高,这样才能让scrollView确定好内部的contentSize</strong></p>
+</blockquote>
+<h3 id="如何让设置约束的视图们执行动画"><a href="#如何让设置约束的视图们执行动画" class="headerlink" title="如何让设置约束的视图们执行动画?"></a>如何让设置约束的视图们执行动画?</h3><blockquote>
+<p>　　举一个简单的例子如图,View视图有红,蓝两个子视图.蓝色视图约束为top,leading,hight,width.红色视图约束也和蓝色类型一样.现在想要一个这样的动画效果:当蓝色视图的高度变小时,红色视图在蓝色视图缩小过程向上移动.我尝试了直接给蓝色视图设置一个frame.size.height = 0的动画效果,结果是蓝色视图随便执行了动画,但是红色视图无任何变化.这里对于设置过约束的视图要产生动画效果需要用到另一种方法.<br>　　<strong>解决方案:想要让约束在动画过程中一直生效,需要使用layoutIfNeeded这个方法,具体用法看最后代码.需要注意的是,如果没有达到预想的效果,肯定是约束没设置好,例如同时设置了视图的上下然后再变化高度,这样就无效果了</strong></p>
+</blockquote>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">IBAction</span>)move:(<span class="keyword">id</span>)sender &#123;</span><br><span class="line">    <span class="comment">//设置蓝色视图height约束为10</span></span><br><span class="line">    <span class="keyword">self</span>.heightConstraint.constant = <span class="number">10</span>;</span><br><span class="line">    [<span class="built_in">UIView</span> animateWithDuration:<span class="number">3</span> animations:^&#123;</span><br><span class="line">        [<span class="keyword">self</span>.view layoutIfNeeded];</span><br><span class="line">    &#125;];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<img src="/images/ConstraintAnimate.png" class="" width="150" height="150" title="ConstraintAnimate">
+<img src="/images/ConstraintAnimated.png" class="" width="150" height="150" title="ConstraintAnimated">
+
+<h3 id="在interface界面里找不到Cell视图的contentView属性"><a href="#在interface界面里找不到Cell视图的contentView属性" class="headerlink" title="在interface界面里找不到Cell视图的contentView属性"></a>在interface界面里找不到Cell视图的contentView属性</h3><blockquote>
+<p>　　有时候在xib或者storyboard文件中设置Cell视图的时候,却发现找不到contentView了,原因就是视图对象本身不是一个Cell视图,而是一个UIView视图.<br>　　<strong>解决方案:从对象库面板里面拉取一个Cell视图替换掉UIView视图即可</strong></p>
+</blockquote>
+<h3 id="有时候无法在导航栏上摆放BarButtonItem"><a href="#有时候无法在导航栏上摆放BarButtonItem" class="headerlink" title="有时候无法在导航栏上摆放BarButtonItem"></a>有时候无法在导航栏上摆放BarButtonItem</h3><blockquote>
+<p>　　导航栏比较特殊,例如直接从对象库面板拉取一个NavigatinController,rootViewController默认是一个tableViewController,这时候是无法直接在导航栏添加BarButtonItem的.<br>　　<strong>解决方案:需要将BarButtonItem摆放在Navigation Item上,而Navigation Item则需要放在navigation bar上</strong></p>
+</blockquote>
+<h3 id="如何在interface界面里和代码里设置导航栏的样式"><a href="#如何在interface界面里和代码里设置导航栏的样式" class="headerlink" title="如何在interface界面里和代码里设置导航栏的样式"></a>如何在interface界面里和代码里设置导航栏的样式</h3><blockquote>
+<p>　　在不熟悉的情况下,设置了效果往往无效,比如颜色等.<br>　　<strong>下面总结一下导航栏的设置方法(注意,navigationController.navigationBar在viewDidLoad是nil,只有在控制器触发viewWillAppear方法后才有值)</strong></p>
+</blockquote>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">设置标题颜色,需要设置Title Color.</span><br><span class="line">设置所有item颜色则需要设置View Tint属性,设置的item颜色会在push一个视图后,变成新视图的Bar Button item的默认颜色.</span><br><span class="line">如果要设置整个Bar的背景颜色,需要设置Bar Tint属性.</span><br><span class="line">下面总结一下用代码设置导航栏相关颜色和按钮的方法.</span><br><span class="line">(<span class="number">1</span>)设置导航栏标题颜色<span class="keyword">self</span>.navigationController.navigationBar.titleTextAttributes = [<span class="built_in">NSDictionary</span> dictionaryWithObjectsAndKeys:</span><br><span class="line">                                           [<span class="built_in">UIColor</span> whiteColor],</span><br><span class="line">                                           <span class="built_in">UITextAttributeTextColor</span>];</span><br><span class="line">或者 <span class="keyword">self</span>.navigationController.navigationBar.titleTextAttributes = [<span class="built_in">NSDictionary</span> dictionaryWithObjectsAndKeys:</span><br><span class="line">                                                                   [<span class="built_in">UIColor</span> whiteColor],</span><br><span class="line">                                                                   <span class="built_in">NSForegroundColorAttributeName</span>, <span class="literal">nil</span>];</span><br><span class="line"></span><br><span class="line">(<span class="number">2</span>)设置导航栏背景颜色<span class="keyword">self</span>.navigationController.navigationBar.barTintColor</span><br><span class="line">(<span class="number">3</span>)设置导航栏上面的bar button items文字颜色<span class="keyword">self</span>.navigationController.navigationBar.tintColor;单独对item进行设置则是<span class="keyword">self</span>.navigationItem.leftBarButtonItem.tintColor</span><br><span class="line">(<span class="number">4</span>)设置导航栏上的按钮,需要设置Root视图控制器的navigationItem属性,而不是直接设置导航控制器!因为导航控制后最终的item是会取值Root视图控制器的</span><br><span class="line">* 注意,navigationController.navigationBar在viewDidLoad是<span class="literal">nil</span>,只有在控制器触发viewWillAppear方法后才有值</span><br></pre></td></tr></table></figure>
+
+<h3 id="如何用代码写视图的宽高约束"><a href="#如何用代码写视图的宽高约束" class="headerlink" title="如何用代码写视图的宽高约束"></a>如何用代码写视图的宽高约束</h3><blockquote>
+<p>　　代码写约束一般用如下方法</p>
+</blockquote>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">+ (<span class="keyword">instancetype</span>)constraintWithItem:(<span class="keyword">id</span>)view1</span><br><span class="line">                         attribute:(<span class="built_in">NSLayoutAttribute</span>)attr1</span><br><span class="line">                         relatedBy:(<span class="built_in">NSLayoutRelation</span>)relation</span><br><span class="line">                            toItem:(<span class="keyword">id</span>)view2</span><br><span class="line">                         attribute:(<span class="built_in">NSLayoutAttribute</span>)attr2</span><br><span class="line">                        multiplier:(<span class="built_in">CGFloat</span>)multiplier</span><br><span class="line">                          constant:(<span class="built_in">CGFloat</span>)c</span><br></pre></td></tr></table></figure>
+<p>其中有一个问题,就是宽高约束这种参考对象就只有自己了,那么如何写呢?</p>
+<blockquote>
+<p>　　<strong>解决方案:</strong></p>
+</blockquote>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="keyword">self</span>.userContactInfoView addConstraint:[<span class="built_in">NSLayoutConstraint</span> constraintWithItem:<span class="keyword">self</span>.userContactInfoView attribute:<span class="built_in">NSLayoutAttributeHeight</span> relatedBy:<span class="built_in">NSLayoutRelationEqual</span> toItem:<span class="literal">nil</span> attribute:<span class="built_in">NSLayoutAttributeNotAnAttribute</span> multiplier:<span class="number">1</span> constant:<span class="number">100</span>]];</span><br></pre></td></tr></table></figure>
+
+<h3 id="继承UIImageView的子类-drawRect-方法不被调用"><a href="#继承UIImageView的子类-drawRect-方法不被调用" class="headerlink" title="继承UIImageView的子类,drawRect:方法不被调用"></a>继承UIImageView的子类,drawRect:方法不被调用</h3><blockquote>
+<p>　　开发文档对这个问题进行了详细说明,为了提高ImageView的渲染效率,系统用的是另外的方式渲染视图,不是通过drawRect:方法来进行的.<br>　　<strong>解决方案:根据文档的提示,不要继承UIImageView去实现展示图片的功能,如果有必要自定义展示图片功能的,那么实现UIView子类吧</strong></p>
+</blockquote>
+<h3 id="自定义toolBar上的UIBarButtonItem"><a href="#自定义toolBar上的UIBarButtonItem" class="headerlink" title="自定义toolBar上的UIBarButtonItem"></a>自定义toolBar上的UIBarButtonItem</h3><blockquote>
+<p>　　UIBarButtonItem提供了创建UIBarButtonSystemItem的方法,也提供创建自定义视图的方法 - initWithCustomView:,所以想要完全自定义UIBarButtonItem,则可以使用创建自定义视图的方法,先生成一个按钮,自定义按钮,最后在通过initWithCustomView将按钮转化成UIBarButtonItem.<br>　　<strong>实现方案:先做一个UIButton,可以添加图片文字,可以用EdgeInsets属性设置图片文字的偏移,然后使用- (instancetype)initWithCustomView:(UIView *)customView方法把按钮转成UIBarButtonItem,再把item以数组的形式加到 toolbarItems 就可以了.加到toolbar的item会自动有左右空隙,系统会自动摆放item到toolbar的y轴居中位置,只需要设置UIButton的width和height就可以了,点击事件也需要在UIButton上面加.</strong></p>
+</blockquote>
+<h3 id="如何让重写的视图子类也支持直接在Xib-Storyboard中填写参数预览显示效果"><a href="#如何让重写的视图子类也支持直接在Xib-Storyboard中填写参数预览显示效果" class="headerlink" title="如何让重写的视图子类也支持直接在Xib,Storyboard中填写参数预览显示效果"></a>如何让重写的视图子类也支持直接在Xib,Storyboard中填写参数预览显示效果</h3><blockquote>
+<p>　　这个问题,应该是需要Xcode的支持,原理就是在类中加上一些能让xcode识别到的特殊标记.<br>　　<strong>实现方案:具体的标记方法参考这个链接</strong><a target="_blank" rel="noopener" href="https://onevcat.com/2014/10/ib-customize-view/">预览自定义视图子类</a></p>
+</blockquote>
+<h3 id="如何优雅地往TableView上添加无网络图片标记或者加载指示器"><a href="#如何优雅地往TableView上添加无网络图片标记或者加载指示器" class="headerlink" title="如何优雅地往TableView上添加无网络图片标记或者加载指示器"></a>如何优雅地往TableView上添加无网络图片标记或者加载指示器</h3><blockquote>
+<p>　　这个问题还是比较有意思的,因为tableView上面会有很多cell,如果直接往tableView上添加的话,添加的视图会被cell覆盖,如果没有cell但是有分割线的时候,一样会被分割线覆盖.<br>　　<strong>解决方案:1.等到cell都加载完了你再圧入自定义视图(比如在viewDidAppear:(BOOL)animated方法里面添加hud.或者在didload方法中延迟0.5s加载);2.自定义视图加入到tableView的父视图中,例如如果是tableView控制器,可以把自定义视图加入到控制器的view</strong></p>
+</blockquote>
+<h3 id="如何去除TableView中多余的分割线"><a href="#如何去除TableView中多余的分割线" class="headerlink" title="如何去除TableView中多余的分割线"></a>如何去除TableView中多余的分割线</h3><blockquote>
+<p>　　因为tableView中的Cell只能设置显示或者不显示,显示的时候则满屏都显示,尽管Cell的数量还不够一瓶.<br>　　<strong>解决方案:去除多余分割线主要有几种思路,一种是设置tableView不显示分割线,然后在Cell中用一个高度为1像素的UIView,放在Cell的底部作为分割线,这样可以随心所欲地修改分割线的模样.另一种则是实现- (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section这个方法,然后在最后一个section里面返回一个[[UIView alloc] init],接着在- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section里面,返回高度0.5f,这样多余的分割线就不会显示出来了.(这种方法,最后一个Cell下面是没有分割线的).</strong></p>
+</blockquote>
+<h3 id="让一个模态视图透明部分显示成上一个界面"><a href="#让一个模态视图透明部分显示成上一个界面" class="headerlink" title="让一个模态视图透明部分显示成上一个界面"></a>让一个模态视图透明部分显示成上一个界面</h3><blockquote>
+<p>　　简单地将模态视图的背景颜色设置成透明,会直接看到黑色背景.<br>　　<strong>解决方案:除了将视图设置成透明背景颜色之外,还需要设置另一个属性vc.modalPresentationStyle = UIModalPresentationOverCurrentContext,告诉系统要呈现视图栈中下一个视图.</strong></p>
+</blockquote>
+<h3 id="多用百分比实现自动布局"><a href="#多用百分比实现自动布局" class="headerlink" title="多用百分比实现自动布局"></a>多用百分比实现自动布局</h3><blockquote>
+<p>　　做第一个APP的时候,用自动布局时,大部分是使用相对某一个视图的top,bottom,trailing,leading有多少个点这种方式来实现,后来发现在6p上效果跟5s实在差太多了,导致每次遇到6p就要动态调节一下这个具体值,再后来我就想到了肯定有百分比布局的方法,所以现在会结合百分比布局和具体值布局两种方式来实现了.<br>　　<strong>解决方案:这里我就不重复描述解决方案了.推荐一篇我参考过的文章</strong><a target="_blank" rel="noopener" href="http://liumh.com/2015/09/27/ios-autolayout-multiplier/">AutoLayout 百分比布局</a></p>
+</blockquote>
+<h3 id="SearchBar底部有一条黑边"><a href="#SearchBar底部有一条黑边" class="headerlink" title="SearchBar底部有一条黑边"></a>SearchBar底部有一条黑边</h3><blockquote>
+<p>　　为SearchBar设置了tintColor后,底部可能有一条黑线,这个具体原因也不清楚了,解决方案也比较取巧.<br>　　<strong>解决方案:设置searchController.searchBar.layer.borderWidth = 1;searchController.searchBar.layer.borderColor为想要的颜色,从而替换掉黑边.</strong></p>
+</blockquote>
+<h3 id="定制SearchBar取消按钮颜色-输入框光标颜色"><a href="#定制SearchBar取消按钮颜色-输入框光标颜色" class="headerlink" title="定制SearchBar取消按钮颜色,输入框光标颜色"></a>定制SearchBar取消按钮颜色,输入框光标颜色</h3><blockquote>
+<p>　　SearchBar比较特殊,系统并没有提供直接的设置接口.这里可以使用一种全局设置的方式重新定制它们的颜色.<br>　　<strong>解决方案:参考下方代码</strong></p>
+</blockquote>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">searchController.searchBar.tintColor = [<span class="built_in">UIColor</span> lightGrayColor];</span><br><span class="line">[[<span class="built_in">UIBarButtonItem</span> appearanceWhenContainedIn:[<span class="built_in">UISearchBar</span> <span class="keyword">class</span>], <span class="literal">nil</span>]</span><br><span class="line">setTitleTextAttributes:[<span class="built_in">NSDictionary</span> dictionaryWithObjectsAndKeys:</span><br><span class="line">[<span class="built_in">UIColor</span> whiteColor],<span class="built_in">NSForegroundColorAttributeName</span>,<span class="literal">nil</span>] forState:<span class="built_in">UIControlStateNormal</span>];</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="数据相关"><a href="#数据相关" class="headerlink" title="数据相关"></a>数据相关</h2><h3 id="系统自带的字典与JSON互转"><a href="#系统自带的字典与JSON互转" class="headerlink" title="系统自带的字典与JSON互转"></a>系统自带的字典与JSON互转</h3><blockquote>
+<p>　　系统本身就系统了两者互转的API,可能不是很明显所以很多人都用了第三方库了.当然第三方库用起来比较方便.<br>　　<strong>解决方案:字典JSON互转,比较麻烦.</strong></p>
+</blockquote>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//字典转JSON字符串</span></span><br><span class="line"><span class="built_in">NSMutableDictionary</span> *jsonDic = [[<span class="built_in">NSMutableDictionary</span> alloc] init];</span><br><span class="line"><span class="built_in">NSData</span> *jsonData = [<span class="built_in">NSJSONSerialization</span> dataWithJSONObject:jsonDic options:<span class="number">0</span> error:<span class="literal">nil</span>];</span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;%@&quot;</span>,[[<span class="built_in">NSString</span> alloc] initWithData:jsonData encoding:<span class="built_in">NSUTF8StringEncoding</span>]);</span><br><span class="line"><span class="comment">//JSON字符串转字典</span></span><br><span class="line"><span class="built_in">NSData</span> *jsonData = [jsonString dataUsingEncoding:<span class="built_in">NSUTF8StringEncoding</span>];</span><br><span class="line"><span class="built_in">NSDictionary</span> *dic = [<span class="built_in">NSJSONSerialization</span> JSONObjectWithData:jsonData options:<span class="built_in">NSJSONReadingMutableContainers</span> error:&amp;err];</span><br></pre></td></tr></table></figure>
+
+<h3 id="对象属性中有NSTimer对象-导致对象无法被释放的可能原因"><a href="#对象属性中有NSTimer对象-导致对象无法被释放的可能原因" class="headerlink" title="对象属性中有NSTimer对象,导致对象无法被释放的可能原因"></a>对象属性中有NSTimer对象,导致对象无法被释放的可能原因</h3><blockquote>
+<p>　　初始化NSTimer对象时一般需要设置一个target,如果这个target是A对象,然后这个定时器又被A对象的属性强引用,就会出现引用循环问题了.一定要等到调用timer的invalidate方法后才能解除循环引用.参考下面代码应该更加清晰.</p>
+</blockquote>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">A</span> : <span class="title">NSObject</span></span></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="built_in">NSTimer</span> *timer;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">A</span></span></span><br><span class="line"><span class="comment">//执行下面的代码后,self持有对timer的引用,timer也持有对self的引用,产生引用循环了,系统无法自动释放他们了.</span></span><br><span class="line">- (<span class="keyword">void</span>)startFireDateTimerFor &#123;</span><br><span class="line">    <span class="built_in">NSDate</span> *fireDate = [<span class="built_in">NSDate</span> dateWithTimeIntervalSinceNow:<span class="number">1</span>];</span><br><span class="line">    <span class="keyword">self</span>.timer = [[<span class="built_in">NSTimer</span> alloc] initWithFireDate:fireDate</span><br><span class="line">                                              interval:<span class="number">1.0</span>f</span><br><span class="line">                                              target:<span class="keyword">self</span></span><br><span class="line">                                              selector:<span class="keyword">@selector</span>(countedTimerFire:)</span><br><span class="line">                                              userInfo:<span class="literal">nil</span></span><br><span class="line">                                              repeats:<span class="literal">YES</span>];</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">NSRunLoop</span> *runLoop = [<span class="built_in">NSRunLoop</span> currentRunLoop];</span><br><span class="line">    [runLoop addTimer:<span class="keyword">self</span>.codeTimer forMode:<span class="built_in">NSDefaultRunLoopMode</span>];</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>　　<strong>解决方案:在不需要A对象了或者不需要timer的地方,调用timer的invalidate,例如A是一个ViewController,那么就在ViewController将要disappear的时候调用invalidate</strong></p>
+</blockquote>
+<h3 id="为什么NSDate显示的日期和设置的日期不同"><a href="#为什么NSDate显示的日期和设置的日期不同" class="headerlink" title="为什么NSDate显示的日期和设置的日期不同?"></a>为什么NSDate显示的日期和设置的日期不同?</h3><blockquote>
+<p>　　给NSDate初始化一个指定时间,或者用[NSdate date]获取当前时间,不管你的设备是什么时区,使用NSLog打印出来的都是格林标准时间.那么何如打印出本地时间?如何获取当前时区的年月日等参数呢?<br>　　<strong>解决方案:iOS中的NSDate时区问题.如果是通过字符串生成NSDate的,默认字符串就是参照设备时区再转换的.得到的NSdate可以看成是一个记录了时间戳的对象,如果要从NSDate里面获取到实际的年月日,一种是打印成字符串的,则需要使用descriptionWithLocale:,明确选择一个时区(例如[NSLocale currentLocale])再打印,否则就是显示默认的Greenwich Mean Time (GMT)了.另一种是要获取到年月日的,可以使用日历对象.[NSCalendar currentCalendar],这个实例化出来的就是一个本地日历,不需要再设置成本地时区.然后结合- (NSDateComponents *)components:(NSCalendarUnit)unitFlags fromDate:(NSDate *)date方法,就可以获取到一个完整的日期组件对象了.</strong></p>
+</blockquote>
+<h3 id="使用信号量进行异步操作同步等待"><a href="#使用信号量进行异步操作同步等待" class="headerlink" title="使用信号量进行异步操作同步等待"></a>使用信号量进行异步操作同步等待</h3><blockquote>
+<p>　　有时候某些操作是异步进行的,但是我们需要获取到数据才能进行下一步操作,这个时候可以使用信号量进行同步等待.<br>　　<strong>解决方案:先创建一个信号量,在调用异步代码后进行等待信号量,在异步方法中最末尾部分发送信号量,详细代码如下:</strong></p>
+</blockquote>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//创建一个semaphore</span></span><br><span class="line">dispatch_semaphore_t sema = dispatch_semaphore_create(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//--异步代码--</span></span><br><span class="line"><span class="comment">//发送一个信号</span></span><br><span class="line">dispatch_semaphore_signal(sema);</span><br><span class="line"><span class="comment">//--异步代码结束--</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//等待信号 </span></span><br><span class="line">dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);</span><br></pre></td></tr></table></figure>
+<p><em>注意:在AFNetworking中无法使用信号量实现同步操作.使用信号量到了wait部分,主线程进入等待状态,所以网络数据接受到后也无法再通过主线程进入回调.所以无法触发回调中的释放信号量方法,导致程序永久卡死.</em></p>
+<h3 id="使用MJextension将字典转成json字符串需要注意的地方"><a href="#使用MJextension将字典转成json字符串需要注意的地方" class="headerlink" title="使用MJextension将字典转成json字符串需要注意的地方"></a>使用MJextension将字典转成json字符串需要注意的地方</h3><blockquote>
+<p>　　如果post给服务的数据是经过参数签名,那么就需要特别留意了.因为使用MJextension将模型(模型中有属性是数组类型)转换成字典,在将字典post给服务器的过程中字典会被AFNetWorking(假设是使用这个第三方库)转换成json字符串,同时去除多余的空格.而我们在做参数签名的时候如果将字典转成json字符串的规则跟AFNetWorking不同,则很可能转换出来的json字符串中数组部分会有多余的空格,从而导致参数签名失败.<br>　　<strong>解决方案:使用MJExtension,遇到模型转字典时,如果字典有数组的,建议把数组先转成json字符串,然后再存回字典,这样在对字典里的内容做参数签名时才不容易出错;否则可能会出现参数签名跟实际上post的内容不一致从而导致签名错误.</strong></p>
+</blockquote>
+<h3 id="CoreData报错-The-model-used-to-open-the-store-is-incompatible-with-the-one-used-to-create-the-store"><a href="#CoreData报错-The-model-used-to-open-the-store-is-incompatible-with-the-one-used-to-create-the-store" class="headerlink" title="CoreData报错:The model used to open the store is incompatible with the one used to create the store"></a>CoreData报错:The model used to open the store is incompatible with the one used to create the store</h3><blockquote>
+<p>　　出现这个错误很可能是因为新增了xcdatamodeld文件,但是新增的文件没有被打包进APP里.<br>　　<strong>解决方案:把APP删了,Product -&gt; Clean一下项目,重新安装即可</strong></p>
+</blockquote>
+<h3 id="读取用户通讯录与审核问题"><a href="#读取用户通讯录与审核问题" class="headerlink" title="读取用户通讯录与审核问题"></a>读取用户通讯录与审核问题</h3><blockquote>
+<p>　　Apple提供了读取操作用户通讯录的接口,但是审核的时候非常严格,一不小心就因为这问题被拒绝了.<br>　　<strong>解决方案:读取用户通讯录的时候,需要弹窗写明读取通讯录之后要干嘛用,而且在提交APP审核的时候需要提供一份隐私政策(也就是在APP资料哪里的隐私URL写上地址,这个会显示在商店APP界面的下面.如下图)</strong></p>
+</blockquote>
+<img src="/images/APP-Privacy-Policy.png" class="" width="150" height="150" title="APP_Privacy_Policy">
+
+<h3 id="如何读取本地json文件"><a href="#如何读取本地json文件" class="headerlink" title="如何读取本地json文件"></a>如何读取本地json文件</h3><blockquote>
+<p>　　json在OC里面对应的数据结构就是NSDictionary,那本地的json文件是用NSDictionary的相关类方法读取到的?其实不是,如果直接用NSDictionary的类方法读取得的一定是nil了.NSDictionary 有两个类方法用户初始化对象,分别是+ dictionaryWithContentsOfURL:和 + dictionaryWithContentsOfFile:,但是这两个方法使用来读取plist文件的,如果读取本地json文件,应该先把json转成字符串,再将字符串转成NSData,最后将NSData转成SDictionary.<br>　　<strong>解决方案:具体代码如下:</strong></p>
+</blockquote>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSString</span> *jsonString = [<span class="built_in">NSString</span> stringWithContentsOfURL:[[<span class="built_in">NSBundle</span> mainBundle] URLForResource:<span class="string">@&quot;region&quot;</span> withExtension:<span class="string">@&quot;json&quot;</span>] encoding:<span class="built_in">NSUTF8StringEncoding</span> error:<span class="literal">nil</span>];</span><br><span class="line"><span class="built_in">NSData</span> *jsonData = [jsonString dataUsingEncoding:<span class="built_in">NSUTF8StringEncoding</span>];</span><br><span class="line"><span class="built_in">NSDictionary</span> *regionDic = [<span class="built_in">NSJSONSerialization</span> JSONObjectWithData:jsonData options:<span class="built_in">NSJSONReadingMutableContainers</span> error:<span class="literal">nil</span>];</span><br><span class="line"><span class="comment">//也可以使用 + dictionaryWithContentsOfFile:方法.</span></span><br></pre></td></tr></table></figure>
+<p><em>注意:URL实质上就是file:///开头的路径(file:///private/var/mobile/Containers/Bundle/Application/F09363E1-7F9F-4315-A3F2-4F08E6092E0A/LiveStone.app/region.json),而path则是从磁盘根目录开始的目录路径(/private/var/mobile/Containers/Bundle/Application/F09363E1-7F9F-4315-A3F2-4F08E6092E0A/LiveStone.app/region.json)</em></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/iOS/">iOS</a>
+</div>
+
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2016/03/30/2016-03-30-These-days-in-the-iOS-Programming-road-through-the-pits/" data-title="在iOS编程路上走过的坑 - Tips | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/04/09/2016-04-09-talking-about-iOS-Reverse-Engineering/" title="浅谈iOS安全与入侵(逆向工程)">
+  <strong>上一篇：</strong><br/>
+  <span>
+  浅谈iOS安全与入侵(逆向工程)</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/03/27/2016-03-27-The-Design-Patterns-book-notes/"  title="设计模式 - 读书笔记">
+ <strong>下一篇：</strong><br/> 
+ <span>设计模式 - 读书笔记
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">2.</span> <span class="toc-text">背景</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#UI%E7%9B%B8%E5%85%B3"><span class="toc-number">2.1.</span> <span class="toc-text">UI相关</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#scrollView-contentOffect%E8%8E%AB%E5%90%8D%E7%AD%89%E4%BA%8E-64"><span class="toc-number">2.1.1.</span> <span class="toc-text">scrollView.contentOffect莫名等于-64</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AE%E6%8E%A7%E5%88%B6%E5%99%A8backBarButtonItem%E6%88%96%E8%80%85leftBarButtonItem%E6%97%A0%E6%95%88"><span class="toc-number">2.1.2.</span> <span class="toc-text">设置控制器backBarButtonItem或者leftBarButtonItem无效</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8addObserver%E7%9B%91%E5%90%AC%E8%A7%86%E5%9B%BE%E7%9A%84frame%E6%97%A0%E6%95%88%E6%9E%9C"><span class="toc-number">2.1.3.</span> <span class="toc-text">使用addObserver监听视图的frame无效果</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TabBarController%E4%B8%8ENavigationController%E8%B0%81%E5%B5%8C%E5%A5%97%E8%B0%81"><span class="toc-number">2.1.4.</span> <span class="toc-text">TabBarController与NavigationController谁嵌套谁?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#iOS8%E4%B8%ADCollectionView%E5%8A%A0%E8%BD%BD%E9%80%9F%E5%BA%A6%E5%BC%82%E5%B8%B8%E6%85%A2"><span class="toc-number">2.1.5.</span> <span class="toc-text">iOS8中CollectionView加载速度异常慢</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E4%B8%AACollectionView%E5%87%BA%E7%8E%B0EXC-BAD-ACCESS"><span class="toc-number">2.1.6.</span> <span class="toc-text">多个CollectionView出现EXC_BAD_ACCESS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CollectionView%E7%9A%84Cell%E4%B8%AD%E6%B7%BB%E5%8A%A0%E6%8C%89%E9%92%AE%E6%97%A0%E6%B3%95%E5%93%8D%E5%BA%94%E4%BA%8B%E4%BB%B6"><span class="toc-number">2.1.7.</span> <span class="toc-text">CollectionView的Cell中添加按钮无法响应事件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E8%AE%BE%E7%BD%AEUIButton-titleLaebl-title%E6%97%A0%E6%95%88%E6%9E%9C"><span class="toc-number">2.1.8.</span> <span class="toc-text">代码设置UIButton.titleLaebl.title无效果</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BAScrollview%E4%B8%AD%E8%AE%BE%E7%BD%AE%E4%B8%8A%E4%B8%8B%E5%B7%A6%E5%8F%B3%E7%BA%A6%E6%9D%9F%E5%90%8E%E6%8F%90%E7%A4%BAambiguous"><span class="toc-number">2.1.9.</span> <span class="toc-text">为Scrollview中设置上下左右约束后提示ambiguous</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E8%AE%A9%E8%AE%BE%E7%BD%AE%E7%BA%A6%E6%9D%9F%E7%9A%84%E8%A7%86%E5%9B%BE%E4%BB%AC%E6%89%A7%E8%A1%8C%E5%8A%A8%E7%94%BB"><span class="toc-number">2.1.10.</span> <span class="toc-text">如何让设置约束的视图们执行动画?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%A8interface%E7%95%8C%E9%9D%A2%E9%87%8C%E6%89%BE%E4%B8%8D%E5%88%B0Cell%E8%A7%86%E5%9B%BE%E7%9A%84contentView%E5%B1%9E%E6%80%A7"><span class="toc-number">2.1.11.</span> <span class="toc-text">在interface界面里找不到Cell视图的contentView属性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%89%E6%97%B6%E5%80%99%E6%97%A0%E6%B3%95%E5%9C%A8%E5%AF%BC%E8%88%AA%E6%A0%8F%E4%B8%8A%E6%91%86%E6%94%BEBarButtonItem"><span class="toc-number">2.1.12.</span> <span class="toc-text">有时候无法在导航栏上摆放BarButtonItem</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%9C%A8interface%E7%95%8C%E9%9D%A2%E9%87%8C%E5%92%8C%E4%BB%A3%E7%A0%81%E9%87%8C%E8%AE%BE%E7%BD%AE%E5%AF%BC%E8%88%AA%E6%A0%8F%E7%9A%84%E6%A0%B7%E5%BC%8F"><span class="toc-number">2.1.13.</span> <span class="toc-text">如何在interface界面里和代码里设置导航栏的样式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E7%94%A8%E4%BB%A3%E7%A0%81%E5%86%99%E8%A7%86%E5%9B%BE%E7%9A%84%E5%AE%BD%E9%AB%98%E7%BA%A6%E6%9D%9F"><span class="toc-number">2.1.14.</span> <span class="toc-text">如何用代码写视图的宽高约束</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%A7%E6%89%BFUIImageView%E7%9A%84%E5%AD%90%E7%B1%BB-drawRect-%E6%96%B9%E6%B3%95%E4%B8%8D%E8%A2%AB%E8%B0%83%E7%94%A8"><span class="toc-number">2.1.15.</span> <span class="toc-text">继承UIImageView的子类,drawRect:方法不被调用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89toolBar%E4%B8%8A%E7%9A%84UIBarButtonItem"><span class="toc-number">2.1.16.</span> <span class="toc-text">自定义toolBar上的UIBarButtonItem</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E8%AE%A9%E9%87%8D%E5%86%99%E7%9A%84%E8%A7%86%E5%9B%BE%E5%AD%90%E7%B1%BB%E4%B9%9F%E6%94%AF%E6%8C%81%E7%9B%B4%E6%8E%A5%E5%9C%A8Xib-Storyboard%E4%B8%AD%E5%A1%AB%E5%86%99%E5%8F%82%E6%95%B0%E9%A2%84%E8%A7%88%E6%98%BE%E7%A4%BA%E6%95%88%E6%9E%9C"><span class="toc-number">2.1.17.</span> <span class="toc-text">如何让重写的视图子类也支持直接在Xib,Storyboard中填写参数预览显示效果</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E4%BC%98%E9%9B%85%E5%9C%B0%E5%BE%80TableView%E4%B8%8A%E6%B7%BB%E5%8A%A0%E6%97%A0%E7%BD%91%E7%BB%9C%E5%9B%BE%E7%89%87%E6%A0%87%E8%AE%B0%E6%88%96%E8%80%85%E5%8A%A0%E8%BD%BD%E6%8C%87%E7%A4%BA%E5%99%A8"><span class="toc-number">2.1.18.</span> <span class="toc-text">如何优雅地往TableView上添加无网络图片标记或者加载指示器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%8E%BB%E9%99%A4TableView%E4%B8%AD%E5%A4%9A%E4%BD%99%E7%9A%84%E5%88%86%E5%89%B2%E7%BA%BF"><span class="toc-number">2.1.19.</span> <span class="toc-text">如何去除TableView中多余的分割线</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A9%E4%B8%80%E4%B8%AA%E6%A8%A1%E6%80%81%E8%A7%86%E5%9B%BE%E9%80%8F%E6%98%8E%E9%83%A8%E5%88%86%E6%98%BE%E7%A4%BA%E6%88%90%E4%B8%8A%E4%B8%80%E4%B8%AA%E7%95%8C%E9%9D%A2"><span class="toc-number">2.1.20.</span> <span class="toc-text">让一个模态视图透明部分显示成上一个界面</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E7%94%A8%E7%99%BE%E5%88%86%E6%AF%94%E5%AE%9E%E7%8E%B0%E8%87%AA%E5%8A%A8%E5%B8%83%E5%B1%80"><span class="toc-number">2.1.21.</span> <span class="toc-text">多用百分比实现自动布局</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SearchBar%E5%BA%95%E9%83%A8%E6%9C%89%E4%B8%80%E6%9D%A1%E9%BB%91%E8%BE%B9"><span class="toc-number">2.1.22.</span> <span class="toc-text">SearchBar底部有一条黑边</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E5%88%B6SearchBar%E5%8F%96%E6%B6%88%E6%8C%89%E9%92%AE%E9%A2%9C%E8%89%B2-%E8%BE%93%E5%85%A5%E6%A1%86%E5%85%89%E6%A0%87%E9%A2%9C%E8%89%B2"><span class="toc-number">2.1.23.</span> <span class="toc-text">定制SearchBar取消按钮颜色,输入框光标颜色</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%9B%B8%E5%85%B3"><span class="toc-number">2.2.</span> <span class="toc-text">数据相关</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E8%87%AA%E5%B8%A6%E7%9A%84%E5%AD%97%E5%85%B8%E4%B8%8EJSON%E4%BA%92%E8%BD%AC"><span class="toc-number">2.2.1.</span> <span class="toc-text">系统自带的字典与JSON互转</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E8%B1%A1%E5%B1%9E%E6%80%A7%E4%B8%AD%E6%9C%89NSTimer%E5%AF%B9%E8%B1%A1-%E5%AF%BC%E8%87%B4%E5%AF%B9%E8%B1%A1%E6%97%A0%E6%B3%95%E8%A2%AB%E9%87%8A%E6%94%BE%E7%9A%84%E5%8F%AF%E8%83%BD%E5%8E%9F%E5%9B%A0"><span class="toc-number">2.2.2.</span> <span class="toc-text">对象属性中有NSTimer对象,导致对象无法被释放的可能原因</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88NSDate%E6%98%BE%E7%A4%BA%E7%9A%84%E6%97%A5%E6%9C%9F%E5%92%8C%E8%AE%BE%E7%BD%AE%E7%9A%84%E6%97%A5%E6%9C%9F%E4%B8%8D%E5%90%8C"><span class="toc-number">2.2.3.</span> <span class="toc-text">为什么NSDate显示的日期和设置的日期不同?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E4%BF%A1%E5%8F%B7%E9%87%8F%E8%BF%9B%E8%A1%8C%E5%BC%82%E6%AD%A5%E6%93%8D%E4%BD%9C%E5%90%8C%E6%AD%A5%E7%AD%89%E5%BE%85"><span class="toc-number">2.2.4.</span> <span class="toc-text">使用信号量进行异步操作同步等待</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8MJextension%E5%B0%86%E5%AD%97%E5%85%B8%E8%BD%AC%E6%88%90json%E5%AD%97%E7%AC%A6%E4%B8%B2%E9%9C%80%E8%A6%81%E6%B3%A8%E6%84%8F%E7%9A%84%E5%9C%B0%E6%96%B9"><span class="toc-number">2.2.5.</span> <span class="toc-text">使用MJextension将字典转成json字符串需要注意的地方</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CoreData%E6%8A%A5%E9%94%99-The-model-used-to-open-the-store-is-incompatible-with-the-one-used-to-create-the-store"><span class="toc-number">2.2.6.</span> <span class="toc-text">CoreData报错:The model used to open the store is incompatible with the one used to create the store</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96%E7%94%A8%E6%88%B7%E9%80%9A%E8%AE%AF%E5%BD%95%E4%B8%8E%E5%AE%A1%E6%A0%B8%E9%97%AE%E9%A2%98"><span class="toc-number">2.2.7.</span> <span class="toc-text">读取用户通讯录与审核问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E8%AF%BB%E5%8F%96%E6%9C%AC%E5%9C%B0json%E6%96%87%E4%BB%B6"><span class="toc-number">2.2.8.</span> <span class="toc-text">如何读取本地json文件</span></a></li></ol></li></ol></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Greedy-Algorithm/" title="Greedy Algorithm">Greedy Algorithm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2020 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

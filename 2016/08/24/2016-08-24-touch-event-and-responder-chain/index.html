@@ -1,0 +1,672 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>iOS中的触摸事件和响应者链 | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="文档更新说明 最后更新 2016年08月29日 首次更新 2016年08月29日  前言　　先介绍一篇文章,讲解了触摸事件和响应者链的基本知识,省得我再说一遍,本文主要是结合实际例子对触摸事件和响应者链做一个示范(本例下载),方便理解iOS中的触摸事件和手势处理. 触摸事件的传递　　当用户触摸屏幕的时候,硬件就可以捕获到触摸的位置以及接下来触摸的详细动作,这里为了简化问题,我们只对用户点击屏幕时产">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS中的触摸事件和响应者链">
+<meta property="og:url" content="http://yoursite.com/2016/08/24/2016-08-24-touch-event-and-responder-chain/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="文档更新说明 最后更新 2016年08月29日 首次更新 2016年08月29日  前言　　先介绍一篇文章,讲解了触摸事件和响应者链的基本知识,省得我再说一遍,本文主要是结合实际例子对触摸事件和响应者链做一个示范(本例下载),方便理解iOS中的触摸事件和手势处理. 触摸事件的传递　　当用户触摸屏幕的时候,硬件就可以捕获到触摸的位置以及接下来触摸的详细动作,这里为了简化问题,我们只对用户点击屏幕时产">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/images/touch-chain-1.png">
+<meta property="og:image" content="http://yoursite.com/images/touch-chain-tap-red.png">
+<meta property="og:image" content="http://yoursite.com/images/touch-chain-blueview-user-interaction-disable.png">
+<meta property="article:published_time" content="2016-08-24T10:05:30.000Z">
+<meta property="article:modified_time" content="2016-08-29T06:40:42.000Z">
+<meta property="article:author" content="Cocos">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/images/touch-chain-1.png">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/08/24/2016-08-24-touch-event-and-responder-chain/" title="iOS中的触摸事件和响应者链" itemprop="url">iOS中的触摸事件和响应者链</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2016-08-24T10:05:30.000Z" itemprop="datePublished"> 发表于 2016-08-24</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A7%A6%E6%91%B8%E4%BA%8B%E4%BB%B6%E7%9A%84%E4%BC%A0%E9%80%92"><span class="toc-number">3.</span> <span class="toc-text">触摸事件的传递</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%93%8D%E5%BA%94%E8%80%85%E9%93%BE"><span class="toc-number">4.</span> <span class="toc-text">响应者链</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#userInteractionEnabled%E5%B1%9E%E6%80%A7%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-number">5.</span> <span class="toc-text">userInteractionEnabled属性的作用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B8%A9%E9%A6%A8%E6%8F%90%E7%A4%BA"><span class="toc-number">7.</span> <span class="toc-text">温馨提示</span></a></li></ol>
+		
+		</div>
+		
+		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
+<li>最后更新 2016年08月29日</li>
+<li>首次更新 2016年08月29日</li>
+</ul>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>　　先介绍一篇文章,讲解了触摸事件和响应者链的基本知识,省得我再说一遍,本文主要是结合实际例子对触摸事件和响应者链做一个示范(<a target="_blank" rel="noopener" href="https://github.com/cocos543/TestTouchEvent">本例下载</a>),方便理解<a target="_blank" rel="noopener" href="http://my.oschina.net/aofe/blog/268749">iOS中的触摸事件和手势处理</a>.</p>
+<h1 id="触摸事件的传递"><a href="#触摸事件的传递" class="headerlink" title="触摸事件的传递"></a>触摸事件的传递</h1><p>　　当用户触摸屏幕的时候,硬件就可以捕获到触摸的位置以及接下来触摸的详细动作,这里为了简化问题,我们只对用户点击屏幕时产生的touchesBegan事件做讨论.新建一个工程,在默认的ViewController上放蓝红两个视图(BlueView为RedView的父视图,ControllerView为控制器的View),如下图:</p>
+<img src="/images/touch-chain-1.png" class="" width="1300" height="700" title="touch-chain-1">
+<p>　　接着,分别在ViewController,ControllerView,BlueView,RedView中重写touchesBegean方法.</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//ViewController.m</span></span><br><span class="line">- (<span class="keyword">void</span>)touchesBegan:(<span class="built_in">NSSet</span>&lt;<span class="built_in">UITouch</span> *&gt; *)touches withEvent:(<span class="built_in">UIEvent</span> *)event&#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;ViewController&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//ControllerView</span></span><br><span class="line">- (<span class="keyword">void</span>)touchesBegan:(<span class="built_in">NSSet</span>&lt;<span class="built_in">UITouch</span> *&gt; *)touches withEvent:(<span class="built_in">UIEvent</span> *)event&#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;ControllerView&quot;</span>);</span><br><span class="line">    [<span class="keyword">super</span> touchesBegan:touches withEvent:event];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//BlueView.m</span></span><br><span class="line">- (<span class="keyword">void</span>)touchesBegan:(<span class="built_in">NSSet</span>&lt;<span class="built_in">UITouch</span> *&gt; *)touches withEvent:(<span class="built_in">UIEvent</span> *)event&#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;Blue View&quot;</span>);</span><br><span class="line">    [<span class="keyword">super</span> touchesBegan:touches withEvent:event];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//RedView.m</span></span><br><span class="line">- (<span class="keyword">void</span>)touchesBegan:(<span class="built_in">NSSet</span>&lt;<span class="built_in">UITouch</span> *&gt; *)touches withEvent:(<span class="built_in">UIEvent</span> *)event&#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;Red View&quot;</span>);</span><br><span class="line">    [<span class="keyword">super</span> touchesBegan:touches withEvent:event];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>　　运行程序,点击红色视图,控制台输出</p>
+<pre><code>2016-08-29 10:12:52.514 TestTouchEvent[3702:311422] Red View
+2016-08-29 10:12:52.514 TestTouchEvent[3702:311422] Blue View
+2016-08-29 10:12:52.514 TestTouchEvent[3702:311422] ControllerView
+2016-08-29 10:12:52.514 TestTouchEvent[3702:311422] ViewController</code></pre>
+<img src="/images/touch-chain-tap-red.png" class="" width="1300" height="700" title="touch-chain-tap-red">
+<p>恩,这样我们心里有个数了.硬件检测到用户触摸屏幕,就会把事件传给UIApplication,接着就在APP中寻找一个合适的视图,最后调用该视图的touchesBegan方法来处理事件.</p>
+<h1 id="响应者链"><a href="#响应者链" class="headerlink" title="响应者链"></a>响应者链</h1><p>　　修改一下上一小节的代码,将RedView中的部分代码注释掉,如下:</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//ViewController.m</span></span><br><span class="line">- (<span class="keyword">void</span>)touchesBegan:(<span class="built_in">NSSet</span>&lt;<span class="built_in">UITouch</span> *&gt; *)touches withEvent:(<span class="built_in">UIEvent</span> *)event&#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;ViewController&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//ControllerView</span></span><br><span class="line">- (<span class="keyword">void</span>)touchesBegan:(<span class="built_in">NSSet</span>&lt;<span class="built_in">UITouch</span> *&gt; *)touches withEvent:(<span class="built_in">UIEvent</span> *)event&#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;ControllerView&quot;</span>);</span><br><span class="line">    [<span class="keyword">super</span> touchesBegan:touches withEvent:event];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//BlueView.m</span></span><br><span class="line">- (<span class="keyword">void</span>)touchesBegan:(<span class="built_in">NSSet</span>&lt;<span class="built_in">UITouch</span> *&gt; *)touches withEvent:(<span class="built_in">UIEvent</span> *)event&#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;Blue View&quot;</span>);</span><br><span class="line">    [<span class="keyword">super</span> touchesBegan:touches withEvent:event];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//RedView.m</span></span><br><span class="line">- (<span class="keyword">void</span>)touchesBegan:(<span class="built_in">NSSet</span>&lt;<span class="built_in">UITouch</span> *&gt; *)touches withEvent:(<span class="built_in">UIEvent</span> *)event&#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;Red View&quot;</span>);</span><br><span class="line">    <span class="comment">//[super touchesBegan:touches withEvent:event];</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>　　我们在RedView中实现了touchesBegan,但是不调用了父类方法.运行,再次点击RedView,输出如下:</p>
+<pre><code>2016-08-29 10:53:14.152 TestTouchEvent[6839:487156] Red View</code></pre>
+<p>　　可以看到这次只有RedView的touchesBegan被触发.这说明了默认的touchesBegan方法实现了将触摸事件传给上一个响应者去处理的功能.
+　　</p>
+<h1 id="userInteractionEnabled属性的作用"><a href="#userInteractionEnabled属性的作用" class="headerlink" title="userInteractionEnabled属性的作用"></a>userInteractionEnabled属性的作用</h1><p>　　将BlueView的userInteractionEnabled设置为NO,如图:</p>
+<img src="/images/touch-chain-blueview-user-interaction-disable.png" class="" width="1300" height="700" title="touch-chain-blueview-user-interaction-disable">
+<p>运行程序,点击红色视图和蓝色视图,输出都如下:</p>
+<pre><code>2016-08-29 10:56:55.104 TestTouchEvent[6877:501115] ControllerView
+2016-08-29 10:56:55.104 TestTouchEvent[6877:501115] ViewController</code></pre>
+<p>我们可以看到,当BlueView不再接受用户的互交时,系统只会将触摸事件传递到BlueView的上一个响应者(这里是ControllerView)就结束事件传递了,然后再由ControllerView处理事件,处理完交给上一个响应者.</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ol>
+<li>当触摸事件产生后,系统会从UIApplication开始查找合适的视图来处理事件.<br>UIApplication-&gt;UIWindow-&gt;ViewController-&gt;ControllerView-&gt;BlueView-&gt;RedView.</li>
+<li>最合适的视图处理完事件之后,默认会将事件传递给上一个响应者.<br>RedView=&gt;BlueView=&gt;ControllerView=&gt;ViewController=&gt;UIWindow=&gt;UIApplication.</li>
+<li>如果中途某一个视图的userInteractionEnabled被设置成NO,那么事件就不会传递到它那里.<br>UIApplication-&gt;UIWindow-&gt;ViewController-&gt;ControllerView- - -&gt;BlueView(userInteractionEnabled=NO)- - -&gt;RedView.</li>
+</ol>
+<h1 id="温馨提示"><a href="#温馨提示" class="headerlink" title="温馨提示"></a>温馨提示</h1><p>　　如果想让一个视图不接受触摸事件,希望触摸事件”穿透”它跑到它下方的视图去,那么只需要设置视图的userInteractionEnabled为NO即可.<br>　　<br>　　UIImageView的userInteractionEnabled属性默认为NO,所以它和它的子视图都不响应任何事件.<br>　　<br>　　touchsBegan默认实现虽然是将事件交给上一个响应者处理,但是不能在重写touchsBegan时使用nextResponder方法代替.Apple是这样说的</p>
+<blockquote>
+<p>Tells the responder when one or more fingers touch down in a view or window.The default implementation of this method does nothing. However immediate UIKit subclasses of UIResponder, particularly UIView, forward the message up the responder chain.To forward the message to the next responder, send the message to super (the superclass implementation); do not send the message directly to the next responder.</p>
+</blockquote>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/iOS/">iOS</a>
+</div>
+
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2016/08/24/2016-08-24-touch-event-and-responder-chain/" data-title="iOS中的触摸事件和响应者链 | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/10/20/2016-10-20-wkwebview-highlight-when-touch-blank-space/" title="WKWebview 触摸DOM-Body之外空白部分出现整体暗黑高亮问题的解决方案">
+  <strong>上一篇：</strong><br/>
+  <span>
+  WKWebview 触摸DOM-Body之外空白部分出现整体暗黑高亮问题的解决方案</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/08/19/2016-08-19-In-the-iOS-Programming-road-tips2/"  title="在iOS编程路上走过的坑 - Tips2">
+ <strong>下一篇：</strong><br/> 
+ <span>在iOS编程路上走过的坑 - Tips2
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A7%A6%E6%91%B8%E4%BA%8B%E4%BB%B6%E7%9A%84%E4%BC%A0%E9%80%92"><span class="toc-number">3.</span> <span class="toc-text">触摸事件的传递</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%93%8D%E5%BA%94%E8%80%85%E9%93%BE"><span class="toc-number">4.</span> <span class="toc-text">响应者链</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#userInteractionEnabled%E5%B1%9E%E6%80%A7%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-number">5.</span> <span class="toc-text">userInteractionEnabled属性的作用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B8%A9%E9%A6%A8%E6%8F%90%E7%A4%BA"><span class="toc-number">7.</span> <span class="toc-text">温馨提示</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Greedy-Algorithm/" title="Greedy Algorithm">Greedy Algorithm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2020 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

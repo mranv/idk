@@ -1,0 +1,689 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>给CCTrendCharts类库加上CocoaPods支持的有趣经历 | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="文档更新说明 最后更新 2020年02月26日 首次更新 2020年02月26日  前言　　早在两三年前我就看过用CocoaPods托管类库的文章, 当时看别人写的一大堆内容, 自己也没有什么特别需要托管的类库, 所以一直没创建过, 其实今天回过头来看这些文章, 感觉有些时候是写得太复杂了, 本身创建Pods类库就是一件非常简单的事情. 最近公司APP做了一个全新的版本, 其中有一个新的图表界面,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="给CCTrendCharts类库加上CocoaPods支持的有趣经历">
+<meta property="og:url" content="http://yoursite.com/2020/02/26/2020-02-26-add-cocoapods-support-to-your-own-libraries/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="文档更新说明 最后更新 2020年02月26日 首次更新 2020年02月26日  前言　　早在两三年前我就看过用CocoaPods托管类库的文章, 当时看别人写的一大堆内容, 自己也没有什么特别需要托管的类库, 所以一直没创建过, 其实今天回过头来看这些文章, 感觉有些时候是写得太复杂了, 本身创建Pods类库就是一件非常简单的事情. 最近公司APP做了一个全新的版本, 其中有一个新的图表界面,">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/images/cctrendcharts-bar.jpeg">
+<meta property="article:published_time" content="2020-02-26T07:44:24.000Z">
+<meta property="article:modified_time" content="2020-03-05T04:44:31.000Z">
+<meta property="article:author" content="Cocos">
+<meta property="article:tag" content="iOS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/images/cctrendcharts-bar.jpeg">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2020/02/26/2020-02-26-add-cocoapods-support-to-your-own-libraries/" title="给CCTrendCharts类库加上CocoaPods支持的有趣经历" itemprop="url">给CCTrendCharts类库加上CocoaPods支持的有趣经历</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2020-02-26T07:44:24.000Z" itemprop="datePublished"> 发表于 2020-02-26</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%9B%B4%E6%8E%A5%E9%9B%86%E6%88%90%E7%B1%BB%E5%BA%93%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">3.</span> <span class="toc-text">直接集成类库遇到的问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%87%E4%BB%A4%E9%9B%86%E9%97%AE%E9%A2%98"><span class="toc-number">3.0.1.</span> <span class="toc-text">指令集问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%88%E6%9C%AC%E4%BE%9D%E8%B5%96%E9%97%AE%E9%A2%98"><span class="toc-number">3.0.2.</span> <span class="toc-text">版本依赖问题</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8CocoaPods%E6%89%98%E7%AE%A1"><span class="toc-number">4.</span> <span class="toc-text">使用CocoaPods托管</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BB%93%E8%AF%AD"><span class="toc-number">5.</span> <span class="toc-text">结语</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8E%A8%E8%8D%90%E9%98%85%E8%AF%BB"><span class="toc-number">6.</span> <span class="toc-text">推荐阅读</span></a></li></ol>
+		
+		</div>
+		
+		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
+<li>最后更新 2020年02月26日</li>
+<li>首次更新 2020年02月26日</li>
+</ul>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>　　早在两三年前我就看过用CocoaPods托管类库的文章, 当时看别人写的一大堆内容, 自己也没有什么特别需要托管的类库, 所以一直没创建过, 其实今天回过头来看这些文章, 感觉有些时候是写得太复杂了, 本身创建Pods类库就是一件非常简单的事情.</p>
+<p>最近公司APP做了一个全新的版本, 其中有一个新的图表界面, 我就把之前自己开发的objc类库<code>CCTrendCharts</code>放进去, 取代了swift版本的<code>Charts</code>, 接着就遇到了一连串的坑, 后面花点时间直接把类库放到<code>Cocoapods</code>上去, 毕竟之前一直用的<code>Cocoapods</code>, 自制的<code>Cocoapods</code>类库体验了一番之后, 写下了这篇文章记录一下.</p>
+<h1 id="直接集成类库遇到的问题"><a href="#直接集成类库遇到的问题" class="headerlink" title="直接集成类库遇到的问题"></a>直接集成类库遇到的问题</h1><h3 id="指令集问题"><a href="#指令集问题" class="headerlink" title="指令集问题"></a>指令集问题</h3><blockquote>
+<p>　　<br>　　题外话, framwork类库分为动态库和静态库, 严格上讲iOS目前只能支持静态库, 但是官方也提供了一种伪动态的支持, 制作framwork的时候, 可以在<strong>Build Setting –&gt; Linking –&gt; Mach-O Type</strong>里面找到类库的类型, 我设置的是Dynamic Libary. 当然使用这种类型打包出来的类库是动态库, 引入到工程里面之后, 必须在对应的targer的<strong>general</strong>里设置类库为<strong>Embed</strong>, 否则程序运行的时候会提示找不到镜像文件</p>
+</blockquote>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">dyld: Library not loaded: xxxx</span><br><span class="line">  Reason: image not found</span><br></pre></td></tr></table></figure>
+
+<p>一开始我是直接把<code>CCTrendCharts</code>类库打包成framwork, 直接集成进项目里, 过年前一直是在公司写代码, 用的测试机和模拟器开发, 所以类库编译的时候柔合<code>x86_64</code>和<code>i386</code>指令集. </p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Architectures <span class="keyword">in</span> the fat file: CCTrendCharts are: i386 x86_64 armv7 arm64</span><br></pre></td></tr></table></figure>
+
+<p>后面春节遇到武汉肺炎, 接着就开始在家办公, 我没带电脑的转接器回老家, 所以只能用模拟器调试, 后面版本上线发布到苹果商店的时候, 就开始遇到第一个坑了, xcode老是提示打包失败, 折腾一番之后查到<code>IDEDistribution.standard.log</code>提示<code>CCTrendCharts</code>里面包含了X86_64的指令集, 所以打包失败了.</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/var/folders/p3/<span class="number">00</span>n1b8h97cvcdwrv12lxw16h0000gn/T/IDEDistributionOptionThinning.~~~<span class="number">7</span>jpElK/Payload/FlowMinerEnterprise.app/Frameworks/CCTrendCharts.framework/CCTrendCharts:</span><br><span class="line">Mach header</span><br><span class="line">      magic cputype cpusubtype  caps    filetype ncmds sizeofcmds      flags</span><br><span class="line">MH_MAGIC_64  X86_64        ALL  <span class="number">0x00</span>       DYLIB    <span class="number">22</span>       <span class="number">3416</span>   NOUNDEFS DYLDLINK TWOLEVEL NO_REEXPORTED_DYLIBS</span><br></pre></td></tr></table></figure>
+
+<p>所以我只能在打包的时候就执行下面指令, 把无关的指令集移除, 然后在模拟器开发的时候又把没移除前的二进制文件放回去, 好傻.</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">lipo -remove i386 CCTrendCharts -o CCTrendCharts</span><br><span class="line">lipo -remove x86_64 CCTrendCharts -o CCTrendCharts</span><br></pre></td></tr></table></figure>
+
+<h3 id="版本依赖问题"><a href="#版本依赖问题" class="headerlink" title="版本依赖问题"></a>版本依赖问题</h3><p>　　暂时解决了指令集问题, 很快又遇到第二个坑了. 我之前也写过一个便捷的KVO类库, 名字是<code>CCEasyKVO</code>, 里面有一个私有类<code>CCInternalObserver</code>, 这个类库在<code>CCTendCharts</code>中有用到. 当我在APP工程里也引入<code>CCEasyKVO</code>的时候, 问题就出现了, 提示我出现重复的标记:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">duplicate symbol <span class="string">&#x27;_OBJC_CLASS_$_CCInternalObserver&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>然后我就只能把<code>CCTendCharts</code>中的类名改成<code>CCInternalObserver_CCTrendCharts</code>, 避开了这个冲突, 这个也是很傻.</p>
+<h1 id="使用CocoaPods托管"><a href="#使用CocoaPods托管" class="headerlink" title="使用CocoaPods托管"></a>使用CocoaPods托管</h1><p>　　要解决上面的两个问题, 应该有多种方法, 比如我一开始想到用shell脚本, 编译的时候自动移除指令, 编译好再加回来之类的, 不过感觉好复杂, 后来就想到把这两个类库都放到<code>CocoaPods </code>上, 简单方便一劳永逸.</p>
+<p>网上有很多文章介绍如何集成创建<code>CocoaPods </code>仓库, 这里我就不重复说了, 随便搜索一篇看看就可以了, 下面简单记录一下我用到的指令</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">pod lib create 项目  #创建了一个Pods仓库模板, 不是必须的</span><br><span class="line">pod trunk me #查看当前帐号</span><br><span class="line">pod lib lint #本地验证类库是否符合要求</span><br><span class="line">pod trunk <span class="keyword">register</span> 邮箱 <span class="string">&#x27;用户名&#x27;</span> --description=<span class="string">&#x27;描述信息&#x27;</span> #没帐号的先注册帐号</span><br><span class="line">pod trunk push CCTrendCharts.podspec #把仓库配置文件上传给Cocoapods官方的大仓库</span><br><span class="line"></span><br><span class="line">pod setup #更新本地大仓库</span><br><span class="line">pod reop update #也是更新本地大仓库</span><br><span class="line">rm ~/Library/Caches/CocoaPods/search_index.json #删除老的所以文件, 这样才能找到search自己刚发布的类库</span><br></pre></td></tr></table></figure>
+
+<p>这里主要记录一下我使用的最新版本1.9.x出现的一些区别. 现在新版的”CocoaPods”客户端, 默认都是采用”trunk repo”的CND类型的仓库, 使用这个仓库对于大陆朋友来说, 有一个最坑的地方就是他被墙了, 刚好春节回家那段时间, 全部vpn都被封了, 这个也是太惨了, 一开始pod install都无法执行.</p>
+<blockquote>
+<p>题外话, 新版的Pods客户端默认会强制添加trunk仓库, 输入<strong>trunk repo</strong>就可以看到.</p>
+</blockquote>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">master</span><br><span class="line">- Type: git (master)</span><br><span class="line">- URL:  https:<span class="comment">//github.com/CocoaPods/Specs.git</span></span><br><span class="line">- Path: /Users/cocos/.cocoapods/repos/master</span><br><span class="line"></span><br><span class="line">trunk</span><br><span class="line">- Type: CDN</span><br><span class="line">- URL:  https:<span class="comment">//cdn.cocoapods.org/</span></span><br><span class="line">- Path: /Users/cocos/.cocoapods/repos/trunk</span><br><span class="line"></span><br><span class="line"><span class="number">2</span> repos</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>如果是首次从老版本升级或者新安装的Pods客户端时, 执行pod install的时候默认会一直卡在添加trunk repo的地方</p>
+</blockquote>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[!] CDN: trunk Repo update failed - <span class="number">17</span> error(s):</span><br><span class="line">CDN: trunk URL couldn<span class="string">&#x27;t be downloaded: https://raw.githubusercontent.com/xxx/xxx.podspec.json, error: Operation timed out - SSL_connect</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这个只能开个vpn解决, 或者在自己的Podfile文件中指定原来的默认源master, 这个网上也有好多文章, 找一下就有了.</p>
+</blockquote>
+<p>然后把仓库配置文件<code>CCTrendCharts.podspec</code>通过<strong>pod trunk push</strong>指令上传后, 执行<code>pod setup</code>, 删除了<code>search_index.json</code>, 在执行Search命令的时候还是搜索不到仓库, 但是在另一台电脑上却搜索到了. 后面通过<code>pod repo update</code>指令解决了这个问题.</p>
+<p>还有一个地方上面没有提到, 就是配置依赖库, 这一步很重要, 这样在App中或者是<code>CCTendCharts</code>类库中都能轻松使用<code>CCEasyKVO</code>库了. 先为<code>CCEasyKVO</code>类库创建好Pods并上传后, 在.pospec文件里, 增加下面配置即可.</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">s.dependency <span class="string">&#x27;CCEasyKVO&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h1><p>　　将类库都做成Pods库后, 不管是真机还是模拟器还是打包上传到商店, 都不需要再担心指令集问题了, 也不用担心代码依赖问题, 而制作Pods仓库是一件非常简单的事情, 所以算是小投入大收益吧. 后面有时间和心情的话, 我打算整一下iOS的自动化打包发布, 给项目加一下自动化打包管理功能, 这样就不用手动打包文件上传测试平台给测试组同事用那么麻烦了.</p>
+<p>最后放上<code>CCTrendCharts</code>类库做出来的柱型图, 感觉还是挺好看的, 希望能有更多star, 我看<strong>Charts</strong>都有2万star啊 : )</p>
+<div align=center><img src="/images/cctrendcharts-bar.jpeg" width=30% /></div>
+
+<h1 id="推荐阅读"><a href="#推荐阅读" class="headerlink" title="推荐阅读"></a>推荐阅读</h1><p><a target="_blank" rel="noopener" href="https://github.com/cocos543/CCTrendCharts">CCTrendCharts仓库地址</a><br><a target="_blank" rel="noopener" href="https://github.com/cocos543/CCEasyKVO">CCEasyKVO仓库地址</a></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/iOS/">iOS</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/iOS/">iOS</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2020/02/26/2020-02-26-add-cocoapods-support-to-your-own-libraries/" data-title="给CCTrendCharts类库加上CocoaPods支持的有趣经历 | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2020/03/05/2020-03-05-Solve-the-click-conflicts-in-UITableView-nested-UICollectionView/" title="解决UITableView嵌套UICollectionView出现的点击冲突问题(实现点击穿透)的另一种思路">
+  <strong>上一篇：</strong><br/>
+  <span>
+  解决UITableView嵌套UICollectionView出现的点击冲突问题(实现点击穿透)的另一种思路</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2020/02/22/2019-07-03-Let-the-system-s-kvo-also-support-block/"  title="为系统的KVO功能添加Block(闭包)特性">
+ <strong>下一篇：</strong><br/> 
+ <span>为系统的KVO功能添加Block(闭包)特性
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%9B%B4%E6%8E%A5%E9%9B%86%E6%88%90%E7%B1%BB%E5%BA%93%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">3.</span> <span class="toc-text">直接集成类库遇到的问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%87%E4%BB%A4%E9%9B%86%E9%97%AE%E9%A2%98"><span class="toc-number">3.0.1.</span> <span class="toc-text">指令集问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%88%E6%9C%AC%E4%BE%9D%E8%B5%96%E9%97%AE%E9%A2%98"><span class="toc-number">3.0.2.</span> <span class="toc-text">版本依赖问题</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8CocoaPods%E6%89%98%E7%AE%A1"><span class="toc-number">4.</span> <span class="toc-text">使用CocoaPods托管</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BB%93%E8%AF%AD"><span class="toc-number">5.</span> <span class="toc-text">结语</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8E%A8%E8%8D%90%E9%98%85%E8%AF%BB"><span class="toc-number">6.</span> <span class="toc-text">推荐阅读</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Greedy-Algorithm/" title="Greedy Algorithm">Greedy Algorithm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2020 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

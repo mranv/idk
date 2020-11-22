@@ -1,0 +1,679 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>认真理解OC和Swift中的字符串 | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="文档更新说明 最后更新 2019年06月19日 首次更新 2019年06月19日  前言　　之前写过一篇OC中的NSString和Swift中的String , 简单记录了字符串数量的数量问题, 这次仔细说一下, 老的文档就不改了, 直接开一个新的. 　　 如何正确处理逐个字符的问题　　前面讲到, 在OC里面NSString的length表示存储字符的UFT16的单元数量, 如果我们的字符串全部是">
+<meta property="og:type" content="article">
+<meta property="og:title" content="认真理解OC和Swift中的字符串">
+<meta property="og:url" content="http://yoursite.com/2019/06/19/2019-06-19-NSString-in-OC-and-String-in-Swift-2/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="文档更新说明 最后更新 2019年06月19日 首次更新 2019年06月19日  前言　　之前写过一篇OC中的NSString和Swift中的String , 简单记录了字符串数量的数量问题, 这次仔细说一下, 老的文档就不改了, 直接开一个新的. 　　 如何正确处理逐个字符的问题　　前面讲到, 在OC里面NSString的length表示存储字符的UFT16的单元数量, 如果我们的字符串全部是">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-06-19T02:50:52.000Z">
+<meta property="article:modified_time" content="2019-06-19T10:01:41.000Z">
+<meta property="article:author" content="Cocos">
+<meta property="article:tag" content="Swift">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2019/06/19/2019-06-19-NSString-in-OC-and-String-in-Swift-2/" title="认真理解OC和Swift中的字符串" itemprop="url">认真理解OC和Swift中的字符串</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2019-06-19T02:50:52.000Z" itemprop="datePublished"> 发表于 2019-06-19</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E6%AD%A3%E7%A1%AE%E5%A4%84%E7%90%86%E9%80%90%E4%B8%AA%E5%AD%97%E7%AC%A6%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">3.</span> <span class="toc-text">如何正确处理逐个字符的问题</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Swift%E4%B8%ADString%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%86%E9%80%90%E4%B8%AA%E5%AD%97%E7%AC%A6"><span class="toc-number">4.</span> <span class="toc-text">Swift中String如何处理逐个字符?</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AE%A9Swift%E5%AD%97%E7%AC%A6%E4%B8%B2%E4%B9%9F%E6%94%AF%E6%8C%81%E6%95%B4%E5%9E%8B%E4%B8%8B%E6%A0%87%E8%AE%BF%E9%97%AE"><span class="toc-number">5.</span> <span class="toc-text">让Swift字符串也支持整型下标访问</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
+<li>最后更新 2019年06月19日</li>
+<li>首次更新 2019年06月19日</li>
+</ul>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>　　之前写过一篇<a target="_blank" rel="noopener" href="http://blog.cocosdever.com/2018/03/12/NSString-in-OC-and-String-in-Swift/">OC中的NSString和Swift中的String</a> , 简单记录了字符串数量的数量问题, 这次仔细说一下, 老的文档就不改了, 直接开一个新的.
+　　</p>
+<h1 id="如何正确处理逐个字符的问题"><a href="#如何正确处理逐个字符的问题" class="headerlink" title="如何正确处理逐个字符的问题"></a>如何正确处理逐个字符的问题</h1><p>　　前面讲到, 在OC里面NSString的length表示存储字符的UFT16的单元数量, 如果我们的字符串全部是字母, 那么一个字母就表示1个单元, 但是字符串夹杂着汉字, emoji的时候就麻烦了, 麻烦的不是说汉字有多个字节存储, 相反汉字如果用UTF16存储的话,只需要1个单元即可(内存占用两个字节), 但是emoji不同, 有的需要2个UTF16单元, 有的甚至需要更多, 先来看下面代码:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)viewDidLoad &#123;</span><br><span class="line">    [<span class="keyword">super</span> viewDidLoad];</span><br><span class="line">    <span class="comment">// Do any additional setup after loading the view.</span></span><br><span class="line">    </span><br><span class="line">    <span class="built_in">NSString</span> *str = <span class="string">@&quot;中国人😂|🥶a&quot;</span>;</span><br><span class="line">    printf(<span class="string">&quot;%lu\n&quot;</span>, (<span class="keyword">unsigned</span> <span class="keyword">long</span>)str.length);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; str.length; i++)&#123;</span><br><span class="line">        <span class="keyword">unichar</span> ch = [str characterAtIndex: i];</span><br><span class="line">        printf(<span class="string">&quot;%s\n&quot;</span>, [[<span class="built_in">NSString</span> stringWithCharacters:&amp;ch length:<span class="number">1</span>] cStringUsingEncoding:<span class="built_in">NSUTF8StringEncoding</span>]);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>运行上面代码,结果如下:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">9</span></span><br><span class="line">中</span><br><span class="line">国</span><br><span class="line">人</span><br><span class="line">(null)</span><br><span class="line">(null)</span><br><span class="line">|</span><br><span class="line">(null)</span><br><span class="line">(null)</span><br><span class="line">a</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>可以看到其中emoji表情没有出现, 但是多了几个null这是为什么? 稍微修改一下上面的代码, 用纯OC的形式打印:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)viewDidLoad &#123;</span><br><span class="line">    [<span class="keyword">super</span> viewDidLoad];</span><br><span class="line">    <span class="comment">// Do any additional setup after loading the view.</span></span><br><span class="line">    </span><br><span class="line">    <span class="built_in">NSString</span> *str = <span class="string">@&quot;中国人😂|🥶a&quot;</span>;</span><br><span class="line">    printf(<span class="string">&quot;%lu\n&quot;</span>, (<span class="keyword">unsigned</span> <span class="keyword">long</span>)str.length);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; str.length; i++) &#123;</span><br><span class="line">        <span class="comment">// unichar 是 unsigned short的别名, 占用2个字节</span></span><br><span class="line">        <span class="keyword">unichar</span> ch = [str characterAtIndex: i];</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;%@&quot;</span>, [<span class="built_in">NSString</span> stringWithCharacters:&amp;ch length:<span class="number">1</span>]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行上面代码, 结果如下:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">9</span></span><br><span class="line"><span class="number">2019</span><span class="number">-06</span><span class="number">-19</span> <span class="number">15</span>:<span class="number">15</span>:<span class="number">09.439632</span>+<span class="number">0800</span> OCSimpleView[<span class="number">4247</span>:<span class="number">307941</span>] 中</span><br><span class="line"><span class="number">2019</span><span class="number">-06</span><span class="number">-19</span> <span class="number">15</span>:<span class="number">15</span>:<span class="number">09.439819</span>+<span class="number">0800</span> OCSimpleView[<span class="number">4247</span>:<span class="number">307941</span>] 国</span><br><span class="line"><span class="number">2019</span><span class="number">-06</span><span class="number">-19</span> <span class="number">15</span>:<span class="number">15</span>:<span class="number">09.439909</span>+<span class="number">0800</span> OCSimpleView[<span class="number">4247</span>:<span class="number">307941</span>] 人</span><br><span class="line"><span class="number">2019</span><span class="number">-06</span><span class="number">-19</span> <span class="number">15</span>:<span class="number">15</span>:<span class="number">09.440028</span>+<span class="number">0800</span> OCSimpleView[<span class="number">4247</span>:<span class="number">307941</span>] \ud83d</span><br><span class="line"><span class="number">2019</span><span class="number">-06</span><span class="number">-19</span> <span class="number">15</span>:<span class="number">15</span>:<span class="number">09.440106</span>+<span class="number">0800</span> OCSimpleView[<span class="number">4247</span>:<span class="number">307941</span>] \ude02</span><br><span class="line"><span class="number">2019</span><span class="number">-06</span><span class="number">-19</span> <span class="number">15</span>:<span class="number">15</span>:<span class="number">09.440183</span>+<span class="number">0800</span> OCSimpleView[<span class="number">4247</span>:<span class="number">307941</span>] |</span><br><span class="line"><span class="number">2019</span><span class="number">-06</span><span class="number">-19</span> <span class="number">15</span>:<span class="number">15</span>:<span class="number">09.440251</span>+<span class="number">0800</span> OCSimpleView[<span class="number">4247</span>:<span class="number">307941</span>] \ud83e</span><br><span class="line"><span class="number">2019</span><span class="number">-06</span><span class="number">-19</span> <span class="number">15</span>:<span class="number">15</span>:<span class="number">09.440342</span>+<span class="number">0800</span> OCSimpleView[<span class="number">4247</span>:<span class="number">307941</span>] \udd76</span><br><span class="line"><span class="number">2019</span><span class="number">-06</span><span class="number">-19</span> <span class="number">15</span>:<span class="number">15</span>:<span class="number">09.440342</span>+<span class="number">0800</span> OCSimpleView[<span class="number">4247</span>:<span class="number">307941</span>] a</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>现在可以看明白了, 原来符号<code>😂</code>需要2个UFT16单元表示, <code>🥶</code>也是需要2个单元, 所以我们上面使用方法<code>stringWithCharacters</code>的时候, <code>😂</code>需要两个单元才能解析出完整的符号,我们却只传了一个, 导致解析失败打印出来的就是<code>null</code>.</p>
+<p>　　理解了这个之后, 接着说正确处理的方法. OC提供了一个自动识别符号字节大小的方法, 修改一下代码如下:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)viewDidLoad &#123;</span><br><span class="line">    [<span class="keyword">super</span> viewDidLoad];</span><br><span class="line">    <span class="comment">// Do any additional setup after loading the view.</span></span><br><span class="line">    </span><br><span class="line">    <span class="built_in">NSString</span> *str = <span class="string">@&quot;中国人😂|🥶a&quot;</span>;</span><br><span class="line">    printf(<span class="string">&quot;%lu\n&quot;</span>, (<span class="keyword">unsigned</span> <span class="keyword">long</span>)str.length);</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">NSRange</span> range;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; str.length; i += range.length) &#123;</span><br><span class="line">        range = [str rangeOfComposedCharacterSequenceAtIndex:i];</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;%@, range.length=%@&quot;</span>, [str substringWithRange:range], @(range.length));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 打印如下</span></span><br><span class="line"><span class="comment">9</span></span><br><span class="line"><span class="comment">2019-06-19 15:28:02.422055+0800 OCSimpleView[4510:322599] 中, range.length=1</span></span><br><span class="line"><span class="comment">2019-06-19 15:28:02.422182+0800 OCSimpleView[4510:322599] 国, range.length=1</span></span><br><span class="line"><span class="comment">2019-06-19 15:28:02.422276+0800 OCSimpleView[4510:322599] 人, range.length=1</span></span><br><span class="line"><span class="comment">2019-06-19 15:28:02.422394+0800 OCSimpleView[4510:322599] 😂, range.length=2</span></span><br><span class="line"><span class="comment">2019-06-19 15:28:02.422481+0800 OCSimpleView[4510:322599] |, range.length=1</span></span><br><span class="line"><span class="comment">2019-06-19 15:28:02.422579+0800 OCSimpleView[4510:322599] 🥶, range.length=2</span></span><br><span class="line"><span class="comment">2019-06-19 15:28:02.422667+0800 OCSimpleView[4510:322599] a, range.length=1</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+
+<p>终于可以正确获取每一个符号了. 看到这里, 我们对OC字符串的处理的理解加深了, 平时产品经理让你限制用户名符号个数之类的处理起来也更明白了. 其实OC在这方面的处理还是不明显的, 下面看看Swift的处理方法, 顺便理解一下Swift为什么要这么设计.</p>
+<h1 id="Swift中String如何处理逐个字符"><a href="#Swift中String如何处理逐个字符" class="headerlink" title="Swift中String如何处理逐个字符?"></a>Swift中String如何处理逐个字符?</h1><p>　　第一次接触Swift的时候估计很多人都被其中的字符串API搞晕了, 它不像OC一样有一个<code>- (unichar)characterAtIndex:(NSUInteger)index;</code>方法, index是整形, 传0就是第0个符号. 取而代之的是String.Index类, 下面先看一下遍历字符</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> str2 = <span class="string">&quot;中国人😂|🥶a&quot;</span></span><br><span class="line"><span class="built_in">print</span>(str2.<span class="built_in">count</span>) </span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> <span class="built_in">c</span> <span class="keyword">in</span> str2 &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="built_in">c</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行上面代码, 结果如下</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">7</span></span><br><span class="line">中</span><br><span class="line">国</span><br><span class="line">人</span><br><span class="line">😂</span><br><span class="line">|</span><br><span class="line">🥶</span><br><span class="line">a</span><br></pre></td></tr></table></figure>
+<p>一个for循环可以直接遍历出人眼可见的符号, 而不像OC一样使用for i++语法遍历出的是单个UFT16单元, 这个确实可以避免OC中得到一半符号数据的尴尬.<br>　　再看一下, 如果得到指定位置的符号.</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="string">&quot;index 0:&quot;</span>, str2[str2.index(str2.startIndex, offsetBy: <span class="number">0</span>)])</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;index 3:&quot;</span>, str2[str2.index(str2.startIndex, offsetBy: <span class="number">3</span>)])</span><br><span class="line"></span><br><span class="line"><span class="comment">/*运行结果</span></span><br><span class="line"><span class="comment">index 0: 中</span></span><br><span class="line"><span class="comment">index 3: 😂</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+<p>重点说明, 上面的API就是很多人第一次接触Swift的时候感觉到的困惑, 为什么不直接用<br><code>str2[0], str2[1] </code><br>这样的形式来取第一个第二个字符? 而把API复杂化. 从上面OC的处理方式我们知道, 直接使用数字获取某一个符号, 能否成功是跟数据的存储有很大关系, 为了让语法看起来更加清晰, Swift采取了Index的形式, 一个Index就代表一个完整单元, 用户不用担心数据完整性问题(我猜的, 实际上你要用str[0]表示第一个单元也可理解). 这里有个小窍门, 如果不考虑性能问题, 可以直接将String转为数组, 这样每个数组元素都是一个<code>Character</code>, 就支持下标访问了.<br>　　深入一点, 如何获取字符串的其他表现形式呢? 像上面直接获取<code>str2.count</code>得到的数量是7, 这个又和OC不同. Swift为字符串提供了多种不同视图, 看下面代码:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="string">&quot;count:&quot;</span>, str2.<span class="built_in">count</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;utf8:&quot;</span>, str2.utf8.<span class="built_in">count</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;utf16:&quot;</span>, str2.utf16.<span class="built_in">count</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;unicodeScalars:&quot;</span>, str2.unicodeScalars.<span class="built_in">count</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 运行结果</span></span><br><span class="line"><span class="comment">count: 7</span></span><br><span class="line"><span class="comment">utf8: 19</span></span><br><span class="line"><span class="comment">utf16: 9</span></span><br><span class="line"><span class="comment">unicodeScalars: 7</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<p>要理解上面的结果, 我们需要知道每一个视图存储的内容是什么.<br>先从<code>UFT8View</code>开始, 查看源码, 得到<code>UTF8View</code>中存储的元素是<code>public typealias Element = UTF8.CodeUnit</code>, 而<code>UTF8.CodeUnit</code>又是<code>public typealias CodeUnit = UInt8</code>, 所以<code>UTF8View</code>里存的就是字符串的utf8编码, 每个元素都是一个Uint8, 0-255, 也就是一个字节, utf8编码中文占3字节, emoji大部分是4个字节,字母占1个字节, 9+8+2=19, 所以<code>str2.utf8.count</code>为19, 下面代码使用<code>String.UTF8View.Index</code>来获取指定index的单元</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="string">&quot;index 0:&quot;</span>, str2.utf8[str2.utf8.index(str2.utf8.startIndex, offsetBy: <span class="number">0</span>)])</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 运行结果</span></span><br><span class="line"><span class="comment">utf8 index 0: 228</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<p>其实我们有更简单的方法获取视图里的元素, 代码如下:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> uft8Arr = <span class="type">Array</span>(str2.utf8)</span><br><span class="line"><span class="built_in">print</span>(uft8Arr[<span class="number">0</span>])</span><br><span class="line"><span class="built_in">print</span>(uft8Arr)</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 运行结果</span></span><br><span class="line"><span class="comment">228</span></span><br><span class="line"><span class="comment">[228, 184, 173, 229, 155, 189, 228, 186, 186, 240, 159, 152, 130, 124, 240, 159, 165, 182, 97]</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<p>其他视图, <code>UTF16View</code>存储的元素类型是UInt16, 所以<code>str2.utf16.count</code>为9, 和OC中length相同; <code>UnicodeScalarView</code> 存储的元素类型是<code>Unicode.Scalar</code>, 可以理解为是一个Unicode编码单元, 一个单元对应一个人眼可见的符号, 所以<code>str2.unicodeScalars.count</code>为7.<br>最后再看一下str2字符串中视图的全部数据,加深理解</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="type">Array</span>(str2))</span><br><span class="line"><span class="built_in">print</span>(<span class="type">Array</span>(str2.utf8))</span><br><span class="line"><span class="built_in">print</span>(<span class="type">Array</span>(str2.utf16))</span><br><span class="line"><span class="built_in">print</span>(<span class="type">Array</span>(str2.unicodeScalars))</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 运行结果</span></span><br><span class="line"><span class="comment">[&quot;中&quot;, &quot;国&quot;, &quot;人&quot;, &quot;😂&quot;, &quot;|&quot;, &quot;🥶&quot;, &quot;a&quot;]</span></span><br><span class="line"><span class="comment">[228, 184, 173, 229, 155, 189, 228, 186, 186, 240, 159, 152, 130, 124, 240, 159, 165, 182, 97]</span></span><br><span class="line"><span class="comment">[20013, 22269, 20154, 55357, 56834, 124, 55358, 56694, 97]</span></span><br><span class="line"><span class="comment">[&quot;\u&#123;4E2D&#125;&quot;, &quot;\u&#123;56FD&#125;&quot;, &quot;\u&#123;4EBA&#125;&quot;, &quot;\u&#123;0001F602&#125;&quot;, &quot;|&quot;, &quot;\u&#123;0001F976&#125;&quot;, &quot;a&quot;]</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="让Swift字符串也支持整型下标访问"><a href="#让Swift字符串也支持整型下标访问" class="headerlink" title="让Swift字符串也支持整型下标访问"></a>让Swift字符串也支持整型下标访问</h1><p>　　下面代码还是比较简单的, 扩展一下String类, 这样就支持便捷的整型下标访问了<br><code>str[0]</code>, <code>str[0..&lt;str.count]</code>, <code>str[0...1]</code></p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// MARK: - 扩展系统的String类, 支持整型下标访问</span></span><br><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">String</span> </span>&#123;</span><br><span class="line">    <span class="keyword">fileprivate</span> <span class="keyword">subscript</span>(i: <span class="type">Int</span>) -&gt; <span class="type">Character</span> &#123;</span><br><span class="line">        <span class="keyword">get</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">self</span>[<span class="keyword">self</span>.index(<span class="keyword">self</span>.startIndex, offsetBy: i)]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">fileprivate</span> <span class="keyword">subscript</span>(r: <span class="type">Range</span>&lt;<span class="type">Int</span>&gt;) -&gt; <span class="type">Substring</span> &#123;</span><br><span class="line">        <span class="keyword">get</span> &#123;</span><br><span class="line">            <span class="keyword">let</span> startIndex = <span class="keyword">self</span>.index(<span class="keyword">self</span>.startIndex, offsetBy: r.lowerBound)</span><br><span class="line">            <span class="keyword">let</span> endIndex = <span class="keyword">self</span>.index(<span class="keyword">self</span>.startIndex, offsetBy: r.upperBound)</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">self</span>[startIndex..&lt;endIndex]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">fileprivate</span> <span class="keyword">subscript</span>(r: <span class="type">ClosedRange</span>&lt;<span class="type">Int</span>&gt;) -&gt; <span class="type">Substring</span> &#123;</span><br><span class="line">        <span class="keyword">get</span> &#123;</span><br><span class="line">            <span class="keyword">let</span> startIndex = <span class="keyword">self</span>.index(<span class="keyword">self</span>.startIndex, offsetBy: r.lowerBound)</span><br><span class="line">            <span class="keyword">let</span> endIndex = <span class="keyword">self</span>.index(<span class="keyword">self</span>.startIndex, offsetBy: r.upperBound)</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">self</span>[startIndex...endIndex]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>　　OC对于字符串的态度就是, 简单的一律使用UTF16来表示, 开发者想要更仔细处理字符, 需要调用更细致的API; Swift的设计则是一律使用人眼可见的符号表示, 想要更深入的处理字符串, 可以选择不同的视图, 这里仁者见仁智者见智, 你更喜欢哪种方式呢?</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/iOS/">iOS</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Swift/">Swift</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2019/06/19/2019-06-19-NSString-in-OC-and-String-in-Swift-2/" data-title="认真理解OC和Swift中的字符串 | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2019/07/19/2019-07-19-modular-design-in-ios/" title="业界流行的三种iOS组件化设计方案">
+  <strong>上一篇：</strong><br/>
+  <span>
+  业界流行的三种iOS组件化设计方案</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2019/05/17/2019-05-17-a-simple-tcp-data-transfer-demo/"  title="TCP数据协议设计和数据传输处理">
+ <strong>下一篇：</strong><br/> 
+ <span>TCP数据协议设计和数据传输处理
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E6%AD%A3%E7%A1%AE%E5%A4%84%E7%90%86%E9%80%90%E4%B8%AA%E5%AD%97%E7%AC%A6%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">3.</span> <span class="toc-text">如何正确处理逐个字符的问题</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Swift%E4%B8%ADString%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%86%E9%80%90%E4%B8%AA%E5%AD%97%E7%AC%A6"><span class="toc-number">4.</span> <span class="toc-text">Swift中String如何处理逐个字符?</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AE%A9Swift%E5%AD%97%E7%AC%A6%E4%B8%B2%E4%B9%9F%E6%94%AF%E6%8C%81%E6%95%B4%E5%9E%8B%E4%B8%8B%E6%A0%87%E8%AE%BF%E9%97%AE"><span class="toc-number">5.</span> <span class="toc-text">让Swift字符串也支持整型下标访问</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Greedy-Algorithm/" title="Greedy Algorithm">Greedy Algorithm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2020 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

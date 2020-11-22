@@ -1,0 +1,751 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>用代码来实现你喜欢的动画效果 — 虫儿跑 | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="文档更新说明 2018-03-28 修改fillMode部分类型描述 2016-03-25 完成全文 2016-03-24 完成4.3 2016-03-22 完成4.1,4.2 2016-03-21 初稿前言　　接触iOS应用开发不久,对于很多我暂时不清楚怎么实现的功能效果都挺感兴趣的.iOS开发中,动画特效是必不可少的一部分,最近学习了一下动画,顺便花了点时间实现了一个虫子嚅动的动画效果并写成一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用代码来实现你喜欢的动画效果 — 虫儿跑">
+<meta property="og:url" content="http://yoursite.com/2016/03/21/2016-03-21-iOS-animation-design-of-the-worm-run/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="文档更新说明 2018-03-28 修改fillMode部分类型描述 2016-03-25 完成全文 2016-03-24 完成4.3 2016-03-22 完成4.1,4.2 2016-03-21 初稿前言　　接触iOS应用开发不久,对于很多我暂时不清楚怎么实现的功能效果都挺感兴趣的.iOS开发中,动画特效是必不可少的一部分,最近学习了一下动画,顺便花了点时间实现了一个虫子嚅动的动画效果并写成一">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/images/a-diligent-worm.gif">
+<meta property="og:image" content="http://yoursite.com/images/Core-Animation-Classes.png">
+<meta property="og:image" content="http://yoursite.com/images/kCAMediaTimingFunctionLinear.png">
+<meta property="og:image" content="http://yoursite.com/images/kCAMediaTimingFunctionEaseIn.png">
+<meta property="og:image" content="http://yoursite.com/images/kCAMediaTimingFunctionEaseOut.png">
+<meta property="og:image" content="http://yoursite.com/images/kCAMediaTimingFunctionEaseInEaseOut.png">
+<meta property="og:image" content="http://yoursite.com/images/kCAMediaTimingFunctionDefault.png">
+<meta property="og:image" content="http://yoursite.com/images/full-worm-red.png">
+<meta property="og:image" content="http://yoursite.com/images/worm-strokeEndAm1.gif">
+<meta property="og:image" content="http://yoursite.com/images/worm-strokeStartAm1.gif">
+<meta property="og:image" content="http://yoursite.com/images/worm-strokeEndAm1-strokeStartAm1.gif">
+<meta property="og:image" content="http://yoursite.com/images/worm-strokeEndAm2.gif">
+<meta property="og:image" content="http://yoursite.com/images/worm-strokeStartAm2.gif">
+<meta property="og:image" content="http://yoursite.com/images/worm-strokeEndAm1&2-strokeStartAm1&2.gif">
+<meta property="og:image" content="http://yoursite.com/images/worm-strokeEndAm1&2-strokeStartAm1&2-translation.x.gif">
+<meta property="og:image" content="http://yoursite.com/images/worm-first&secondLayer.gif">
+<meta property="og:image" content="http://yoursite.com/images/worm-first&second&thirdLayer.gif">
+<meta property="og:image" content="http://yoursite.com/images/a-diligent-worm-in-iOS.gif">
+<meta property="article:published_time" content="2016-03-21T11:49:50.000Z">
+<meta property="article:modified_time" content="2018-03-28T09:49:54.000Z">
+<meta property="article:author" content="Cocos">
+<meta property="article:tag" content="iOS动画">
+<meta property="article:tag" content="HUD">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/images/a-diligent-worm.gif">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/03/21/2016-03-21-iOS-animation-design-of-the-worm-run/" title="用代码来实现你喜欢的动画效果 — 虫儿跑" itemprop="url">用代码来实现你喜欢的动画效果 — 虫儿跑</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2016-03-21T11:49:50.000Z" itemprop="datePublished"> 发表于 2016-03-21</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%9C%8B%E4%B8%8A%E7%9A%84%E5%8A%A8%E7%94%BB"><span class="toc-number">3.</span> <span class="toc-text">看上的动画</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%9D%E8%80%83"><span class="toc-number">4.</span> <span class="toc-text">思考</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%86%E8%A7%A3iOS%E4%B8%AD%E5%AE%9E%E7%8E%B0%E5%8A%A8%E7%94%BB%E7%9A%84%E6%96%B9%E6%B3%95"><span class="toc-number">4.1.</span> <span class="toc-text">了解iOS中实现动画的方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%93%AA%E4%BA%9B%E5%B7%A5%E5%85%B7%E5%8F%AF%E4%BB%A5%E5%88%A9%E7%94%A8"><span class="toc-number">4.2.</span> <span class="toc-text">哪些工具可以利用?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#iOS%E5%8A%A8%E7%94%BB%E7%9A%84%E5%87%A0%E4%B8%AA%E9%87%8D%E8%A6%81%E6%A6%82%E5%BF%B5"><span class="toc-number">4.3.</span> <span class="toc-text">iOS动画的几个重要概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8B%86%E5%88%86%E5%8A%A8%E7%94%BB-%E7%AE%80%E5%8C%96%E6%80%9D%E8%B7%AF"><span class="toc-number">4.4.</span> <span class="toc-text">拆分动画,简化思路</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E5%8A%A8%E6%89%8B"><span class="toc-number">5.</span> <span class="toc-text">开始动手</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E5%8A%A8%E7%94%BB%E7%9A%84%E6%A0%B8%E5%BF%83%E9%83%A8%E5%88%86"><span class="toc-number">5.1.</span> <span class="toc-text">实现动画的核心部分</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E5%90%88%E5%8A%A8%E7%94%BB%E5%AE%9E%E7%8E%B0%E6%9C%80%E7%BB%88%E6%95%88%E6%9E%9C"><span class="toc-number">5.2.</span> <span class="toc-text">整合动画实现最终效果</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E4%BB%A3%E7%A0%81-%E5%AE%9E%E7%8E%B0HUD%E7%9A%84%E5%8A%9F%E8%83%BD"><span class="toc-number">5.3.</span> <span class="toc-text">优化代码,实现HUD的功能</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%90%8E%E8%AF%AD"><span class="toc-number">6.</span> <span class="toc-text">后语</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A8%E8%8D%90%E9%98%85%E8%AF%BB"><span class="toc-number">6.1.</span> <span class="toc-text">推荐阅读</span></a></li></ol></li></ol>
+		
+		</div>
+		
+		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
+<li>2018-03-28 修改fillMode部分类型描述</li>
+<li>2016-03-25 完成全文</li>
+<li>2016-03-24 完成4.3</li>
+<li>2016-03-22 完成4.1,4.2</li>
+<li>2016-03-21 初稿<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1>　　接触iOS应用开发不久,对于很多我暂时不清楚怎么实现的功能效果都挺感兴趣的.iOS开发中,动画特效是必不可少的一部分,最近学习了一下动画,顺便花了点时间实现了一个虫子嚅动的动画效果并写成一个指示器(HUD).本文将讲述怎么学习动画设计,最终的效果就是要做到看上一个喜欢的动画,然后能用代码在iOS中实现他,最后能够在实际项目使用😃.<h1 id="看上的动画"><a href="#看上的动画" class="headerlink" title="看上的动画"></a>看上的动画</h1>　　这是一篇和动画有关的文章,那我就在文章开头放出这次想要实现的动画吧,大家也好思考一下具体怎么去实现.下面是我在豆瓣网上看到的一张动画图,觉得挺有意思的,于是我打算用程序实现它.我给它取了一个名字,虫儿跑,一只勤奋的虫子.<br>　　<img src="/images/a-diligent-worm.gif" class="" title="a-diligent-worm"></li>
+</ul>
+<h1 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h1><h2 id="了解iOS中实现动画的方法"><a href="#了解iOS中实现动画的方法" class="headerlink" title="了解iOS中实现动画的方法"></a>了解iOS中实现动画的方法</h2><p>　　iOS中的动画主要有View级别,Layer级别.View级别动画可以利用UIView的类中animation开头的类方法实现,使用简单方便,但是无法操作更多细节,它其实就是Core Animation的封装.Layer级别的动画相对于View级别来说要底层一些,主要是使用Core Animation来实现.相关CA类如下图:<br>　　<img src="/images/Core-Animation-Classes.png" class="" title="Core-Animation-Classes"></p>
+<blockquote>
+<p>CAAnimation：核心动画的基础类，不能直接使用，负责动画运行时间、速度的控制，本身实现了CAMediaTiming协议。<br>CAPropertyAnimation：属性动画的基类（通过属性进行动画设置，注意是可动画属性），不能直接使用。<br>CAAnimationGroup：动画组，动画组是一种组合模式设计，可以通过动画组来进行所有动画行为的统一控制，组中所有动画效果可以并发执行。<br>CATransition：转场动画，主要通过滤镜进行动画效果设置。<br>CABasicAnimation：基础动画，通过属性修改进行动画参数控制，只有初始状态和结束状态。<br>CAKeyframeAnimation：关键帧动画，同样是通过属性进行动画参数控制，但是同基础动画不同的是它可以有多个状态控制。</p>
+</blockquote>
+<p>　　根据实际场景,本文主要是在CALayer的子类CAShapeLayer(看名字很容易看出这是专门用作图形处理的子类)中利用CABasicAnimation, CAAnimationGroup来实现动画效果.更多iOS动画知识,可以参考文后的<a href="/2016/03/21/iOS-animation-design-of-the-worm-run/#%E6%8E%A8%E8%8D%90%E9%98%85%E8%AF%BB">阅读推荐</a><br>　　CABasicAnimation类有几个属性要特别留意,分别是fromValue和toValue,这两个基本就是CABasicAnimation的核心了,其余大部分是继承子父类的.这里要重点指出的是创建CABasicAnimation对象时候要指出keyPath,用来指明动画是平移缩放旋转还是绘制等.其中keyPath可以设置为strokeStart, strokeEnd,而CAShapeLayer也有两个属性分别是strokeStart, strokeEnd.网上很多文章介绍这些属性的作用了.我这里就不重复描述了,感觉这种东西光自己描述真的是很难说清楚,我发现有一个特别便捷直观的方法,那就是你在代码中自己测试观察.所以我特别写了两段测试的代码.大家也可以在我的<a href="/2016/03/21/iOS-animation-design-of-the-worm-run/#%E6%8E%A8%E8%8D%90%E9%98%85%E8%AF%BB">GitHub</a>上找到可以直接运行的代码.</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">CAShapeLayer</span> *firstWormShapeLayer = [[<span class="built_in">CAShapeLayer</span> alloc] init];</span><br><span class="line">    firstWormShapeLayer.path = [<span class="keyword">self</span> testPath];</span><br><span class="line">    firstWormShapeLayer.lineWidth = <span class="number">2</span>;</span><br><span class="line">    firstWormShapeLayer.lineCap = kCALineCapRound;</span><br><span class="line">    firstWormShapeLayer.strokeColor = [<span class="built_in">UIColor</span> redColor].CGColor;</span><br><span class="line">    firstWormShapeLayer.fillColor = [<span class="built_in">UIColor</span> clearColor].CGColor;</span><br><span class="line">    firstWormShapeLayer.actions = [[<span class="built_in">NSDictionary</span> alloc] initWithObjectsAndKeys:[<span class="built_in">NSNull</span> null],<span class="string">@&quot;strokeStart&quot;</span>,[<span class="built_in">NSNull</span> null],<span class="string">@&quot;strokeEnd&quot;</span>, <span class="literal">nil</span>];</span><br><span class="line"></span><br><span class="line"><span class="comment">//self 是一个UIView对象</span></span><br><span class="line"><span class="comment">//@property (nonatomic,strong) CAShapeLayer *firstWormShapeLayer;</span></span><br><span class="line">[<span class="keyword">self</span>.layer addSublayer:firstWormShapeLayer];</span><br><span class="line"><span class="keyword">self</span>.firstWormShapeLayer = firstWormShapeLayer;</span><br><span class="line">[<span class="keyword">self</span> testAnimation];</span><br><span class="line"> </span><br><span class="line"> <span class="meta">#<span class="meta-keyword">pragma</span> mark - 测试用</span></span><br><span class="line"> <span class="comment">// 生成一条用于制作动画的路径</span></span><br><span class="line">-(<span class="built_in">CGPathRef</span>)testPath&#123;</span><br><span class="line">    <span class="comment">//画一个半圆</span></span><br><span class="line">    <span class="built_in">UIBezierPath</span>* wormPath = <span class="built_in">UIBezierPath</span>.bezierPath;</span><br><span class="line">    [wormPath moveToPoint: <span class="built_in">CGPointMake</span>(<span class="number">5</span>,<span class="number">20</span>)];</span><br><span class="line">    [wormPath addLineToPoint:<span class="built_in">CGPointMake</span>(<span class="number">35</span>, <span class="number">20</span>)];</span><br><span class="line">    <span class="built_in">CGPathRef</span> path = wormPath.CGPath;</span><br><span class="line">    <span class="keyword">return</span> path;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 开始动画效果</span></span><br><span class="line">-(<span class="keyword">void</span>)testAnimation&#123;</span><br><span class="line">    <span class="built_in">CABasicAnimation</span> *strokeStartAm = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;strokeStart&quot;</span>];</span><br><span class="line">    <span class="comment">//时间函数,用于描述动画的速度和时间的关系,可以先忽略</span></span><br><span class="line">    strokeStartAm.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithName:kCAMediaTimingFunctionEaseOut];</span><br><span class="line">    strokeStartAm.toValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0.2</span>];</span><br><span class="line">    strokeStartAm.fromValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">1</span>];</span><br><span class="line">    <span class="comment">//一次动画的执行时间</span></span><br><span class="line">    strokeStartAm.duration = <span class="number">2</span>;</span><br><span class="line">    <span class="comment">//动画重复次数</span></span><br><span class="line">    strokeStartAm.repeatCount = <span class="number">100</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">CABasicAnimation</span> *strokeEndAm = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;strokeEnd&quot;</span>];</span><br><span class="line">    strokeEndAm.toValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">1</span>];</span><br><span class="line">    strokeEndAm.fromValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0</span>];</span><br><span class="line">    strokeEndAm.duration = <span class="number">2</span>;</span><br><span class="line">    strokeEndAm.repeatCount = <span class="number">100</span>;</span><br><span class="line">    </span><br><span class="line">    [<span class="keyword">self</span>.firstWormShapeLayer addAnimation:strokeEndAm forKey:<span class="literal">nil</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="哪些工具可以利用"><a href="#哪些工具可以利用" class="headerlink" title="哪些工具可以利用?"></a>哪些工具可以利用?</h2><p>　　要实现一个动画,最重要的就是确定动画的速度与时间的关系,确定动画的基本元素.比如动画的基本形状,字形,路径等.这里我找到了几种相当不错的工具.</p>
+<ol>
+<li><a href="/2016/03/21/iOS-animation-design-of-the-worm-run/#%E6%8E%A8%E8%8D%90%E9%98%85%E8%AF%BB">CAMediaTimingFunction playground</a><br>可视化观察timingFunction的曲线</li>
+<li><a href="/2016/03/21/iOS-animation-design-of-the-worm-run/#%E6%8E%A8%E8%8D%90%E9%98%85%E8%AF%BB">Sketch</a><br>这是一款Mac上的矢量图绘制工具,可以到处SVG格式的文件</li>
+<li><a href="/2016/03/21/iOS-animation-design-of-the-worm-run/#%E6%8E%A8%E8%8D%90%E9%98%85%E8%AF%BB">PaintCode</a><br>用于将SVG文件转换成OC的路径代码(提醒一下,PaintCode这个软件制作出来的路径绘制顺序可能不是你想要的)<br>　　本文将要实现的动画效果看上去像是一个半圆😆,所以应该是用不上路径代码生成工具.</li>
+</ol>
+<h2 id="iOS动画的几个重要概念"><a href="#iOS动画的几个重要概念" class="headerlink" title="iOS动画的几个重要概念"></a>iOS动画的几个重要概念</h2><ol>
+<li><p>关键帧：一个动画可能是单一的变化,等比例放大缩小,也可能是由好几个变化组成,比如先放大,再缩小,再平移.在iOS动画设计中,系统提供一些设置关键帧方法,你只要定义好关键帧和关键帧帧之间的时间分配,系统就会根据关键帧的区别自动补全过度帧,达到一个动画流畅的效果.</p>
+</li>
+<li><p>层：<a href="/2016/03/21/iOS-animation-design-of-the-worm-run/#%E4%BA%86%E8%A7%A3iOS%E4%B8%AD%E5%AE%9E%E7%8E%B0%E5%8A%A8%E7%94%BB%E7%9A%84%E6%96%B9%E6%B3%95">4.1小节</a>中提到,在CALayer上才能实现更多动画的细节.View的层概念类似PhotoShop中的图层,一个图像的最终效果可以通过多个层重叠实现的,同样的一个View在屏幕上显示的效果除了View上面的内容之外,还有一个很大的因素就是这个View的层里内容.</p>
+</li>
+<li><p>时间函数：动画总会在设定的时间长度内执行完,在这段时间内,动画的变化有多大,变化的速度有多快,这主要取决于时间函数.如果时间函数是线性函数,那表示动画的变化速度在这一段时间内是均匀变化的.如果是曲线的,那又是另一种效果,下面给出系统提供的5种时间函数的函数图像,方便大家理解.</p>
+<img src="/images/kCAMediaTimingFunctionLinear.png" class="" title="kCAMediaTimingFunctionLinear">线型函数
+<img src="/images/kCAMediaTimingFunctionEaseIn.png" class="" title="kCAMediaTimingFunctionEaseIn">缓入
+<img src="/images/kCAMediaTimingFunctionEaseOut.png" class="" title="kCAMediaTimingFunctionEaseOut">缓出
+<img src="/images/kCAMediaTimingFunctionEaseInEaseOut.png" class="" title="kCAMediaTimingFunctionEaseInEaseOut">慢入慢出
+<img src="/images/kCAMediaTimingFunctionDefault.png" class="" title="kCAMediaTimingFunctionDefault">系统默认的时间函数
+<p>系统还提供了一个设置时间函数的方法[CAMediaTimingFunction functionWithControlPoints::::],具体用法参考<a target="_blank" rel="noopener" href="http://netcetera.org/camtf-playground.html">CAMediaTimingFunction playground</a></p>
+</li>
+<li><p>fillMode：填充模式是CAMediaTiming协议里的属性,所有的Core Animation动画类都有,用于描述在动画的前后,图层要填充的内容.</p>
+</li>
+</ol>
+<p><strong>kCAFillModeRemoved</strong>：默认是这个属性,动画完成后,就从layer中移除了.看到的效果就是动画结束后,内容变成了模型图层了,这经常发生在你有多个动画对象要同时执行动画,但是这些对象的时间长度不同,造成一些对象执行完了就显示完整图形了.<br><strong>kCAFillModeForwards</strong>：当动画结束后,保留动画结束时的模样.<br><strong>kCAFillModeBackwards</strong>：动画在开始前就显示出动画要开始时的模样.比如你动画延迟2秒执行,那么动画在没开始执行这段时间的模样就是动画开始执行时的样子.<br><strong>kCAFillModeBoth</strong>：同时具备kCAFillModeForwards和kCAFillModeBackwards的效果<br>5. 动画组： iOS动画中,可以使用CAAnimationGroup来实现动画组功能.动画组对象可以加入多个动画对象,这些动画对象将会在动画组开始执行的时候同时执行动画.CAAnimationGroup也有自己的长度,重复次数等属性,这些和组中的每一个动画属性都不冲突.这个是很重要的,举个例子.动画对象A长度1s,重复2次;动画对象B长度1.5s,重复2次;动画对象C时间长度2s,重复次数3次;动画组G,长度3秒,重复无数次.ABC加入G中,效果就是G在执行一次动画时,A可以重复执行2次,然后空闲1s.B重复2次,没有空闲.C执行完第一次,在重复第二次时执行了1秒就没法继续执行了,因为3秒时间一个周期到了,G又重复了整个这个动画效果.<br>　　<strong>iOS动画还有很多概念和属性,由于本文要实现的动画没有涉及到,所以就不讲述了.具体的大家可以在推荐阅读中继续学习,然后尝试实现更多效果</strong></p>
+<h2 id="拆分动画-简化思路"><a href="#拆分动画-简化思路" class="headerlink" title="拆分动画,简化思路"></a>拆分动画,简化思路</h2><p>　　不同的拆分思路,写出来的代码也不同,如果一开始拆分得不好,有可能代码要多写很多,而且还不一定能实现.观察一下上面提供的GIF动画,整个动画是由一个半圆弧组成,一共是三种颜色,红黄绿色.这里有几种思路.<br>　　一种是整个动画由一个layer组成,layer上画一个半圆弧,把圆弧分层三段,分别画上不同的颜色.要注意的是动画除了圆弧的伸张缩小外还有一个平移运动.这种思路看似简单,但是有个地方不好实现,就是半圆弧的拉伸和缩小,颜色长度比例要保持一样.半圆弧可以从0画到完整的半圆弧,再从左端向右端消失,这个容易实现拉伸缩小效果,但是颜色跟着拉伸缩小就不好做了.<br>　　另一种思路是拆分动画,用多个layer组成,也是本文所使用的方法.通过拆分动画,可以简化思路和算法.观察GIF,可以把动画看成三个layer,每一个layer各自画着自己的半圆弧,红色保留完整弧长,微调黄色和绿色的可见弧长,其中绿色最短.注意一下,一开我也是把基础图形设定为半圆弧,但是做着做着发现没法实现先头红尾绿,接着先绿尾红这样的效果,所以基础图形的设定是非常重要的,一定要考虑清楚,否则事倍功半.这里我们需要把基础图形设定成有两个半圆弧连着的.如图:</p>
+<p>　　<img src="/images/full-worm-red.png" class="" title="full-worm-red"></p>
+<p>左半圆弧可以实现头红尾绿,右半圆弧可以实现先绿尾红的效果,动画过程中始终只显示最多一半的路径(半圆弧).</p>
+<h1 id="开始动手"><a href="#开始动手" class="headerlink" title="开始动手"></a>开始动手</h1><h2 id="实现动画的核心部分"><a href="#实现动画的核心部分" class="headerlink" title="实现动画的核心部分"></a>实现动画的核心部分</h2><p>根据动画的拆分思路,先实现红色部分的效果,再叠加黄色和绿色的图层.下面是核心代码和注释.<br>CCWormView.h</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//创建UIView的子类CCWormView</span></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">CCWormView</span> : <span class="title">UIView</span></span></span><br><span class="line"><span class="comment">//省略其他代码</span></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+<p>CCWormView的实现</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> WORM_ANIMATION_KEY_FIRST @<span class="meta-string">&quot;WORM_ANIMATION_KEY_FIRST&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> WORM_ANIMATION_KEY_SECOND @<span class="meta-string">&quot;WORM_ANIMATION_KEY_SECOND&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> WORM_ANIMATION_KEY_THIRD @<span class="meta-string">&quot;WORM_ANIMATION_KEY_THIRD&quot;</span></span></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">CCWormView</span> ()</span></span><br><span class="line"><span class="comment">//用户实现红色虫动画的层</span></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>,<span class="keyword">strong</span>) <span class="built_in">CAShapeLayer</span> *firstWormShapeLayer;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">CCWormView</span></span></span><br><span class="line"><span class="comment">//省略其他代码</span></span><br><span class="line"><span class="comment">//...</span></span><br><span class="line"><span class="comment">//初始化层</span></span><br><span class="line">-(<span class="keyword">instancetype</span>)initWithFrame:(<span class="built_in">CGRect</span>)frame HUDStyle:(CCWormHUDStyle)style&#123;</span><br><span class="line">    <span class="built_in">CAShapeLayer</span> *firstWormShapeLayer = [[<span class="built_in">CAShapeLayer</span> alloc] init];</span><br><span class="line">    <span class="comment">//设置动画的路径</span></span><br><span class="line">    firstWormShapeLayer.path = [<span class="keyword">self</span> wormRunLongPath];</span><br><span class="line">    <span class="comment">//画笔宽度</span></span><br><span class="line">    firstWormShapeLayer.lineWidth = CCWormHUDLineWidth;</span><br><span class="line">    <span class="comment">//设置线段头尾为圆形</span></span><br><span class="line">    firstWormShapeLayer.lineCap = kCALineCapRound;</span><br><span class="line">    <span class="comment">//设置线段拐角点为圆形</span></span><br><span class="line">    firstWormShapeLayer.lineJoin = kCALineCapRound;</span><br><span class="line">    <span class="comment">//设置路径绘制颜色为红色</span></span><br><span class="line">    firstWormShapeLayer.strokeColor = [<span class="built_in">UIColor</span> redColor].CGColor;</span><br><span class="line">    <span class="comment">//设置填充颜色为透明</span></span><br><span class="line">    firstWormShapeLayer.fillColor = [<span class="built_in">UIColor</span> clearColor].CGColor;</span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    firstWormShapeLayer.actions = [[<span class="built_in">NSDictionary</span> alloc] initWithObjectsAndKeys:[<span class="built_in">NSNull</span> null],<span class="string">@&quot;strokeStart&quot;</span>,[<span class="built_in">NSNull</span> null],<span class="string">@&quot;strokeEnd&quot;</span>, <span class="literal">nil</span>];</span><br><span class="line">    <span class="comment">//将其加入到view的layer中.</span></span><br><span class="line">    [<span class="keyword">self</span>.layer addSublayer:firstWormShapeLayer];    </span><br><span class="line">    <span class="keyword">self</span>.firstWormShapeLayer = firstWormShapeLayer;</span><br><span class="line">    <span class="comment">//动画部分,为CAShapeLayer添加动画效果</span></span><br><span class="line">    [<span class="keyword">self</span> firstWormAnimation];</span><br><span class="line">&#125;</span><br><span class="line">-(<span class="built_in">CGPathRef</span>)wormRunLongPath&#123;</span><br><span class="line">    <span class="comment">//确定路径起点位置</span></span><br><span class="line">    <span class="built_in">CGPoint</span> center;</span><br><span class="line">    center = <span class="built_in">CGPointMake</span>(<span class="keyword">self</span>.frame.size.width * <span class="number">9</span> / <span class="number">10</span>, <span class="keyword">self</span>.frame.size.height / <span class="number">2</span>);</span><br><span class="line">    <span class="comment">//两个连着的半圆</span></span><br><span class="line">    <span class="built_in">CGFloat</span> radius = (CCWormHUDViewWith / <span class="number">2.0</span>) / <span class="number">2.0</span>;</span><br><span class="line">    <span class="built_in">UIBezierPath</span> *wormPath = [<span class="built_in">UIBezierPath</span> bezierPathWithArcCenter:center radius:radius startAngle:M_PI endAngle:<span class="number">2</span> * M_PI clockwise:<span class="literal">YES</span>];</span><br><span class="line">    [wormPath addArcWithCenter:<span class="built_in">CGPointMake</span>(center.x  + radius * <span class="number">2</span>, center.y) radius:radius startAngle:M_PI endAngle:<span class="number">2</span> * M_PI clockwise:<span class="literal">YES</span>];</span><br><span class="line">    <span class="comment">//返回CGPathRef,因为CAShapeLayer的path属性类型为CGPathRef</span></span><br><span class="line">    <span class="built_in">CGPathRef</span> path = wormPath.CGPath;</span><br><span class="line">    <span class="keyword">return</span> path;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下面是<strong>firstWormAnimation</strong>部分<br><strong>第一步</strong>　实现红色虫运动的前半部分</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">///虫子拉伸</span></span><br><span class="line"><span class="built_in">CABasicAnimation</span> *strokeEndAm = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;strokeEnd&quot;</span>];</span><br><span class="line">strokeEndAm.toValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0.5</span>];</span><br><span class="line"><span class="comment">//fromValue 开始画时已经存在的部分的量</span></span><br><span class="line">strokeEndAm.fromValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0</span>];</span><br><span class="line">strokeEndAm.duration = <span class="number">0.75</span>;</span><br><span class="line">strokeEndAm.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithControlPoints:<span class="number">0.42</span> :<span class="number">0.0</span> :<span class="number">1.0</span> :<span class="number">0.55</span>];</span><br><span class="line"><span class="comment">//动画结束后,保留结束时的模样</span></span><br><span class="line">strokeEndAm.fillMode = kCAFillModeForwards;</span><br><span class="line"><span class="comment">//将动画加入firstWormShapeLayer的代码省略了.</span></span><br></pre></td></tr></table></figure>
+<p>将CABasicAnimation对象的动画关键路径为<em>strokeEnd</em>,fromValue=0,toValue=0.5.效果就是动画从空开始画,到一半路径时结束,效果如下:</p>
+<img src="/images/worm-strokeEndAm1.gif" class="" title="worm-strokeEndAm1">
+
+<p><strong>第二步</strong>　实现红色虫收缩的动画</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//虫子缩小</span></span><br><span class="line"><span class="built_in">CABasicAnimation</span> *strokeStartAm = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;strokeStart&quot;</span>];</span><br><span class="line">strokeStartAm.toValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0.5</span>];</span><br><span class="line">strokeStartAm.fromValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0</span>];</span><br><span class="line">strokeStartAm.duration = <span class="number">0.45</span>;</span><br><span class="line"><span class="comment">//如果不被Group加入的话,CACurrentMediaTime() + 0.75 才表示延迟0.75秒.</span></span><br><span class="line">strokeStartAm.beginTime = <span class="number">0.75</span>;<span class="comment">//延迟一秒执行</span></span><br><span class="line">strokeStartAm.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithName:kCAMediaTimingFunctionEaseInEaseOut];</span><br><span class="line">strokeStartAm.fillMode = kCAFillModeForwards;</span><br></pre></td></tr></table></figure>
+<p>将CABasicAnimation对象的动画关键路径为<em>strokeStart</em>,fromValue=0,toValue=0.5.效果就是动画开始执行时就从起点也就是左端慢慢消失直到一半路径的位置停止.设置延迟0.75秒的作用就是等待虫子拉伸动画结束,再执行缩小.效果如下:<br>(提醒一下,下图是单独执行缩小动画,不包括上面的拉伸动画的结果,由于动画延迟0.75秒,所以这0.75秒会显示完整路径,结合拉伸动画效果就正常了)</p>
+<img src="/images/worm-strokeStartAm1.gif" class="" title="worm-strokeStartAm1">
+<p>将第一二步动画放入一个组里同时执行,看看效果</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">CAAnimationGroup</span> *animationGroup = [<span class="built_in">CAAnimationGroup</span> animation];</span><br><span class="line">animationGroup.animations = [<span class="built_in">NSArray</span> arrayWithObjects: strokeEndAm, strokeStartAm, <span class="literal">nil</span>];</span><br><span class="line">animationGroup.repeatCount = HUGE_VALF;</span><br><span class="line"><span class="comment">//动画总时间应该以组中动画时间最长为标准</span></span><br><span class="line">animationGroup.duration = WormRunTime * <span class="number">2</span>;</span><br><span class="line">[<span class="keyword">self</span>.firstWormShapeLayer addAnimation:animationGroup forKey:WORM_ANIMATION_KEY_FIRST];</span><br></pre></td></tr></table></figure>
+<img src="/images/worm-strokeEndAm1-strokeStartAm1.gif" class="" title="worm-strokeEndAm1-strokeStartAm1">
+
+<p><strong>第三步</strong>　实现虫子第二阶段的拉伸</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//虫子拉伸2</span></span><br><span class="line"><span class="built_in">CABasicAnimation</span> *strokeEndAm2 = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;strokeEnd&quot;</span>];</span><br><span class="line">strokeEndAm2.toValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0.5</span> + <span class="number">0.5</span>];</span><br><span class="line"><span class="comment">//fromValue 开始画时已经存在的部分的量</span></span><br><span class="line">strokeEndAm2.fromValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0.5</span> + <span class="number">0</span>];</span><br><span class="line">strokeEndAm2.duration = <span class="number">0.75</span>;</span><br><span class="line">strokeEndAm2.beginTime = <span class="number">1.2</span>;</span><br><span class="line">strokeEndAm2.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithControlPoints:<span class="number">0.42</span> :<span class="number">0.0</span> :<span class="number">1.0</span> :<span class="number">0.55</span>];</span><br><span class="line">strokeEndAm2.fillMode = kCAFillModeForwards;</span><br></pre></td></tr></table></figure>
+<p>虫子第二阶段的拉伸和第一阶段基本一样,需要改变的是toValue,fromValue的值,还有动画的开始时间必须是第一阶段结束后立即执行,一共是延迟1.2s,看看效果.</p>
+<img src="/images/worm-strokeEndAm2.gif" class="" title="worm-strokeEndAm2">
+
+<p><strong>第四步</strong>　实现虫子第二阶段的缩小</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//虫子缩小2</span></span><br><span class="line"><span class="built_in">CABasicAnimation</span> *strokeStartAm2 = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;strokeStart&quot;</span>];</span><br><span class="line">strokeStartAm2.toValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0.5</span> + <span class="number">0.5</span>];</span><br><span class="line">strokeStartAm2.fromValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0.5</span> + <span class="number">0</span>];</span><br><span class="line">strokeStartAm2.duration = <span class="number">0.45</span>;</span><br><span class="line">strokeStartAm2.beginTime = <span class="number">0.75</span> + <span class="number">1.2</span>;<span class="comment">//延迟一秒执行</span></span><br><span class="line">strokeStartAm2.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithName:kCAMediaTimingFunctionEaseInEaseOut];</span><br></pre></td></tr></table></figure>
+<p>和第一阶段类似,看看效果.</p>
+<img src="/images/worm-strokeStartAm2.gif" class="" title="worm-strokeStartAm2">
+<p>现在把前四步都放入组中同时进行,看看效果.</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">animationGroup.animations = [<span class="built_in">NSArray</span> arrayWithObjects: strokeStartAm, strokeEndAm, strokeEndAm2, strokeStartAm2, <span class="literal">nil</span>];</span><br></pre></td></tr></table></figure>
+<img src="/images/worm-strokeEndAm1&2-strokeStartAm1&2.gif" class="" title="worm-strokeEndAm1&amp;2-strokeStartAm1&amp;2">
+
+<p><strong>第五步</strong>　实现虫子持续移动的效果</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//平移动画</span></span><br><span class="line"><span class="built_in">CABasicAnimation</span> *xTranslationAm = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;transform.translation.x&quot;</span>];</span><br><span class="line">xTranslationAm.toValue = [<span class="built_in">NSNumber</span> numberWithFloat: (<span class="number">40</span> / <span class="number">-1.0</span>)];</span><br><span class="line">xTranslationAm.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithName:kCAMediaTimingFunctionEaseOut];</span><br><span class="line">xTranslationAm.duration = <span class="number">1.18</span>;</span><br><span class="line">xTranslationAm.fillMode = kCAFillModeForwards;</span><br><span class="line"></span><br><span class="line"><span class="built_in">CABasicAnimation</span> *xTranslationAm2 = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;transform.translation.x&quot;</span>];</span><br><span class="line">xTranslationAm2.toValue = [<span class="built_in">NSNumber</span> numberWithFloat: (<span class="number">40</span> / <span class="number">-1.0</span>) * <span class="number">2</span>];</span><br><span class="line">xTranslationAm2.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithName:kCAMediaTimingFunctionEaseOut];</span><br><span class="line">xTranslationAm2.duration = <span class="number">1.18</span>;</span><br><span class="line">xTranslationAm2.beginTime = <span class="number">1.20</span>;</span><br><span class="line">xTranslationAm2.fillMode = kCAFillModeForwards;</span><br></pre></td></tr></table></figure>
+<p>持续移动可以沿x轴平移来实现,平移要分两部分,第一阶段移动结束后稍微停留一下,再继续第二阶段的移动.每一个阶段的移动停留时间和虫子拉伸缩小总时长一样.将平移和上面四步动画结合,看看效果</p>
+<img src="/images/worm-strokeEndAm1&2-strokeStartAm1&2-translation.x.gif" class="" title="worm-strokeEndAm1&amp;2-strokeStartAm1&amp;2-translation.x">
+<p>这样,红色虫的动画效果基本就实现了.</p>
+<h2 id="整合动画实现最终效果"><a href="#整合动画实现最终效果" class="headerlink" title="整合动画实现最终效果"></a>整合动画实现最终效果</h2><p>　　现在还差黄色和绿色部分的动画.那么怎么实现黄色部分?注意观察,如果虫子在拉伸还没结束的时候就开始缩小,是不是效果就是黄色那样😋!如果黄色拉伸时间比红色慢,其他时间比例都不变,是不是可以实现红色先走随后拉动黄色呢?答案是肯定的.<br>　　黄色和绿色的动画逻辑和红色是一模一样的,不同的就是动画的参数设置不同,下面给出黄色和绿色的参数.<br>先看看黄色虫子的参数设置.</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//虫子拉伸</span></span><br><span class="line"><span class="built_in">CABasicAnimation</span> *strokeEndAm = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;strokeEnd&quot;</span>];</span><br><span class="line">strokeEndAm.toValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0.5</span>];</span><br><span class="line"><span class="comment">//fromValue 开始画时已经存在的部分的量</span></span><br><span class="line">strokeEndAm.fromValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0.010</span>];</span><br><span class="line">strokeEndAm.duration = <span class="number">0.75</span>;</span><br><span class="line">strokeEndAm.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithControlPoints:<span class="number">0.42</span> :<span class="number">0.0</span> :<span class="number">1.0</span> :<span class="number">0.55</span>];</span><br><span class="line">strokeEndAm.fillMode = kCAFillModeForwards;</span><br><span class="line"></span><br><span class="line"><span class="comment">//虫子缩小</span></span><br><span class="line"><span class="built_in">CABasicAnimation</span> *strokeStartAm = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;strokeStart&quot;</span>];</span><br><span class="line">strokeStartAm.toValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0.490</span>];</span><br><span class="line">strokeStartAm.fromValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0</span>];</span><br><span class="line">strokeStartAm.duration = <span class="number">0.70</span>;</span><br><span class="line">strokeStartAm.beginTime = <span class="number">0.50</span>;</span><br><span class="line">strokeStartAm.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithName:kCAMediaTimingFunctionEaseInEaseOut];</span><br><span class="line">strokeStartAm.fillMode = kCAFillModeForwards;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//虫子拉伸2 拉伸的第二阶段,必须让上一层的第二阶段先动</span></span><br><span class="line"><span class="built_in">CABasicAnimation</span> *strokeEndAm2 = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;strokeEnd&quot;</span>];</span><br><span class="line">strokeEndAm2.toValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0.5</span> + <span class="number">0.5</span>];</span><br><span class="line"><span class="comment">//fromValue 开始画时已经存在的部分的量</span></span><br><span class="line">strokeEndAm2.fromValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0.5</span>];</span><br><span class="line">strokeEndAm2.duration = <span class="number">0.75</span>;</span><br><span class="line">strokeEndAm2.beginTime = <span class="number">1.2</span> + <span class="number">0.15</span>;</span><br><span class="line">strokeEndAm2.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithControlPoints:<span class="number">0.42</span> :<span class="number">0.0</span> :<span class="number">1.0</span> :<span class="number">0.55</span>];</span><br><span class="line">strokeEndAm2.fillMode = kCAFillModeForwards;</span><br><span class="line"></span><br><span class="line"><span class="comment">//虫子缩小2</span></span><br><span class="line"><span class="built_in">CABasicAnimation</span> *strokeStartAm2 = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;strokeStart&quot;</span>];</span><br><span class="line">strokeStartAm2.toValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0.5</span> + <span class="number">0.5</span>];</span><br><span class="line">strokeStartAm2.fromValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0.5</span> + <span class="number">0</span>];</span><br><span class="line">strokeStartAm2.duration = <span class="number">0.30</span>;</span><br><span class="line">strokeStartAm2.beginTime =<span class="number">0.15</span> + <span class="number">0.75</span> + <span class="number">1.2</span>;</span><br><span class="line">strokeStartAm2.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithName:kCAMediaTimingFunctionEaseInEaseOut];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//平移动画</span></span><br><span class="line"><span class="built_in">CABasicAnimation</span> *xTranslationAm = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;transform.translation.x&quot;</span>];</span><br><span class="line">xTranslationAm.toValue = [<span class="built_in">NSNumber</span> numberWithFloat: (<span class="number">40</span> / <span class="number">-1.0</span>)];</span><br><span class="line">xTranslationAm.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithName:kCAMediaTimingFunctionEaseOut];</span><br><span class="line">xTranslationAm.duration = <span class="number">1.18</span>;</span><br><span class="line">xTranslationAm.fillMode = kCAFillModeForwards;</span><br><span class="line"></span><br><span class="line"><span class="built_in">CABasicAnimation</span> *xTranslationAm2 = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;transform.translation.x&quot;</span>];</span><br><span class="line">xTranslationAm2.toValue = [<span class="built_in">NSNumber</span> numberWithFloat: (<span class="number">40</span> / <span class="number">-1.0</span>) * <span class="number">2</span>];</span><br><span class="line">xTranslationAm2.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithName:kCAMediaTimingFunctionEaseOut];</span><br><span class="line">xTranslationAm2.duration = <span class="number">1.18</span>;</span><br><span class="line">xTranslationAm2.beginTime = <span class="number">1.20</span>;</span><br><span class="line">xTranslationAm2.fillMode = kCAFillModeForwards;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">CAAnimationGroup</span> *animationGroup = [<span class="built_in">CAAnimationGroup</span> animation];</span><br><span class="line">animationGroup.animations = [<span class="built_in">NSArray</span> arrayWithObjects: strokeStartAm, strokeEndAm, xTranslationAm, strokeEndAm2, strokeStartAm2, xTranslationAm2, <span class="literal">nil</span>];</span><br><span class="line">animationGroup.repeatCount = HUGE_VALF;</span><br><span class="line"><span class="comment">//动画总时间应该以组中动画时间最长为标准</span></span><br><span class="line">animationGroup.duration = <span class="number">1.2</span> * <span class="number">2</span>;</span><br><span class="line">[<span class="keyword">self</span>.secondWormShapeLayer addAnimation:animationGroup forKey:<span class="literal">nil</span>];</span><br></pre></td></tr></table></figure>
+<p>将黄色和红色两个层合并在一起同时执行动画,看看效果</p>
+<img src="/images/worm-first&secondLayer.gif" class="" title="worm-first&amp;secondLayer">
+
+<p>下面是绿色虫子的参数.</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//虫子拉伸</span></span><br><span class="line"><span class="built_in">CABasicAnimation</span> *strokeEndAm = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;strokeEnd&quot;</span>];</span><br><span class="line">strokeEndAm.toValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0.5</span>];</span><br><span class="line"><span class="comment">//fromValue 开始画时已经存在的部分的量</span></span><br><span class="line">strokeEndAm.fromValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0.010</span>];</span><br><span class="line">strokeEndAm.duration = <span class="number">0.75</span>;</span><br><span class="line">strokeEndAm.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithControlPoints:<span class="number">0.42</span> :<span class="number">0.0</span> :<span class="number">1.0</span> :<span class="number">0.55</span>];</span><br><span class="line">strokeEndAm.fillMode = kCAFillModeForwards;</span><br><span class="line"></span><br><span class="line"><span class="comment">//虫子缩小</span></span><br><span class="line"><span class="built_in">CABasicAnimation</span> *strokeStartAm = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;strokeStart&quot;</span>];</span><br><span class="line">strokeStartAm.toValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0.490</span> ];</span><br><span class="line">strokeStartAm.fromValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0</span>];</span><br><span class="line">strokeStartAm.duration = <span class="number">0.90</span>;</span><br><span class="line">strokeStartAm.beginTime = <span class="number">0.25</span>;</span><br><span class="line">strokeStartAm.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithName:kCAMediaTimingFunctionEaseInEaseOut];</span><br><span class="line">strokeStartAm.fillMode = kCAFillModeForwards;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//虫子拉伸2 拉伸的第二阶段,必须让上一层的第二阶段先动</span></span><br><span class="line"><span class="built_in">CABasicAnimation</span> *strokeEndAm2 = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;strokeEnd&quot;</span>];</span><br><span class="line">strokeEndAm2.toValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0.5</span> + <span class="number">0.5</span>];</span><br><span class="line"><span class="comment">//fromValue 开始画时已经存在的部分的量</span></span><br><span class="line">strokeEndAm2.fromValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0.5</span>];</span><br><span class="line">strokeEndAm2.duration = <span class="number">0.75</span>;</span><br><span class="line">strokeEndAm2.beginTime = <span class="number">1.2</span> + <span class="number">0.15</span> + <span class="number">0.20</span>;</span><br><span class="line">strokeEndAm2.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithControlPoints:<span class="number">0.42</span> :<span class="number">0.0</span> :<span class="number">1.0</span> :<span class="number">0.55</span>];</span><br><span class="line">strokeEndAm2.fillMode = kCAFillModeForwards;</span><br><span class="line"></span><br><span class="line"><span class="comment">//虫子缩小2</span></span><br><span class="line"><span class="built_in">CABasicAnimation</span> *strokeStartAm2 = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;strokeStart&quot;</span>];</span><br><span class="line">strokeStartAm2.toValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0.5</span> + <span class="number">0.5</span>];</span><br><span class="line">strokeStartAm2.fromValue = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">0.5</span> + <span class="number">0</span>];</span><br><span class="line">strokeStartAm2.duration = <span class="number">0.30</span>;</span><br><span class="line">strokeStartAm2.beginTime =<span class="number">0.15</span> + <span class="number">0.75</span> + <span class="number">1.2</span>;</span><br><span class="line">strokeStartAm2.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithName:kCAMediaTimingFunctionEaseInEaseOut];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//平移动画</span></span><br><span class="line"><span class="built_in">CABasicAnimation</span> *xTranslationAm = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;transform.translation.x&quot;</span>];</span><br><span class="line">xTranslationAm.toValue = [<span class="built_in">NSNumber</span> numberWithFloat: (HUDWith / <span class="number">-1.0</span> + <span class="number">10</span>)];</span><br><span class="line">xTranslationAm.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithName:kCAMediaTimingFunctionEaseOut];</span><br><span class="line">xTranslationAm.duration = <span class="number">1.18</span>;</span><br><span class="line">xTranslationAm.fillMode = kCAFillModeForwards;</span><br><span class="line"></span><br><span class="line"><span class="built_in">CABasicAnimation</span> *xTranslationAm2 = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;transform.translation.x&quot;</span>];</span><br><span class="line">xTranslationAm2.toValue = [<span class="built_in">NSNumber</span> numberWithFloat: (HUDWith / <span class="number">-1.0</span> + <span class="number">10</span>) * <span class="number">2</span>];</span><br><span class="line">xTranslationAm2.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithName:kCAMediaTimingFunctionEaseOut];</span><br><span class="line">xTranslationAm2.duration = <span class="number">1.18</span>;</span><br><span class="line">xTranslationAm2.beginTime = <span class="number">1.20</span>;</span><br><span class="line">xTranslationAm2.fillMode = kCAFillModeForwards;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">CAAnimationGroup</span> *animationGroup = [<span class="built_in">CAAnimationGroup</span> animation];</span><br><span class="line">animationGroup.animations = [<span class="built_in">NSArray</span> arrayWithObjects: strokeStartAm, strokeEndAm, xTranslationAm, strokeEndAm2, strokeStartAm2, xTranslationAm2, <span class="literal">nil</span>];</span><br><span class="line">animationGroup.repeatCount = HUGE_VALF;</span><br><span class="line"><span class="comment">//动画总时间应该以组中动画时间最长为标准</span></span><br><span class="line">animationGroup.duration = <span class="number">1.2</span> * <span class="number">2</span>;</span><br><span class="line">[<span class="keyword">self</span>.thirdWormShapeLayer addAnimation:animationGroup forKey:<span class="literal">nil</span>];</span><br></pre></td></tr></table></figure>
+<p>最终将红黄绿三个虫子合并,看看合成的效果😄</p>
+<img src="/images/worm-first&second&thirdLayer.gif" class="" title="worm-first&amp;second&amp;thirdLayer">
+<p>　　.</p>
+<h2 id="优化代码-实现HUD的功能"><a href="#优化代码-实现HUD的功能" class="headerlink" title="优化代码,实现HUD的功能"></a>优化代码,实现HUD的功能</h2><p>　　三个虫子的动画逻辑都是一下的,所以这里可以优化一下代码结构,最后加上UIView动画,实现一个指示器(HUD),这样就可以提供给别人使用了~<br>　　先把虫子动画中变化的参数提取出来,封装在一个方法里,然后三个虫分别给出自己的参数调用一下方法就可以得到动画对象了.封装后的代码如下.(其中有一些是全局静态变量和宏定义,不用太在意,具体可参考Git上的完整源码)</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> *  第三条虫子嚅动</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">-(<span class="keyword">void</span>)thirdWormAnimation&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">CAAnimationGroup</span> *animationGroup = [<span class="keyword">self</span> baseWormAnimationWithEnd1From:<span class="number">0.010</span> end1To:<span class="number">0.5</span> end1Duration:<span class="number">0.75</span> start1From:<span class="number">0</span> start1To:<span class="number">0.490</span> start1Duration:<span class="number">0.9</span> start1Begin:<span class="number">0.25</span> end2From:<span class="number">0.5</span> end2To:<span class="number">0.5</span> + <span class="number">0.5</span> end2Duration:<span class="number">0.75</span> end2Begin:WormRunTime + <span class="number">0.15</span> + <span class="number">0.20</span> start2From:<span class="number">0.5</span> start2To:<span class="number">0.5</span> + <span class="number">0.5</span> start2Duration:<span class="number">0.30</span> start2Begin:<span class="number">0.15</span> + <span class="number">0.75</span> + WormRunTime];</span><br><span class="line">    </span><br><span class="line">    [<span class="keyword">self</span>.thirdWormShapeLayer addAnimation:animationGroup forKey:WORM_ANIMATION_KEY_THIRD];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> *  第二条虫子嚅动</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">-(<span class="keyword">void</span>)secondWormAnimation&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">CAAnimationGroup</span> *animationGroup = [<span class="keyword">self</span> baseWormAnimationWithEnd1From:<span class="number">0.010</span> end1To:<span class="number">0.5</span> end1Duration:<span class="number">0.75</span> start1From:<span class="number">0</span> start1To:<span class="number">0.490</span> start1Duration:<span class="number">0.70</span> start1Begin:<span class="number">0.50</span> end2From:<span class="number">0.5</span> end2To:<span class="number">0.5</span> + <span class="number">0.5</span> end2Duration:<span class="number">0.75</span> end2Begin:WormRunTime + <span class="number">0.15</span> start2From:<span class="number">0.5</span> start2To:<span class="number">0.5</span> + <span class="number">0.5</span> start2Duration:<span class="number">0.30</span> start2Begin:<span class="number">0.15</span> + <span class="number">0.75</span> + WormRunTime];</span><br><span class="line">    </span><br><span class="line">    [<span class="keyword">self</span>.secondWormShapeLayer addAnimation:animationGroup forKey:WORM_ANIMATION_KEY_SECOND];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> *  第一条虫子嚅动 (最底部的那条)</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">-(<span class="keyword">void</span>)firstWormAnimation&#123;</span><br><span class="line">    <span class="built_in">CAAnimationGroup</span> *animationGroup = [<span class="keyword">self</span> baseWormAnimationWithEnd1From:<span class="number">0</span> end1To:<span class="number">0.5</span> end1Duration:<span class="number">0.75</span> start1From:<span class="number">0</span> start1To:<span class="number">0.5</span> start1Duration:<span class="number">0.45</span> start1Begin:<span class="number">0.75</span> end2From:<span class="number">0.5</span> end2To:<span class="number">0.5</span> + <span class="number">0.5</span> end2Duration:<span class="number">0.75</span> end2Begin:<span class="number">1.2</span> start2From:<span class="number">0.5</span> start2To:<span class="number">0.5</span> + <span class="number">0.5</span> start2Duration:<span class="number">0.45</span> start2Begin:<span class="number">0.75</span> + WormRunTime];</span><br><span class="line">    </span><br><span class="line">    [<span class="keyword">self</span>.firstWormShapeLayer addAnimation:animationGroup forKey:WORM_ANIMATION_KEY_FIRST];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">-(<span class="built_in">CAAnimationGroup</span> *)baseWormAnimationWithEnd1From:(<span class="built_in">CGFloat</span>)end1FromValue end1To:(<span class="built_in">CGFloat</span>)end1ToValue end1Duration:(<span class="built_in">CGFloat</span>)end1Duration start1From:(<span class="built_in">CGFloat</span>)start1FromValue start1To:(<span class="built_in">CGFloat</span>)start1ToValue start1Duration:(<span class="built_in">CGFloat</span>)start1Duration start1Begin:(<span class="built_in">CGFloat</span>)start1BeginTime end2From:(<span class="built_in">CGFloat</span>)end2FromValue end2To:(<span class="built_in">CGFloat</span>)end2ToValue end2Duration:(<span class="built_in">CGFloat</span>)end2Duration end2Begin:(<span class="built_in">CGFloat</span>)end2BeginTime start2From:(<span class="built_in">CGFloat</span>)start2FromValue start2To:(<span class="built_in">CGFloat</span>)start2ToValue start2Duration:(<span class="built_in">CGFloat</span>)start2Duration start2Begin:(<span class="built_in">CGFloat</span>)start2BeginTime&#123;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="comment">//虫子拉伸1</span></span><br><span class="line">    <span class="built_in">CABasicAnimation</span> *strokeEndAm = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;strokeEnd&quot;</span>];</span><br><span class="line">    strokeEndAm.toValue = [<span class="built_in">NSNumber</span> numberWithFloat:end1ToValue];</span><br><span class="line">    <span class="comment">//fromValue 开始画时已经存在的部分的量</span></span><br><span class="line">    strokeEndAm.fromValue = [<span class="built_in">NSNumber</span> numberWithFloat:end1FromValue];</span><br><span class="line">    strokeEndAm.duration = end1Duration;</span><br><span class="line">    strokeEndAm.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithControlPoints:<span class="number">0.42</span> :<span class="number">0.0</span> :<span class="number">1.0</span> :<span class="number">0.55</span>];</span><br><span class="line">    strokeEndAm.fillMode = kCAFillModeForwards;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//虫子缩小1</span></span><br><span class="line">    <span class="built_in">CABasicAnimation</span> *strokeStartAm = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;strokeStart&quot;</span>];</span><br><span class="line">    strokeStartAm.toValue = [<span class="built_in">NSNumber</span> numberWithFloat:start1ToValue];</span><br><span class="line">    strokeStartAm.fromValue = [<span class="built_in">NSNumber</span> numberWithFloat:start1FromValue];</span><br><span class="line">    strokeStartAm.duration = start1Duration;</span><br><span class="line">    <span class="comment">//如果不被Group加入的话,CACurrentMediaTime() + 1 才表示延迟1秒.</span></span><br><span class="line">    strokeStartAm.beginTime = start1BeginTime;<span class="comment">//延迟执行</span></span><br><span class="line">    strokeStartAm.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithName:kCAMediaTimingFunctionEaseInEaseOut];</span><br><span class="line">    strokeStartAm.fillMode = kCAFillModeForwards;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="comment">//虫子拉伸2 拉伸的第二阶段,必须让上一层的第二阶段先动</span></span><br><span class="line">    <span class="built_in">CABasicAnimation</span> *strokeEndAm2 = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;strokeEnd&quot;</span>];</span><br><span class="line">    strokeEndAm2.toValue = [<span class="built_in">NSNumber</span> numberWithFloat:end2ToValue];</span><br><span class="line">    <span class="comment">//fromValue 开始画时已经存在的部分的量</span></span><br><span class="line">    strokeEndAm2.fromValue = [<span class="built_in">NSNumber</span> numberWithFloat:end2FromValue];</span><br><span class="line">    strokeEndAm2.duration = end2Duration;</span><br><span class="line">    strokeEndAm2.beginTime = end2BeginTime;</span><br><span class="line">    strokeEndAm2.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithControlPoints:<span class="number">0.42</span> :<span class="number">0.0</span> :<span class="number">1.0</span> :<span class="number">0.55</span>];</span><br><span class="line">    strokeEndAm2.fillMode = kCAFillModeForwards;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//虫子缩小2</span></span><br><span class="line">    <span class="built_in">CABasicAnimation</span> *strokeStartAm2 = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;strokeStart&quot;</span>];</span><br><span class="line">    strokeStartAm2.toValue = [<span class="built_in">NSNumber</span> numberWithFloat:start2ToValue];</span><br><span class="line">    strokeStartAm2.fromValue = [<span class="built_in">NSNumber</span> numberWithFloat:start2FromValue];</span><br><span class="line">    strokeStartAm2.duration = start2Duration;</span><br><span class="line">    <span class="comment">//如果不被Group加入的话,CACurrentMediaTime() + 1 才表示延迟1秒.</span></span><br><span class="line">    strokeStartAm2.beginTime = start2BeginTime;<span class="comment">//延迟一秒执行</span></span><br><span class="line">    strokeStartAm2.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithName:kCAMediaTimingFunctionEaseInEaseOut];</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="comment">//平移动画</span></span><br><span class="line">    <span class="built_in">CABasicAnimation</span> *xTranslationAm = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;transform.translation.x&quot;</span>];</span><br><span class="line">    xTranslationAm.toValue = [<span class="built_in">NSNumber</span> numberWithFloat: ( (CCWormHUDViewWith / <span class="number">2.0</span>) / <span class="number">-1.0</span>)];</span><br><span class="line">    xTranslationAm.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithName:kCAMediaTimingFunctionEaseOut];</span><br><span class="line">    xTranslationAm.duration = <span class="number">1.18</span>;</span><br><span class="line">    xTranslationAm.fillMode = kCAFillModeForwards;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">CABasicAnimation</span> *xTranslationAm2 = [<span class="built_in">CABasicAnimation</span> animationWithKeyPath:<span class="string">@&quot;transform.translation.x&quot;</span>];</span><br><span class="line">    xTranslationAm2.toValue = [<span class="built_in">NSNumber</span> numberWithFloat: ( (CCWormHUDViewWith / <span class="number">2.0</span>) / <span class="number">-1.0</span>) * <span class="number">2</span>];</span><br><span class="line">    xTranslationAm2.timingFunction = [<span class="built_in">CAMediaTimingFunction</span> functionWithName:kCAMediaTimingFunctionEaseOut];</span><br><span class="line">    xTranslationAm2.duration = <span class="number">1.18</span>;</span><br><span class="line">    xTranslationAm2.beginTime = <span class="number">1.20</span>;</span><br><span class="line">    xTranslationAm2.fillMode = kCAFillModeForwards;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="built_in">CAAnimationGroup</span> *animationGroup = [<span class="built_in">CAAnimationGroup</span> animation];</span><br><span class="line">    animationGroup.animations = [<span class="built_in">NSArray</span> arrayWithObjects: strokeStartAm, strokeEndAm, xTranslationAm, strokeEndAm2, strokeStartAm2, xTranslationAm2, <span class="literal">nil</span>];</span><br><span class="line">    animationGroup.repeatCount = HUGE_VALF;</span><br><span class="line">    <span class="comment">//动画总时间应该以组中动画时间最长为标准</span></span><br><span class="line">    animationGroup.duration = WormRunTime * <span class="number">2</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> animationGroup;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>接下来为这个动画所在的视图添加UIView级别动画,做成一个HUD,并且提供两个公开的实例方法用于显示和隐藏HUD</strong><br>　　讲了半天Core Animation动画,不知道你是不是累了.往下看,接下来你一定会觉得使用UIView级别的动画是多么轻松😆,让我们开始轻松一下😃.下面看一下怎么在显示和隐藏视图时使用动画.</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">-(<span class="keyword">void</span>)startLodingWormHUD&#123;</span><br><span class="line">    <span class="keyword">self</span>.isShowing = <span class="literal">YES</span>;</span><br><span class="line">    [<span class="keyword">self</span>.presentingView addSubview:<span class="keyword">self</span>];</span><br><span class="line">    <span class="comment">//动起来.显示指示器的时候才开始设置动画效果</span></span><br><span class="line">    [<span class="keyword">self</span> firstWormAnimation];</span><br><span class="line">    [<span class="keyword">self</span> secondWormAnimation];</span><br><span class="line">    [<span class="keyword">self</span> thirdWormAnimation];</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">self</span>.transform = <span class="built_in">CGAffineTransformMakeScale</span>(<span class="number">0.1</span>, <span class="number">0.1</span>);</span><br><span class="line">    [<span class="built_in">UIView</span> animateKeyframesWithDuration:<span class="number">0.6</span> delay:<span class="number">0.0</span> options:<span class="number">0</span> animations:^&#123;</span><br><span class="line">        [<span class="built_in">UIView</span> addKeyframeWithRelativeStartTime:<span class="number">0</span> relativeDuration:<span class="number">0.5</span> animations:^&#123;</span><br><span class="line">            <span class="keyword">self</span>.transform = <span class="built_in">CGAffineTransformMakeScale</span>(<span class="number">1.3</span>, <span class="number">1.3</span>);</span><br><span class="line">        &#125;];</span><br><span class="line">        [<span class="built_in">UIView</span> addKeyframeWithRelativeStartTime:<span class="number">0.5</span> relativeDuration:<span class="number">0.5</span> animations:^&#123;</span><br><span class="line">            <span class="keyword">self</span>.transform = <span class="built_in">CGAffineTransformIdentity</span>;</span><br><span class="line">        &#125;];</span><br><span class="line">    &#125; completion: <span class="literal">nil</span>];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">-(<span class="keyword">void</span>)endLodingWormHUD&#123;</span><br><span class="line">    <span class="comment">//隐藏指示器,同时移除动画</span></span><br><span class="line">    [<span class="built_in">UIView</span> animateKeyframesWithDuration:<span class="number">0.6</span> delay:<span class="number">0</span> options:<span class="number">0</span> animations:^&#123;</span><br><span class="line">        [<span class="built_in">UIView</span> addKeyframeWithRelativeStartTime:<span class="number">0</span> relativeDuration:<span class="number">0.5</span> animations:^&#123;</span><br><span class="line">            <span class="keyword">self</span>.transform = <span class="built_in">CGAffineTransformMakeScale</span>(<span class="number">1.2</span>, <span class="number">1.2</span>);</span><br><span class="line">        &#125;];</span><br><span class="line">        [<span class="built_in">UIView</span> addKeyframeWithRelativeStartTime:<span class="number">0.5</span> relativeDuration:<span class="number">0.5</span> animations:^&#123;</span><br><span class="line">            <span class="keyword">self</span>.transform = <span class="built_in">CGAffineTransformMakeScale</span>(<span class="number">0.1</span>, <span class="number">0.1</span>);</span><br><span class="line">        &#125;];</span><br><span class="line">        </span><br><span class="line">    &#125; completion:^(<span class="built_in">BOOL</span> finished)&#123;</span><br><span class="line">        <span class="keyword">self</span>.isShowing = <span class="literal">NO</span>;</span><br><span class="line">        [<span class="keyword">self</span>.firstWormShapeLayer removeAnimationForKey:WORM_ANIMATION_KEY_FIRST];</span><br><span class="line">        [<span class="keyword">self</span>.secondWormShapeLayer removeAnimationForKey:WORM_ANIMATION_KEY_SECOND];</span><br><span class="line">        [<span class="keyword">self</span>.thirdWormShapeLayer removeAnimationForKey:WORM_ANIMATION_KEY_THIRD];</span><br><span class="line">        [<span class="keyword">self</span> removeFromSuperview];</span><br><span class="line">    &#125;];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果在此之前你还不了解UIView动画的基本变化,可参考<a href="/2016/03/11/Interpretation-of-the-relationship-between-CGAffineTransform-iOS-and-matrix/">理解iOS中CGAffineTransform与矩阵的关系</a></p>
+<p>最后看一下结合指示器后勤奋虫子的最终效果</p>
+<img src="/images/a-diligent-worm-in-iOS.gif" class="" title="a-diligent-worm-in-iOS">
+
+<h1 id="后语"><a href="#后语" class="headerlink" title="后语"></a>后语</h1><p>　　从一开始接触动画到实现一个完整的动画中间,肯定会经历很多困惑与不解,然后就要不停搜索查文档了,这个过程虽然很累,但是一旦你把效果实现了,原理想明白了,那是多么享受的一件事情.这里我给一个建议,由于iOS动画中有太多类和属性,方法,你不可能一下子就把他们都明白透彻.一开始肯定是要先找准几个基本的概念先理解了,然后尝试动手写demo,实现一些基础效果.再慢慢将他们结合起来朝着你的目标效果前进.如果中途发现走不动了,效果实现很久也不能完成,那很可能是少用了某些对象,属性,方法,或者你的基础图形都是错的.比如本文,一开始没有使用动画组,发现很多效果做不出,然后我查了一下文档资料发现可以使用动画组实现,效果很容易就出来了.基础图形也是,从一个半圆弧到两个半圆弧,实现起来事半功倍.这个过程需要时间和经验,慢慢来吧,一起进步!<br>　　至此,勤奋虫子的完整效果都已经实现了.还有没多具体细节上面并没有提到.本文所实现的指示器源码和使用Demo可以从<a href="/2016/03/21/iOS-animation-design-of-the-worm-run/#%E6%8E%A8%E8%8D%90%E9%98%85%E8%AF%BB">本文源码:GitHub</a>中找到,可以的话帮忙点一下<strong>Star</strong>,好让更多人看到.<iframe src="https://ghbtns.com/github-btn.html?user=cocos543&repo=CCWormHUD&type=star&count=true" frameborder="0" scrolling="0" width="170px" height="20px"></iframe><br>　　希望大家能从本文中得到自己需要的东西,如果你有更好的想法或发现本文的不足,欢迎指出来.</p>
+<h2 id="推荐阅读"><a href="#推荐阅读" class="headerlink" title="推荐阅读"></a>推荐阅读</h2><p><a target="_blank" rel="noopener" href="https://github.com/cocos543/CCWormHUD">本文源码:GitHub</a><br><a target="_blank" rel="noopener" href="http://www.cnblogs.com/kenshincui/p/3972100.html">iOS开发系列–让你的应用“动”起来</a><br><a target="_blank" rel="noopener" href="http://blog.csdn.net/xiongbaoxr/article/details/50890565">按钮打勾动画特效</a><br><a target="_blank" rel="noopener" href="http://blog.cocosdever.com/2016/03/11/Interpretation-of-the-relationship-between-CGAffineTransform-iOS-and-matrix">理解iOS中CGAffineTransform与矩阵的关系</a><br><strong>下面是工具</strong><br><a target="_blank" rel="noopener" href="http://netcetera.org/camtf-playground.html">CAMediaTimingFunction playground</a><br><a target="_blank" rel="noopener" href="http://pan.baidu.com/s/1i4mLxGx">Sketch下载 密码:5d2b</a><br><a target="_blank" rel="noopener" href="http://pan.baidu.com/s/1dDLPi5F">PaintCode下载 密码:ftpt</a></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/iOS/">iOS</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/iOS动画/">iOS动画</a><a href="/tags/HUD/">HUD</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2016/03/21/2016-03-21-iOS-animation-design-of-the-worm-run/" data-title="用代码来实现你喜欢的动画效果 — 虫儿跑 | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/03/25/2016-03-25-the-design-principle-and-implementation-of-extensible-account-system-2/" title="可绑定可扩展的帐号系统设计原理及其实现(二)">
+  <strong>上一篇：</strong><br/>
+  <span>
+  可绑定可扩展的帐号系统设计原理及其实现(二)</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/03/11/2016-03-11-Interpretation-of-the-relationship-between-CGAffineTransform-iOS-and-matrix/"  title="理解iOS中CGAffineTransform与矩阵的关系">
+ <strong>下一篇：</strong><br/> 
+ <span>理解iOS中CGAffineTransform与矩阵的关系
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%9C%8B%E4%B8%8A%E7%9A%84%E5%8A%A8%E7%94%BB"><span class="toc-number">3.</span> <span class="toc-text">看上的动画</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%9D%E8%80%83"><span class="toc-number">4.</span> <span class="toc-text">思考</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%86%E8%A7%A3iOS%E4%B8%AD%E5%AE%9E%E7%8E%B0%E5%8A%A8%E7%94%BB%E7%9A%84%E6%96%B9%E6%B3%95"><span class="toc-number">4.1.</span> <span class="toc-text">了解iOS中实现动画的方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%93%AA%E4%BA%9B%E5%B7%A5%E5%85%B7%E5%8F%AF%E4%BB%A5%E5%88%A9%E7%94%A8"><span class="toc-number">4.2.</span> <span class="toc-text">哪些工具可以利用?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#iOS%E5%8A%A8%E7%94%BB%E7%9A%84%E5%87%A0%E4%B8%AA%E9%87%8D%E8%A6%81%E6%A6%82%E5%BF%B5"><span class="toc-number">4.3.</span> <span class="toc-text">iOS动画的几个重要概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8B%86%E5%88%86%E5%8A%A8%E7%94%BB-%E7%AE%80%E5%8C%96%E6%80%9D%E8%B7%AF"><span class="toc-number">4.4.</span> <span class="toc-text">拆分动画,简化思路</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E5%8A%A8%E6%89%8B"><span class="toc-number">5.</span> <span class="toc-text">开始动手</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E5%8A%A8%E7%94%BB%E7%9A%84%E6%A0%B8%E5%BF%83%E9%83%A8%E5%88%86"><span class="toc-number">5.1.</span> <span class="toc-text">实现动画的核心部分</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E5%90%88%E5%8A%A8%E7%94%BB%E5%AE%9E%E7%8E%B0%E6%9C%80%E7%BB%88%E6%95%88%E6%9E%9C"><span class="toc-number">5.2.</span> <span class="toc-text">整合动画实现最终效果</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E4%BB%A3%E7%A0%81-%E5%AE%9E%E7%8E%B0HUD%E7%9A%84%E5%8A%9F%E8%83%BD"><span class="toc-number">5.3.</span> <span class="toc-text">优化代码,实现HUD的功能</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%90%8E%E8%AF%AD"><span class="toc-number">6.</span> <span class="toc-text">后语</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A8%E8%8D%90%E9%98%85%E8%AF%BB"><span class="toc-number">6.1.</span> <span class="toc-text">推荐阅读</span></a></li></ol></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Greedy-Algorithm/" title="Greedy Algorithm">Greedy Algorithm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2020 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

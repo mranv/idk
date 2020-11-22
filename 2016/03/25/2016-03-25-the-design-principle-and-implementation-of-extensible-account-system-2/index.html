@@ -1,0 +1,657 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>可绑定可扩展的帐号系统设计原理及其实现(二) | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="文档更新说明 2016-03-26 完成 2016-03-25 初稿  前言　　在可绑定可扩展的帐号系统设计原理及其实现(一)一文中已经啰嗦讲完原理了.本文主要借用PHP代码从实现角度讲述.分成用户注册,帐号绑定,数据迁移,数据查询四个部分. 　　 用户注册手机号注册　　手机号注册的帐号,称为主帐号,实现起来相对比较简单,只需要在users表中插入一条主帐号数据即可. 12345678910111">
+<meta property="og:type" content="article">
+<meta property="og:title" content="可绑定可扩展的帐号系统设计原理及其实现(二)">
+<meta property="og:url" content="http://yoursite.com/2016/03/25/2016-03-25-the-design-principle-and-implementation-of-extensible-account-system-2/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="文档更新说明 2016-03-26 完成 2016-03-25 初稿  前言　　在可绑定可扩展的帐号系统设计原理及其实现(一)一文中已经啰嗦讲完原理了.本文主要借用PHP代码从实现角度讲述.分成用户注册,帐号绑定,数据迁移,数据查询四个部分. 　　 用户注册手机号注册　　手机号注册的帐号,称为主帐号,实现起来相对比较简单,只需要在users表中插入一条主帐号数据即可. 12345678910111">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-03-25T07:31:20.000Z">
+<meta property="article:modified_time" content="2016-03-26T01:27:24.000Z">
+<meta property="article:author" content="Cocos">
+<meta property="article:tag" content="PHP">
+<meta property="article:tag" content="可扩展">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/03/25/2016-03-25-the-design-principle-and-implementation-of-extensible-account-system-2/" title="可绑定可扩展的帐号系统设计原理及其实现(二)" itemprop="url">可绑定可扩展的帐号系统设计原理及其实现(二)</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2016-03-25T07:31:20.000Z" itemprop="datePublished"> 发表于 2016-03-25</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E6%B3%A8%E5%86%8C"><span class="toc-number">3.</span> <span class="toc-text">用户注册</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%8B%E6%9C%BA%E5%8F%B7%E6%B3%A8%E5%86%8C"><span class="toc-number">3.1.</span> <span class="toc-text">手机号注册</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%96%B9%E5%B8%90%E5%8F%B7%E6%B3%A8%E5%86%8C"><span class="toc-number">3.2.</span> <span class="toc-text">第三方帐号注册</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B8%90%E5%8F%B7%E7%BB%91%E5%AE%9A"><span class="toc-number">4.</span> <span class="toc-text">帐号绑定</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%8B%E6%9C%BA%E5%8F%B7%E6%9C%AA%E6%B3%A8%E5%86%8C"><span class="toc-number">4.1.</span> <span class="toc-text">手机号未注册</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%8B%E6%9C%BA%E5%8F%B7%E5%B7%B2%E6%B3%A8%E5%86%8C"><span class="toc-number">4.2.</span> <span class="toc-text">手机号已注册</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E8%BF%81%E7%A7%BB"><span class="toc-number">5.</span> <span class="toc-text">数据迁移</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2"><span class="toc-number">6.</span> <span class="toc-text">数据查询</span></a></li></ol>
+		
+		</div>
+		
+		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
+<li>2016-03-26 完成</li>
+<li>2016-03-25 初稿</li>
+</ul>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>　　在<a href="/2016/03/08/The-design-principle-and-implementation-of-extensible-account-system-1">可绑定可扩展的帐号系统设计原理及其实现(一)</a>一文中已经啰嗦讲完原理了.本文主要借用PHP代码从实现角度讲述.分成用户注册,帐号绑定,数据迁移,数据查询四个部分.
+　　</p>
+<h1 id="用户注册"><a href="#用户注册" class="headerlink" title="用户注册"></a>用户注册</h1><h2 id="手机号注册"><a href="#手机号注册" class="headerlink" title="手机号注册"></a>手机号注册</h2><p>　　手机号注册的帐号,称为主帐号,实现起来相对比较简单,只需要在<strong>users</strong>表中插入一条主帐号数据即可.</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">///UsersModel类</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 主帐号注册</span></span><br><span class="line"><span class="comment">* <span class="doctag">@desc</span> 成功时返回用户id</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">addOne</span>(<span class="params"><span class="variable">$data</span></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> ( <span class="keyword">isset</span>(<span class="variable">$data</span>[<span class="string">&#x27;phone&#x27;</span>]) &amp;&amp; <span class="keyword">isset</span>(<span class="variable">$data</span>[<span class="string">&#x27;nickname&#x27;</span>]) ) &#123;</span><br><span class="line">        <span class="variable">$data</span>[<span class="string">&#x27;created_at&#x27;</span>] = <span class="variable">$data</span>[<span class="string">&#x27;updated_at&#x27;</span>] =  date(<span class="string">&#x27;Y-m-d H:i:s&#x27;</span>,time());</span><br><span class="line">        <span class="comment">//这里需要事务支持</span></span><br><span class="line">        <span class="keyword">$this</span>-&gt;db-&gt;query(<span class="string">&quot;BEGIN&quot;</span>);</span><br><span class="line">        <span class="keyword">try</span>&#123;</span><br><span class="line">            <span class="keyword">if</span>(<span class="keyword">$this</span>-&gt;db-&gt;insert(<span class="keyword">$this</span>-&gt;_tablename,<span class="variable">$data</span>))&#123;</span><br><span class="line">                <span class="variable">$last_id</span> = <span class="keyword">$this</span>-&gt;db-&gt;Insert_ID();</span><br><span class="line">                <span class="variable">$where_string</span> = <span class="string">&#x27;id = &#x27;</span>.<span class="variable">$last_id</span>;</span><br><span class="line">                <span class="keyword">$this</span>-&gt;db-&gt;update(<span class="keyword">$this</span>-&gt;_tablename,<span class="keyword">array</span>(<span class="string">&#x27;nickname&#x27;</span>=&gt;<span class="variable">$last_id</span>),<span class="variable">$where_string</span>,<span class="number">1</span>);</span><br><span class="line">                <span class="comment">//写入资金表,由另一个模型封装,只需要传入uid就好,忽略细节.</span></span><br><span class="line">                <span class="variable">$accModel</span> = <span class="keyword">new</span> AccountModel();</span><br><span class="line">                <span class="variable">$accResult</span> = <span class="variable">$accModel</span>-&gt;addOne(<span class="variable">$last_id</span>);</span><br><span class="line">                <span class="keyword">if</span> (!<span class="variable">$accResult</span>) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Exception</span>(<span class="string">&quot;Can not insert to accounts&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Exception</span>(<span class="string">&quot;Can not insert to users&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">$this</span>-&gt;db-&gt;query(<span class="string">&quot;COMMIT&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="variable">$last_id</span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (<span class="built_in">Exception</span> <span class="variable">$e</span>) &#123;</span><br><span class="line">            <span class="keyword">$this</span>-&gt;db-&gt;query(<span class="string">&quot;ROLLBACK&quot;</span>);                </span><br><span class="line">            <span class="comment">//打印日志,自定义的函数.</span></span><br><span class="line">            log_result(<span class="string">&quot;Roll back : &quot;</span>.<span class="variable">$e</span>-&gt;getMessage);</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="第三方帐号注册"><a href="#第三方帐号注册" class="headerlink" title="第三方帐号注册"></a>第三方帐号注册</h2><p>　　第三方帐号注册相对手机号注册要复杂一点点.先在<strong>open_users</strong>中插入第三方帐号信息,接着在<strong>users</strong>表中插入一条占位数据,最后在<strong>user_aliases</strong>中插入一条自关联数据,这样查询数据就可以不区分登录的帐号是主帐号还是第三方帐号.由于<strong>users</strong>表中的phone是唯一非空字段,所以占位数据的phone自动采用虚拟的方式phone=v+第三方表记录id.<br>　　注册第三方帐号时在<strong>users</strong>表中的占位数据在绑定手机号时,如果手机号从未注册,那这条记录也会变成主帐号,如果手机号已经注册过了,这条记录才是真正作废.</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">///OpenUsersModel类</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 第三方帐号注册</span></span><br><span class="line"><span class="comment">* <span class="doctag">@desc</span> 成功时返回用户id</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">addOne</span>(<span class="params"><span class="variable">$data</span></span>) </span>&#123;</span><br><span class="line">    <span class="comment">//open_users表id</span></span><br><span class="line">    <span class="variable">$ouid</span> = <span class="number">0</span>;</span><br><span class="line">    <span class="comment">//users表id</span></span><br><span class="line">    <span class="variable">$user_id</span> = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$data</span>[<span class="string">&#x27;nickname&#x27;</span>]) &amp;&amp; <span class="keyword">isset</span>(<span class="variable">$data</span>[<span class="string">&#x27;openid&#x27;</span>]) &amp;&amp; <span class="keyword">isset</span>(<span class="variable">$data</span>[<span class="string">&#x27;genre&#x27;</span>]))&#123;</span><br><span class="line">        <span class="variable">$data</span>[<span class="string">&#x27;created_at&#x27;</span>] = <span class="variable">$data</span>[<span class="string">&#x27;updated_at&#x27;</span>] =  date(<span class="string">&#x27;Y-m-d H:i:s&#x27;</span>,time());</span><br><span class="line">        <span class="variable">$openuserData</span> = [];</span><br><span class="line">        <span class="variable">$openuserData</span>[<span class="string">&#x27;openid&#x27;</span>] = <span class="variable">$data</span>[<span class="string">&#x27;openid&#x27;</span>];</span><br><span class="line">        <span class="variable">$openuserData</span>[<span class="string">&#x27;genre&#x27;</span>] = <span class="variable">$data</span>[<span class="string">&#x27;genre&#x27;</span>];</span><br><span class="line">        <span class="variable">$openuserData</span>[<span class="string">&#x27;created_at&#x27;</span>] = <span class="variable">$openuserData</span>[<span class="string">&#x27;updated_at&#x27;</span>] = <span class="variable">$data</span>[<span class="string">&#x27;created_at&#x27;</span>];</span><br><span class="line">        <span class="keyword">$this</span>-&gt;db-&gt;query(<span class="string">&quot;BEGIN&quot;</span>);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">if</span>(<span class="keyword">$this</span>-&gt;db-&gt;insert(<span class="keyword">$this</span>-&gt;_tablename,<span class="variable">$openuserData</span>))&#123;</span><br><span class="line">                <span class="variable">$ouid</span> = <span class="keyword">$this</span>-&gt;db-&gt;Insert_ID();</span><br><span class="line">                <span class="comment">//在用户表中写入占位信息</span></span><br><span class="line">                <span class="variable">$vphone</span> = <span class="string">&quot;v<span class="subst">&#123;$ouid&#125;</span>&quot;</span>;</span><br><span class="line">                <span class="variable">$userData</span> = [];</span><br><span class="line">                <span class="variable">$userData</span>[<span class="string">&#x27;avatar&#x27;</span>] = <span class="variable">$data</span>[<span class="string">&#x27;avatar&#x27;</span>];</span><br><span class="line">                <span class="variable">$userData</span>[<span class="string">&#x27;nickname&#x27;</span>] = <span class="variable">$data</span>[<span class="string">&#x27;nickname&#x27;</span>];</span><br><span class="line">                <span class="variable">$userData</span>[<span class="string">&#x27;phone&#x27;</span>] = <span class="variable">$vphone</span>;</span><br><span class="line">                <span class="variable">$userData</span>[<span class="string">&#x27;created_at&#x27;</span>] = <span class="variable">$userData</span>[<span class="string">&#x27;updated_at&#x27;</span>] =  <span class="variable">$data</span>[<span class="string">&#x27;updated_at&#x27;</span>];</span><br><span class="line">                <span class="keyword">if</span>(!<span class="keyword">$this</span>-&gt;db-&gt;insert(<span class="string">&#x27;users&#x27;</span>,<span class="variable">$userData</span>))&#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Exception</span>(<span class="string">&quot;Can not insert to users&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="variable">$user_id</span> = <span class="keyword">$this</span>-&gt;db-&gt;Insert_ID();</span><br><span class="line">                <span class="comment">//取得user id之后,开始写入资金表和第三方表中对应的数据</span></span><br><span class="line">                <span class="comment">//写入资金表</span></span><br><span class="line">                <span class="variable">$accModel</span> = <span class="keyword">new</span> AccountModel();</span><br><span class="line">                <span class="keyword">if</span> (!<span class="variable">$accModel</span>-&gt;addOne(<span class="variable">$user_id</span>)) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Exception</span>(<span class="string">&quot;Can not insert to accounts&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="comment">//在第三方表中更新获取到的user_id</span></span><br><span class="line">                <span class="variable">$where_string</span> = <span class="string">&#x27;id = &#x27;</span>.<span class="variable">$ouid</span>;</span><br><span class="line">                <span class="keyword">if</span>(!<span class="keyword">$this</span>-&gt;db-&gt;update(<span class="keyword">$this</span>-&gt;_tablename,<span class="keyword">array</span>(<span class="string">&#x27;user_id&#x27;</span>=&gt;<span class="variable">$user_id</span>),<span class="variable">$where_string</span>,<span class="number">1</span>))&#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Exception</span>(<span class="string">&quot;Can not update open_users&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="comment">//最后将userid 插入到ID关系表中,这里比较特殊,因为用户第一次进入微信,此时未绑定手机号码</span></span><br><span class="line">                <span class="comment">//所以还不知道用户主id,因此主id和占位id认为是相同的并且插入到关系表中</span></span><br><span class="line">                  </span><br><span class="line">                <span class="comment">//主id(主帐号uid):用户已经绑定了手机号码所在记录的id</span></span><br><span class="line">                <span class="comment">//占位id(第三方uid):用户第一次微信登录后,系统自动在users表中追加的phone=v+ouid的一条记录所在的id</span></span><br><span class="line">                <span class="variable">$aliasesData</span> = [];</span><br><span class="line">                <span class="variable">$aliasesData</span>[<span class="string">&#x27;alias_user_id&#x27;</span>] = <span class="variable">$aliasesData</span>[<span class="string">&#x27;user_id&#x27;</span>] = <span class="variable">$user_id</span>;</span><br><span class="line">                <span class="keyword">if</span>(!<span class="keyword">$this</span>-&gt;db-&gt;insert(<span class="string">&#x27;user_aliases&#x27;</span>,<span class="variable">$aliasesData</span>))&#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Exception</span>(<span class="string">&quot;Can not insert to alias_user_id&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Exception</span>(<span class="string">&quot;Can not insert to open_users&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">$this</span>-&gt;db-&gt;query(<span class="string">&quot;COMMIT&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="variable">$user_id</span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (<span class="built_in">Exception</span> <span class="variable">$e</span>) &#123;</span><br><span class="line">            <span class="keyword">$this</span>-&gt;db-&gt;query(<span class="string">&quot;ROLLBACK&quot;</span>);</span><br><span class="line">            log_result(<span class="string">&quot;Roll back : &quot;</span>.<span class="variable">$e</span>-&gt;getMessage);</span><br><span class="line">            <span class="keyword">exit</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="帐号绑定"><a href="#帐号绑定" class="headerlink" title="帐号绑定"></a>帐号绑定</h1><p>　　用户登录第三方帐号后,操作绑定手机号码时,先检查用户给出的phone是否存在<strong>users</strong>表的<em>phone</em>字段.手机号码可能已经存在主帐号中也可能是一个全新的号码,所以帐号绑定分成两种情况,下面分别说明.</p>
+<h2 id="手机号未注册"><a href="#手机号未注册" class="headerlink" title="手机号未注册"></a>手机号未注册</h2><p>　　手机号码从未注册过,说明手机号码不存在<strong>users</strong>表中.所以第三方帐号在<strong>users</strong>表中的占位数据可以直接更新为主帐号-&gt;直接将<strong>users</strong>表中phone字段更新为绑定的手机号即可.</p>
+<h2 id="手机号已注册"><a href="#手机号已注册" class="headerlink" title="手机号已注册"></a>手机号已注册</h2><p>　　对于手机号已经注册过的,先找到手机号所在行id(也就是主id),把主id更新到<strong>open_users</strong>表的<em>user_id</em>字段,然后在<strong>user_aliases</strong>表中追加一条记录:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$aliasesData</span> = [];</span><br><span class="line"><span class="variable">$aliasesData</span>[<span class="string">&#x27;user_id&#x27;</span>] = 主id;</span><br><span class="line"><span class="variable">$aliasesData</span>[<span class="string">&#x27;alias_user_id&#x27;</span>] = 占位id;</span><br><span class="line"><span class="keyword">$this</span>-&gt;db-&gt;insert(<span class="string">&#x27;user_aliases&#x27;</span>,<span class="variable">$aliasesData</span>);    </span><br></pre></td></tr></table></figure>
+
+<h1 id="数据迁移"><a href="#数据迁移" class="headerlink" title="数据迁移"></a>数据迁移</h1><p>　　由于表结构已经做了设计优化,数据迁移时,只需要在<strong>accounts</strong>表中,把第三方帐号中的数据转入主帐号中就可.至于其他消费记录购买记录等等一概不需要做任何改动~😋</p>
+<h1 id="数据查询"><a href="#数据查询" class="headerlink" title="数据查询"></a>数据查询</h1><p>　　最后一部分就是数据查询了.根据数据库的设计,我们只需要得到任何一个第三方uid或者主帐号uid,即可从<strong>user_aliases</strong>表中反查出所有的关联id,然后只需要在任何需要查询记录的表中使用SQL的in语法即可查询到数据.</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//伪代码</span></span><br><span class="line"><span class="variable">$sql</span> = <span class="string">&quot;select feature from `orders` where `orders`.user_id in (id1, id2, id3, ...)&quot;</span>;</span><br><span class="line"><span class="variable">$some_data</span> = <span class="keyword">$this</span>-&gt;db-&gt;executeS(<span class="variable">$sql</span>);</span><br></pre></td></tr></table></figure>  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/%E6%9E%B6%E6%9E%84%E4%B8%8E%E8%AE%BE%E8%AE%A1/">架构与设计</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/PHP/">PHP</a><a href="/tags/可扩展/">可扩展</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2016/03/25/2016-03-25-the-design-principle-and-implementation-of-extensible-account-system-2/" data-title="可绑定可扩展的帐号系统设计原理及其实现(二) | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/03/27/2016-03-27-The-Design-Patterns-book-notes/" title="设计模式 - 读书笔记">
+  <strong>上一篇：</strong><br/>
+  <span>
+  设计模式 - 读书笔记</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/03/21/2016-03-21-iOS-animation-design-of-the-worm-run/"  title="用代码来实现你喜欢的动画效果 — 虫儿跑">
+ <strong>下一篇：</strong><br/> 
+ <span>用代码来实现你喜欢的动画效果 — 虫儿跑
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E6%B3%A8%E5%86%8C"><span class="toc-number">3.</span> <span class="toc-text">用户注册</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%8B%E6%9C%BA%E5%8F%B7%E6%B3%A8%E5%86%8C"><span class="toc-number">3.1.</span> <span class="toc-text">手机号注册</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%96%B9%E5%B8%90%E5%8F%B7%E6%B3%A8%E5%86%8C"><span class="toc-number">3.2.</span> <span class="toc-text">第三方帐号注册</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B8%90%E5%8F%B7%E7%BB%91%E5%AE%9A"><span class="toc-number">4.</span> <span class="toc-text">帐号绑定</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%8B%E6%9C%BA%E5%8F%B7%E6%9C%AA%E6%B3%A8%E5%86%8C"><span class="toc-number">4.1.</span> <span class="toc-text">手机号未注册</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%8B%E6%9C%BA%E5%8F%B7%E5%B7%B2%E6%B3%A8%E5%86%8C"><span class="toc-number">4.2.</span> <span class="toc-text">手机号已注册</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E8%BF%81%E7%A7%BB"><span class="toc-number">5.</span> <span class="toc-text">数据迁移</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2"><span class="toc-number">6.</span> <span class="toc-text">数据查询</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Greedy-Algorithm/" title="Greedy Algorithm">Greedy Algorithm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2020 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

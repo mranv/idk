@@ -1,0 +1,889 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>实现一个60帧的QQ音乐首页(高性价比的性能优化方案) | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="文档更新说明 最后更新 2020年03月22日 首次更新 2020年03月27日  前言　　现在的iPhone性能越来越好, 正常开发一个界面都很少会遇到影响体验的卡顿. 但是如果把APP放到比较老的型号上, 卡顿就非常常见了. 利用这篇文章, 结合一下实际的案例QQ音乐首页, 聊一聊解决卡顿的基本思想和方法论. 这是QQ音乐的界面　　　　　　 这是Demo的界面, 部分素材找不到就临时用别的代替">
+<meta property="og:type" content="article">
+<meta property="og:title" content="实现一个60帧的QQ音乐首页(高性价比的性能优化方案)">
+<meta property="og:url" content="http://yoursite.com/2020/03/22/2020-03-22-Implementing-a-60-frame-QQ-Music-Homepage/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="文档更新说明 最后更新 2020年03月22日 首次更新 2020年03月27日  前言　　现在的iPhone性能越来越好, 正常开发一个界面都很少会遇到影响体验的卡顿. 但是如果把APP放到比较老的型号上, 卡顿就非常常见了. 利用这篇文章, 结合一下实际的案例QQ音乐首页, 聊一聊解决卡顿的基本思想和方法论. 这是QQ音乐的界面　　　　　　 这是Demo的界面, 部分素材找不到就临时用别的代替">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/images/qq-music.jpg">
+<meta property="og:image" content="http://yoursite.com/images/qq-music2.jpg">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-homepage.jpg">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-homepage2.jpg">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-ui-structure.jpg">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-search.png">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-function.png">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-function-cell.png">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-topic.gif">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-song-list.jpg">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-movie.jpg">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-vip.jpg">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-gup-v1.png">
+<meta property="og:image" content="https://pic3.zhimg.com/80/v2-98077db5cb31318ec437f00762870142_1440w.jpg">
+<meta property="og:image" content="https://pic2.zhimg.com/80/v2-24394bcd0b84005553320df018e06999_1440w.jpg">
+<meta property="og:image" content="https://pic2.zhimg.com/80/v2-487022d244a9bdefbf03636f5c15ee89_1440w.jpg">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-shadow-path.jpg">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-offscreen-v1.jpg">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-rasterize.jpg">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-gup-fps30.jpg">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-gup-fps58.jpg">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-layer-merge.jpg">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-start-main.jpg">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-start-worker.jpg">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-xib-load.jpg">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-cgcontext-draw.jpg">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-decode-image.jpg">
+<meta property="og:image" content="http://yoursite.com/images/qq-music-cache-image.jpg">
+<meta property="article:published_time" content="2020-03-22T15:13:51.000Z">
+<meta property="article:modified_time" content="2020-03-30T02:00:19.000Z">
+<meta property="article:author" content="Cocos">
+<meta property="article:tag" content="UI">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/images/qq-music.jpg">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2020/03/22/2020-03-22-Implementing-a-60-frame-QQ-Music-Homepage/" title="实现一个60帧的QQ音乐首页(高性价比的性能优化方案)" itemprop="url">实现一个60帧的QQ音乐首页(高性价比的性能优化方案)</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2020-03-22T15:13:51.000Z" itemprop="datePublished"> 发表于 2020-03-22</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%BA%90%E7%A0%81%E4%B8%8B%E8%BD%BD"><span class="toc-number">3.</span> <span class="toc-text">源码下载</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%A6%96%E9%A1%B5%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%80%9D%E8%B7%AF"><span class="toc-number">4.</span> <span class="toc-text">首页的实现思路</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E4%BD%93UI%E7%BB%93%E6%9E%84"><span class="toc-number">4.1.</span> <span class="toc-text">整体UI结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%83%E5%B1%80%E6%96%B9%E5%BC%8F"><span class="toc-number">4.2.</span> <span class="toc-text">布局方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A6%96%E9%A1%B5%E7%B1%BB%E5%9E%8B%E5%88%92%E5%88%86"><span class="toc-number">4.3.</span> <span class="toc-text">首页类型划分</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A1%B6%E9%83%A8%E6%90%9C%E7%B4%A2%E6%A1%86"><span class="toc-number">4.3.1.</span> <span class="toc-text">顶部搜索框</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Banner"><span class="toc-number">4.3.2.</span> <span class="toc-text">Banner</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%BA%E5%AE%9A%E5%86%85%E5%AE%B9%E7%9A%84%E8%A7%86%E5%9B%BE"><span class="toc-number">4.3.3.</span> <span class="toc-text">固定内容的视图</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%AA%E5%90%91%E7%80%91%E5%B8%83%E6%B5%81"><span class="toc-number">4.3.4.</span> <span class="toc-text">横向瀑布流</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%84%E7%A7%8D%E4%B8%8D%E5%90%8C%E7%9A%84CollectionViewCell"><span class="toc-number">4.3.5.</span> <span class="toc-text">各种不同的CollectionViewCell</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96"><span class="toc-number">5.</span> <span class="toc-text">代码优化</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#GPU-%E4%BC%98%E5%8C%96"><span class="toc-number">5.1.</span> <span class="toc-text">GPU 优化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#iOS%E7%9A%84%E6%B8%B2%E6%9F%93%E8%BF%87%E7%A8%8B"><span class="toc-number">5.1.1.</span> <span class="toc-text">iOS的渲染过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%B8%B2%E6%9F%93-%E5%85%89%E6%A0%85%E5%8C%96"><span class="toc-number">5.1.2.</span> <span class="toc-text">什么是渲染? 光栅化?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFGPU%E6%B8%B2%E6%9F%93-%E4%BB%80%E4%B9%88%E6%98%AFCPU%E6%B8%B2%E6%9F%93"><span class="toc-number">5.1.3.</span> <span class="toc-text">什么是GPU渲染, 什么是CPU渲染?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BC%9A%E5%87%BA%E7%8E%B0%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93"><span class="toc-number">5.1.4.</span> <span class="toc-text">为什么会出现离屏渲染?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E4%BC%98%E5%8C%96-tag-v1"><span class="toc-number">5.1.5.</span> <span class="toc-text">开始优化 tag v1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E4%BC%98%E5%8C%96-tag-v1-1"><span class="toc-number">5.1.6.</span> <span class="toc-text">开始优化 tag v1.1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GPU%E7%9A%84%E5%85%B6%E4%BB%96%E4%BC%98%E5%8C%96"><span class="toc-number">5.1.7.</span> <span class="toc-text">GPU的其他优化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CPU-%E4%BC%98%E5%8C%96"><span class="toc-number">5.2.</span> <span class="toc-text">CPU 优化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#CPU%E7%9A%84%E5%87%A0%E7%A7%8D%E5%B8%B8%E8%A7%81%E4%BC%98%E5%8C%96%E6%80%9D%E8%B7%AF"><span class="toc-number">5.2.1.</span> <span class="toc-text">CPU的几种常见优化思路</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E4%BC%98%E5%8C%96-v2-0"><span class="toc-number">5.2.2.</span> <span class="toc-text">开始优化 v2.0</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#CPU%E7%9A%84%E5%85%B6%E4%BB%96%E4%BC%98%E5%8C%96"><span class="toc-number">6.</span> <span class="toc-text">CPU的其他优化</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="toc-number">7.</span> <span class="toc-text">参考文章</span></a></li></ol>
+		
+		</div>
+		
+		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
+<li>最后更新 2020年03月22日</li>
+<li>首次更新 2020年03月27日</li>
+</ul>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>　　现在的iPhone性能越来越好, 正常开发一个界面都很少会遇到影响体验的卡顿. 但是如果把APP放到比较老的型号上, 卡顿就非常常见了. 利用这篇文章, 结合一下实际的案例QQ音乐首页, 聊一聊解决卡顿的基本思想和方法论.</p>
+<p>这是QQ音乐的界面<br>　　<div align=center><br>　　<img src="/images/qq-music.jpg" width=30% /><img src="/images/qq-music2.jpg" width=30% /><br>　　</div></p>
+<p>这是Demo的界面, 部分素材找不到就临时用别的代替一下, 效果基本一致<br>　　<div align=center><br>　　<img src="/images/qq-music-homepage.jpg" width=30% /><img src="/images/qq-music-homepage2.jpg" width=30% /><br>　　</div><br>　　<br>演示的机器是iPhone 6 Plus, iOS 10.2, Xcode 11.3</p>
+<h1 id="源码下载"><a href="#源码下载" class="headerlink" title="源码下载"></a>源码下载</h1><p><a target="_blank" rel="noopener" href="https://github.com/cocos543/QQMusicHomePage">QQMusicHomePage</a></p>
+<h1 id="首页的实现思路"><a href="#首页的实现思路" class="headerlink" title="首页的实现思路"></a>首页的实现思路</h1><h2 id="整体UI结构"><a href="#整体UI结构" class="headerlink" title="整体UI结构"></a>整体UI结构</h2><p>先用一个<strong>UITableView</strong>实现界面的整体, 而每一个能够进行左右滚动的UITableViewCell, 都嵌套一个<strong>UICollectionView</strong>来做.<br>　　<br>虽然说UICollectionView比较重量级, 不过我在老古董iPhone6 Plus上看, CPU占有率只有10%左右, 完全可以接受的.<br>　　<br>至于其他的能支持横向滚动并且复用视图的组件, 这东西我个人认为, 只有系统提供的视图无法优化到满意的情况下, 再去造轮子或者用新轮子, 要看看额外做的工作和得到的收益是不是值得.
+　　</p>
+<div align=center>
+　　<img src="/images/qq-music-ui-structure.jpg" width=30% />
+</div>
+
+<h2 id="布局方式"><a href="#布局方式" class="headerlink" title="布局方式"></a>布局方式</h2><p>先用Auto Layout + XIB文件的形式开发视图. 自动布局相比手动布局, 好处就是速度快一些, 现在第一个版本用的是自动布局, 假如后面优化之后还有明显卡顿的话, 再考虑代码布局.</p>
+<h2 id="首页类型划分"><a href="#首页类型划分" class="headerlink" title="首页类型划分"></a>首页类型划分</h2><h3 id="顶部搜索框"><a href="#顶部搜索框" class="headerlink" title="顶部搜索框"></a>顶部搜索框</h3><p>QQ音乐的搜索框会随着页面向上移动而移动, 但是页面向下移动的时候, 搜索框则固定不动. 所以这里采用一个独立的UIView, 存放搜索框也左边的<code>音乐馆</code><strong>label</strong>, 以及右边的Logo</p>
+<div align=center>
+　　<img src="/images/qq-music-search.png" width=30% />
+</div>
+
+<p>并且监听了TableView的<code>contentOffset</code>属性, 根据滚动的偏移量来设置搜索视图的位置. 这里用到了我之前做过的一个支持自动释放的便捷观察者类库 <code>&quot;NSObject+CCEasyKVO.h&quot;</code> , 有兴趣可以看代码.</p>
+<h3 id="Banner"><a href="#Banner" class="headerlink" title="Banner"></a>Banner</h3><p>搜索框下面是一个可以左右滚动的Banner, 网上轮子很多, 这里就不重新做了.</p>
+<h3 id="固定内容的视图"><a href="#固定内容的视图" class="headerlink" title="固定内容的视图"></a>固定内容的视图</h3><p>这部分界面有5个图标, 因为是固定不变也不可以滚动的, 所以可以直接用普通的UIView或者UIStackView来做, 这里我直接用UICollectionView实现. </p>
+<p>再用另一个UITableVIewCell存放下方的<code>歌单新碟</code>, <code>数字专辑</code> 两个普通的UIView.</p>
+<div align=center>
+　　<img src="/images/qq-music-function.png" width=30% /><img src="/images/qq-music-function-cell.png" width=10% />
+</div>
+
+<h3 id="横向瀑布流"><a href="#横向瀑布流" class="headerlink" title="横向瀑布流"></a>横向瀑布流</h3><p><code>#话题部分</code> Topic是一个横向瀑布流视图, 采用自定义<strong>UICollectionViewFlowLayout</strong>实现.</p>
+<div align=center>
+　　<img src="/images/qq-music-topic.gif" width=30% />
+</div>
+
+<p>创建<strong>TopicWalterfallFlowLayout</strong>类, 继承自<strong>UICollectionViewFlowLayout</strong>, 重写<code>prepareLayout</code>方法, 算好每一个Topic的文本宽度并且缓存起来, 这样<strong>TopicWalterfallFlowLayout</strong>就可以算出全部<strong>CollectionCell</strong>的位置了. 效果如上图.</p>
+<h3 id="各种不同的CollectionViewCell"><a href="#各种不同的CollectionViewCell" class="headerlink" title="各种不同的CollectionViewCell"></a>各种不同的CollectionViewCell</h3><p>往下的可以横向滚动的视图都用UICollectionView实现, 其中分为多种不同的Cell. QQ音乐首页的Cell种类是后台配置的, 我这里只挑选其中几种实现, 其他的都是一样的道理.</p>
+<div align=center>
+　　<img src="/images/qq-music-song-list.jpg" width=30% /><img src="/images/qq-music-movie.jpg" width=30% /><img src="/images/qq-music-vip.jpg" width=30% />
+</div>
+
+<p>其中歌单的Cell, 因为要在图片上显示白色的文本, 所以我在图片上加了一个灰色渐变蒙版, 这样底部的数字看起来才会清晰. 不然遇到白色图片文字就看不清了. 另外两个Cell也是同理 不过截图没体现出来. 这些圆角都使用下面两行代码搞定</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">self</span>.maskV.layer.masksToBounds = <span class="literal">YES</span>;</span><br><span class="line"><span class="keyword">self</span>.maskV.layer.cornerRadius = <span class="number">10.</span>f;</span><br></pre></td></tr></table></figure>
+
+<p>到这里基本就把首页的UI结构介绍完毕了. 这个版本的代码可以从<code>tag v1</code>获取.</p>
+<h1 id="代码优化"><a href="#代码优化" class="headerlink" title="代码优化"></a>代码优化</h1><p>兴匆匆地运行了一下<code>tag v1</code>代码, 在iPhone xs max上挺流畅的, 有点失望, 这不是没得优化吗😂.</p>
+<p>换个手机, 在iPhone6p上跑了一下, 问题来了. 好卡, 略兴奋, 卡顿还挺严重的, 这种会影响到用户体验, 没优化好肯定不能上线的.</p>
+<p>不过有一点让我觉得奇怪的是, 屏幕上显示的FPS一直是60, CPU占有率只有15%, 这种卡顿很容易让人猜出来是GPU处理不过来. 因为FPS指示器用的是<code>CADisplayLink</code>加一个整形变量实现的, 计算出<code>CADisplayLink</code>每秒调用的次数就是帧率. 既然这个FPS一直是60, 那么意味着CPU还是能处理的过来的.</p>
+<p>借助性能调试工具Instruments中的Core animation, 可以看到真实的帧率.</p>
+<div align=center>
+　　<img src="/images/qq-music-gup-v1.png" width=40% />
+</div>
+
+<p>帧率在40帧左右, GPU使用率高达90%, 说明我猜的没错, 下面要做的事情就是平衡GPU和CPU的工作量.</p>
+<p>下面分别从这两个角度来谈代码优化问题.</p>
+<h2 id="GPU-优化"><a href="#GPU-优化" class="headerlink" title="GPU 优化"></a>GPU 优化</h2><p>一说到优化, 很多人都知道圆角这些会影响性能, 可以用带圆角的图片啊, 用CGContext画带圆角图片之类的来取代对视图圆角的设置, 但是并不知道为什么要这么解决. 这会导致无法对出现的卡顿现象做比较深入的分析, 无法精准解决问题.</p>
+<p>比如一开始我就对Topic部分带圆角的视图设置了<code>masksToBounds=YES</code> , 然后胡乱打开了光栅化等, 没有指导思想碰运气式地解决问题, 效率并不高.</p>
+<p>GPU使用率过高, 常见的原因有下面几个</p>
+<ol>
+<li>太多纹理(texture)要处理, 比如一个View有太多子Layer.</li>
+<li>渲染的视图有阴影, 圆角.</li>
+<li>Layer上有Mask.</li>
+<li>View采用模糊显示, 比如用了UIVisualEffectView.</li>
+<li>栅格化(shouldRasterize)图层缓存命中率过低.</li>
+</ol>
+<p>上面这几个比较常见. </p>
+<p>其中阴影,圆角, Mask, Effect, shouldRasterize这几个会触发GPU离屏渲染, 优化GPU的大部分方式, 就是如何处理好离屏渲染. 离屏渲染是GPU的性能杀手, 这里有必要去了解一下.</p>
+<h3 id="iOS的渲染过程"><a href="#iOS的渲染过程" class="headerlink" title="iOS的渲染过程"></a>iOS的渲染过程</h3><p>从CPU计算好视图内容, 到显示在屏幕上给用户观看, iOS的UI渲染一共经历了下面几个过程.</p>
+<div align=center>
+　　<img src="https://pic3.zhimg.com/80/v2-98077db5cb31318ec437f00762870142_1440w.jpg" width=50% />
+</div>
+
+<p>我们的代码运行在Application层, CPU计算好视图信息(座标尺寸, 视图文本信息, 图层关系等), 会把数据提交到<code>Render Server</code>层, 接着进入GPU渲染, 再显示到屏幕上.  </p>
+<blockquote>
+<p>实际过程比这个复杂, 可以找一下资料看看这个具体过程</p>
+</blockquote>
+<h3 id="什么是渲染-光栅化"><a href="#什么是渲染-光栅化" class="headerlink" title="什么是渲染? 光栅化?"></a>什么是渲染? 光栅化?</h3><p>一定要先搞明白什么叫<strong>渲染</strong>, 不然对这个渲染知识点只会是似懂非懂. 这里只讨论2D领域.</p>
+<p>所谓的渲染, 粗鲁地说, 就是把几何图形, 图片数据, 文本等一大堆用来表达视图内容的东西, 计算成像素图(位图), 并且把像素图放到frame buffer中, 这个过程就叫渲染! 显示器就可以读取frame buffer的数据, 显示到屏幕上.</p>
+<p>渲染里面经常看到光栅化这个词, 它指的是把几何图形像素化, 粗浅理解, 光栅化可以等同于渲染. </p>
+<p>这部分知识点应该足够我们做UI性能优化了…</p>
+<blockquote>
+<p>看到一个很有意思的比喻, 如果把渲染比作做菜,  那么你起锅摆盘就是光栅化。</p>
+</blockquote>
+<h3 id="什么是GPU渲染-什么是CPU渲染"><a href="#什么是GPU渲染-什么是CPU渲染" class="headerlink" title="什么是GPU渲染, 什么是CPU渲染?"></a>什么是GPU渲染, 什么是CPU渲染?</h3><p>上面说的视图信息其实就是用的CALayer来表示, 由<code>Core Animation</code>这个框架负责传给GPU渲染(<strong>硬件渲染</strong>), 这就是为啥说用CALayer及其子类(CAShapeLayer等)来展示视图信息效率高, 因为它最后会由GPU渲染. </p>
+<p>而平时我们可能会自己用<code>CoreGraphics</code>这个框架, 创建一个图形上下文CGContext, 画啊画, 再得到一个UIImage, 赋值给layer.contents, 这个步骤其实就是我们自己手动用CPU渲染(<strong>软件渲染</strong>)出像素数据, 这样<code>Core Animation</code>就会直接把这个contents的内容放入到frame buffer中, 显示器直接读取frame buffer, 就可以把它里面一个一个像素打到屏幕上了.</p>
+<div align=center>
+　　<img src="https://pic2.zhimg.com/80/v2-24394bcd0b84005553320df018e06999_1440w.jpg" width=50% />
+</div>
+
+<p>当然渲染并不是一次完成, 比如一个视图有很多个子视图, 渲染的时候就要从最下层开始, 一层一层把视图内容渲染到frame buffer中, 这种方式, 称为<strong>画家算法</strong>.</p>
+<blockquote>
+<p>PS. 有关资料显示, iOS采用双缓冲技术, 实际上是有两个frame buffer, 用来加快渲染效率, 不管它有多少个, 原理都是一样. frame buffer(缓冲区), 就是一块内存区域, 用来存放即将显示到屏幕上的像素数据.</p>
+</blockquote>
+<h3 id="为什么会出现离屏渲染"><a href="#为什么会出现离屏渲染" class="headerlink" title="为什么会出现离屏渲染?"></a>为什么会出现离屏渲染?</h3><p>上面说到渲染就像在画画一样, 一层一层画, 前面画上去的东西就不能修改了. </p>
+<p>这就导致有些视图是无法直接渲染到frame buffer中, 比如有圆角, Mask, 阴影这些. </p>
+<p><strong>带圆角</strong>需要裁剪的视图, 它的所有子视图也需要跟着裁剪, 要提高裁剪效率, 最好的做法就是把全部图层依次画到frame buffer中, 然后再裁剪. 不过前面已经说了, 画进去的东西就不能改了, 所以GPU只能在另一个地方开辟一个新的frame buffer用来存放临时的渲染结果, 然后再把最终结果复制到frame buffer. 这块新的frame buffer也叫离屏缓冲区, 自然这个过程就叫做离屏渲染了. </p>
+<p>可以看到, 离屏渲染需要GPU不停地切换工作环境, 从一个frame buffer切换到另一个frame buffer, GPU的工作环境称为上下文, 不停切换上下文, 会严重降低GPU的工作效率. 这块涉及到GPU的工作原理, 不是我的专业范围就不多说了.</p>
+<div align=center>
+　　<img src="https://pic2.zhimg.com/80/v2-487022d244a9bdefbf03636f5c15ee89_1440w.jpg" width=40% />
+</div>
+
+<p><strong>Mask</strong>和<strong>阴影</strong>这些也是同个道理, 只有把全部视图都画好了, 才能知道裁剪的形状或者阴影的路径, 所以这个渲染的方式会转化成离屏渲染. </p>
+<div align=center>
+　　<img src="/images/qq-music-shadow-path.jpg" width=30% />
+</div>
+
+<p>CALayer有个<code>shadowPath</code>, 设置好它GPU就可以事先知道阴影路径, 就不需要离屏渲染了. 可以看上图, 红色阴影就是用<code>shadowPath</code>实现的; 而圆角的设置, 如果不需要裁剪子视图的话, 把<code>masksToBounds</code>设置成NO, 也不会造成离屏渲染. 下文会讲到这个.</p>
+<p><strong>注意, 不同版本iOS系统对渲染的处理会有差异, 如果能找到一次性渲染好视图的算法, 就不需要离屏了,  所以判断是不是离屏必须用专门的工具, 而不能单凭直觉</strong></p>
+<h3 id="开始优化-tag-v1"><a href="#开始优化-tag-v1" class="headerlink" title="开始优化 tag v1"></a>开始优化 tag v1</h3><p>上面这部分知识点, 是优化的核心指导思想.</p>
+<p>开启离屏检测, 看看首页的渲染情况</p>
+<pre><code>Debug-&gt;View Debugging-&gt;Rendering-&gt;Color Offscreen-Rendered Yellow</code></pre>
+<div align=center>
+　　<img src="/images/qq-music-offscreen-v1.jpg" width=30% />
+</div>
+
+<p>和预期的一样, 所有圆角区域都是离屏渲染. </p>
+<p>尝试开启光栅化, 设置<code>CALayer.shouldRasterize=YES</code>, 这样视图只需要离屏渲染一次, 就会把内容缓存起来供下次使用, 提升性能.</p>
+<div align=center>
+　　<img src="/images/qq-music-rasterize.jpg" width=30% />
+</div>
+
+<p>开启光栅化后CollectionView里面的视图都是红色的, 说明光栅化后无法得到有效缓存,  这样实际上机器性能消耗, 并没有好处.</p>
+<p>UITableView和UICollectionView这些视图, 都是在反复利用那几个Cell, 同时刷新Cell的内容, 这种会复用视图的, 就会不停更新Layer内容导致缓存命中率超低, 不适合开启光栅化.</p>
+<p>所以通过光栅化并没法解决问题, 反而界面的帧率只剩下30了.</p>
+<div align=center>
+　　<img src="/images/qq-music-gup-fps30.jpg" width=30% />
+</div>
+
+<p>代码改回去, 继续优化,  先针对Topic Collection View优化.</p>
+<p>观察一下, Topic 的每一个cell里面虽然也有圆角, 但是只包含了文本, 并没有图片,  显示圆角的背景色并不需要设置masksToBounds. </p>
+<p>官方说了这个问题, 指针对contents的圆角, 才需要设置masksToBounds.</p>
+<blockquote>
+<p> Setting the radius to a value greater than 0.0 causes the layer to begin drawing rounded corners on its background. By default, the corner radius does not apply to the image in the layer’s contents property; it applies only to the background color and border of the layer. However, setting the masksToBounds property to true causes the content to be clipped to the rounded corners.</p>
+</blockquote>
+<p>把Topic视图相关的<code>masksToBounds =YES</code>代码移除掉, 重新运行一下, 滚动到topic这个区间帧数明显提升, 代码可以看<code>tag v1.1</code></p>
+<h3 id="开始优化-tag-v1-1"><a href="#开始优化-tag-v1-1" class="headerlink" title="开始优化 tag v1.1"></a>开始优化 tag v1.1</h3><p>开始优化各种带圆角图片的Cell. 这里的指导思想, 就是平衡CPU和GPU的使用率. </p>
+<p><strong>GPU不够, CPU来凑</strong>.</p>
+<p>iPhone6 Plus的GPU确实不怎么好, 圆角一多占有率飙升到90%了. 结合上面的知识点, 要做的事情就是把部分GPU的工作交给CPU处理. </p>
+<p>利用<code>CoreGraphics</code>框架, 使用CPU渲染带圆角的图片, 在设置给layer.contents, 同时关闭<code>masksToBounds</code>, 这样即可减轻GPU的工作量. </p>
+<p>这里我利用<code>YYAsyncLayer</code>来实现CPU异步渲染, <code>YYAsyncLayer</code>的原理很简单, 当layer需要display的时候, 开启一个异步线程, 创建<strong>CGContextRef</strong>画布, 用户可以在这个异步线程里把视图内容画到<strong>CGContextRef</strong>里, 然后<code>YYAsyncLayer</code>会在主线程帮你把渲染好的内容赋值给layer.contents.</p>
+<p><code>YYAsyncLayer</code>内部根据CPU核数定义了若干串行队列, 放到队列池里, 每次要渲染的时候就从池里一次按顺序取出一个串行队列, 异步执行<code>CoreGraphics</code>渲染代码, 这样做的好处就是能控制并发线程数. 不过我觉得用NSOperationQueue来实现就可以了, 没必要搞这么复杂. </p>
+<p>这个库还提供了一个事务类<code>YYTransaction</code>, 这个类在Runloop上注册了观察者, 当Runloop处于<code>kCFRunLoopBeforeWaiting</code>状态时触发, 优先级非常低, 适合在程序有空闲的时候处理业务逻辑, 后面CPU优化部分会用到.</p>
+<p>这里我封装了一个支持异步CPU渲染圆角图片和灰色渐变的类<strong>AsyncImageView</strong> , 核心代码如下</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">- (YYAsyncLayerDisplayTask *)newAsyncDisplayTask &#123;</span><br><span class="line">    <span class="comment">// 在主线程访问bounds属性</span></span><br><span class="line">    <span class="built_in">CGRect</span> bounds = <span class="keyword">self</span>.bounds;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    YYAsyncLayerDisplayTask *task = [YYAsyncLayerDisplayTask new];</span><br><span class="line">    </span><br><span class="line">    task.willDisplay = ^(<span class="built_in">CALayer</span> *layer) &#123;&#125;;</span><br><span class="line"></span><br><span class="line">    task.display     = ^(<span class="built_in">CGContextRef</span> context, <span class="built_in">CGSize</span> size, <span class="built_in">BOOL</span> (^isCancelled)(<span class="keyword">void</span>)) &#123;</span><br><span class="line">        <span class="keyword">if</span> (isCancelled()) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">CGContextAddPath</span>(context, [<span class="built_in">UIBezierPath</span> bezierPathWithRoundedRect:bounds cornerRadius:<span class="keyword">self</span>.asyncCornerRadius].CGPath);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 注意必须在把图片绘制到上下文之前就切割好绘制区域. 否则切割只对后续的绘制生效, 对已经绘制好的图片不生效.</span></span><br><span class="line">        <span class="built_in">CGContextClip</span>(context);</span><br><span class="line"></span><br><span class="line">        <span class="built_in">CGContextSaveGState</span>(context);</span><br><span class="line">        <span class="built_in">CGContextTranslateCTM</span>(context, <span class="number">0</span>, bounds.size.height);</span><br><span class="line">        <span class="built_in">CGContextScaleCTM</span>(context, <span class="number">1.0</span>, <span class="number">-1.0</span>);</span><br><span class="line">        <span class="built_in">CGContextDrawImage</span>(context, bounds, <span class="keyword">self</span>.image.CGImage);</span><br><span class="line">        <span class="built_in">CGContextRestoreGState</span>(context);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">self</span>.drawMask) &#123;</span><br><span class="line">            <span class="built_in">CGColorSpaceRef</span> rgb = <span class="built_in">CGColorSpaceCreateDeviceRGB</span>();</span><br><span class="line"></span><br><span class="line">            <span class="built_in">CGGradientRef</span> gradient = <span class="built_in">CGGradientCreateWithColorComponents</span>(rgb, <span class="keyword">self</span>-&gt;_colors, <span class="literal">NULL</span>, <span class="keyword">self</span>.maskColors.count);</span><br><span class="line">            <span class="built_in">CGContextDrawLinearGradient</span>(context, gradient, <span class="built_in">CGPointMake</span>(size.width / <span class="number">2</span>, <span class="number">0</span>), <span class="built_in">CGPointMake</span>(size.width / <span class="number">2</span>, size.height), <span class="number">0</span>);</span><br><span class="line">            <span class="built_in">CGGradientRelease</span>(gradient);</span><br><span class="line">            <span class="built_in">CGColorSpaceRelease</span>(rgb);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    task.didDisplay = ^(<span class="built_in">CALayer</span> *layer, <span class="built_in">BOOL</span> finished) &#123;&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> task;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>前面提到说QQ音乐首页会在图片上放一些白色的文本, 一开始的做法是添加一个灰色渐变的视图盖在图片上, 然后文本放灰色视图上.</p>
+<p>这里我顺便给<strong>AsyncImageView</strong>类增加了绘制渐变蒙版的功能, 这样就不需要额外叠加灰色图层了, 能提高效率.</p>
+<p>利用<strong>AsyncImageView</strong>替换掉UICollectionViewCell上的UIImageView.</p>
+<div align=center>
+　　<img src="/images/qq-music-gup-fps58.jpg" width=30% />
+</div>
+
+<p>现在竖向滚动的时候, GPU从45帧提高到55~59帧了, 肉眼只能偶尔看到轻微卡顿, 完全可以接受的. 已经到达上线标准了.</p>
+<p>滚动时的CPU使用率从之前的15%提升30~50%, GPU从90%下降到28%左右. </p>
+<p>由此可见, 通过正确的指导思想, 确实让CPU核GPU的使用率更加平衡, 用户体验也会更好. 这个版本的代码可以在<code>tag v2.0</code>获得.</p>
+<h3 id="GPU的其他优化"><a href="#GPU的其他优化" class="headerlink" title="GPU的其他优化"></a>GPU的其他优化</h3><p>上面的优化主要是处理离屏渲染, 我觉得离屏渲染是GPU优化的重点, 工作量最少, 提升最大. 其他的优化, 可以从减少纹理的角度出发.</p>
+<p>比如减少透明图层的使用. 能合并的图层, 可以先合并到一起. 比如下面这个界面, 是可以从图片的角度上, 直接提供一张图片即可</p>
+<div align=center>
+　　<img src="/images/qq-music-layer-merge.jpg" width=30% />
+</div>
+
+<p>但是这种操作工作量比较大, 首先要修改UICollectionViewCell的视图结构, 然后还要让服务器把两个图片合成一张, 或者在APP里, 找个主线程空闲时间把两个图合成一张再保存起来, 篇幅有限我就不做了, 如果你的程序优化了离屏渲染还是很卡, 那就有必要做了.</p>
+<p>下面开始着手CPU优化, CPU优化也有很多指导思想.</p>
+<h2 id="CPU-优化"><a href="#CPU-优化" class="headerlink" title="CPU 优化"></a>CPU 优化</h2><h3 id="CPU的几种常见优化思路"><a href="#CPU的几种常见优化思路" class="headerlink" title="CPU的几种常见优化思路"></a>CPU的几种常见优化思路</h3><p>在优化之前, 可以用Instruments工具里的Time Profiler时间分析工具, 很方便查看各行代码的CPU执行时间.</p>
+<p>常见的CPU优化指导思想, 总结起来大概就是这两点, </p>
+<ol>
+<li>时间不阔绰, 任务提前做, 就是<strong>预处理</strong></li>
+<li>大事化小, 小事化了, 就是<strong>拆分任务</strong></li>
+</ol>
+<p>具体到编码上, 有下面几种方法</p>
+<ol>
+<li>文件资源提前加载, 就是<strong>预加载</strong></li>
+<li>取消自动布局, 提前计算视图frame, 就是<strong>预排版</strong></li>
+<li>提前缓存像素图, 供下次直接使用, 就是<strong>预渲染</strong></li>
+<li>空间换时间, 就是<strong>缓存</strong>, 预渲染也属于缓存的一种.</li>
+<li>限制线程数, 就是<strong>并发控制</strong></li>
+<li>代码布局, 放弃xib, StoryBoard,  就是<strong>很麻烦</strong></li>
+</ol>
+<p>保持界面流畅, 还要时刻注意不要在主线程上做太多事情, 主线程每一帧只有16.67ms.</p>
+<p>此外应该还有其他, 比如对象的释放放到后台队列(这个在<strong>YYAsyncLayer</strong>里面可以看到<strong>YYAsyncLayerGetReleaseQueue</strong>), 其他的暂时想不到了.</p>
+<h3 id="开始优化-v2-0"><a href="#开始优化-v2-0" class="headerlink" title="开始优化 v2.0"></a>开始优化 v2.0</h3><p>有了指导思想, 下面开始用Time Profiler找一下哪些任务占用较多CPU资源, 如果能预处理的, 就先预处理. </p>
+<p>预处理的时候, 多利用runloop提供的观察者模式, 尽量把预处理的代码放到runloop即将休眠的时候处理, 而且每次只处理一个任务, 把任务拆分成多个子任务处理,  尽量避免在一帧的时间内做太多事情.</p>
+<p>先关闭FPS视图, 避免Timer干扰分析.</p>
+<p>运行程序</p>
+<div align=center>
+　　<img src="/images/qq-music-start-main.jpg" width=40% /><img src="/images/qq-music-start-worker.jpg" width=40% />
+</div>
+
+
+<p> 从程序启动后了1秒左右的时间里, 可以看到消耗CPU的地方几种在下面几个.</p>
+<ol>
+<li>主线程主要工作量在TableViewCell和CollectionViewCell的加载</li>
+<li>非主线程主要工作量是<strong>AsyncImageView</strong>的CPU渲染, <strong>SDImageCache</strong>的图片加载</li>
+</ol>
+<div align=center>
+　　<img src="/images/qq-music-xib-load.jpg" width=30% /><img src="/images/qq-music-cgcontext-draw.jpg" width=30% /><img src="/images/qq-music-decode-image.jpg" width=30% />
+</div>
+
+<p>通过Time Profiler的代码分析功能, 可以轻松看到具体的代码细节, 其中<code>SongListCell</code>中的UICollectionViewCell的xib文件的加载消耗26ms.</p>
+<p>一个线程中的<strong>AsyncImageView</strong>的图片绘制占用了149ms, 阴影绘制占用了36ms.</p>
+<p>一个线程中的<strong>SDImageCache</strong>缓存加载主要是在图片解码的地方, 消耗了119ms.</p>
+<p>可以看出来, 首页消耗CPU的地方就是加载xib文件和图片解码, CPU渲染图片, 因为Dome比较简单, 所以这个情况是符合预期的.</p>
+<p>图片解码这块已经使用了<strong>SDWebImage</strong>这个框架, 他把解码操作放到非主线程了, 如果要加载的图片是在磁盘中有的, 加载后在一个串行IO队列中解码, 这个不会有线程爆炸问题. 如果图片在磁盘没有的, 需要联网下载的, 下载和解码的逻辑被放到下载队列中执行, 最大并发数是6, 所以<strong>SDWebImage</strong>针对当前这个Demo来说, 不会有线程问题.</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">_ioQueue = dispatch_queue_create(<span class="string">&quot;com.hackemist.SDWebImageCache&quot;</span>, DISPATCH_QUEUE_SERIAL);</span><br><span class="line"></span><br><span class="line">_downloadQueue = [<span class="built_in">NSOperationQueue</span> new];</span><br><span class="line">_downloadQueue.maxConcurrentOperationCount = _config.maxConcurrentDownloads; <span class="comment">// 默认是6</span></span><br><span class="line">_downloadQueue.name = <span class="string">@&quot;com.hackemist.SDWebImageDownloader&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>上线滚动和左右滚动, 都可以看到性能消耗的地方主要是对<strong>AsyncImageView</strong>的渲染. 滚动时加载Cell后会设置URL, 而AsyncImageView只要被设置了URL, 马上开始圆角Image的渲染, 同一个图片来回滚动会被重复渲染, 所以这个地方可以优化一下.</p>
+<p>思路就是把URL作为key, 渲染出圆角的图片作为value, 一起保存到内存中. 同时在得到圆角的value后, 还要把<strong>SDWebImage</strong>从内存缓存里的相同URL的图片删除, 避免原图和圆角图同时存在内容, 浪费内存空间.</p>
+<p>关于缓存类的选择, 我在<strong>NSCache</strong>, <strong>YYCache</strong>, <strong>SDMemoryCache</strong>中, 选择了<strong>SDMemoryCache</strong>. 原因就是这里暂时不需要追求极致性能, <strong>SDMemoryCache</strong>比较适合缓存图片.</p>
+<p>创建内存缓存对象<strong>AsyncImageCache</strong>, 继承自<strong>SDMemoryCache</strong>, <strong>SDMemoryCache</strong>继承自<strong>NSCache</strong>, 它除了提供系统的缓存功能之外, 还特别适合缓存图片.</p>
+<p>这是因为<strong>SDMemoryCache</strong>内部定义了一个<strong>NSMapTable</strong>类型的weakCache, MapTable支持对值弱引用, 这样做的好处就是如果系统发起内存警告时, 父类NSCache会把缓存释放掉, 这样用户从缓存里获取图片的时候, 如果在weakCache里还存在图片的话,  说明图片还显示在屏幕上, 这时候直接把屏幕上的图片写入缓存并返回即可, 效率更高.</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)setImageURL:(<span class="built_in">NSURL</span> *)imageURL &#123;</span><br><span class="line">    _imageURL = imageURL;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">UIImage</span> *cacheImage = [AsyncImageCache.shareCache objectForKey:imageURL.absoluteString];</span><br><span class="line">    <span class="keyword">if</span> (cacheImage) &#123;</span><br><span class="line">        <span class="keyword">self</span>.layer.contents = (<span class="keyword">id</span>)cacheImage.CGImage;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        __<span class="keyword">weak</span> __<span class="keyword">typeof</span>(<span class="keyword">self</span>) wself = <span class="keyword">self</span>;</span><br><span class="line">        [SDWebImageManager.sharedManager loadImageWithURL:imageURL options:<span class="number">0</span> progress:<span class="literal">nil</span> completed:^(<span class="built_in">UIImage</span> *_Nullable image, <span class="built_in">NSData</span> *_Nullable data, <span class="built_in">NSError</span> *_Nullable error, SDImageCacheType cacheType, <span class="built_in">BOOL</span> finished, <span class="built_in">NSURL</span> *_Nullable imageURL) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!error) &#123;</span><br><span class="line">                wself.image = image;</span><br><span class="line">                [wself.layer setNeedsDisplay];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (YYAsyncLayerDisplayTask *)newAsyncDisplayTask &#123;</span><br><span class="line">    <span class="comment">// 在主线程访问bounds属性</span></span><br><span class="line">    <span class="built_in">CGRect</span> bounds = <span class="keyword">self</span>.bounds;</span><br><span class="line"></span><br><span class="line">    YYAsyncLayerDisplayTask *task = [YYAsyncLayerDisplayTask new];</span><br><span class="line"></span><br><span class="line">    task.willDisplay = ^(<span class="built_in">CALayer</span> *layer) &#123;&#125;;</span><br><span class="line"></span><br><span class="line">    task.display     =  略</span><br><span class="line"></span><br><span class="line">    task.didDisplay = ^(<span class="built_in">CALayer</span> *layer, <span class="built_in">BOOL</span> finished) &#123;</span><br><span class="line">        <span class="keyword">if</span> (finished) &#123;</span><br><span class="line">            <span class="built_in">UIImage</span> *image = [<span class="built_in">UIImage</span> imageWithCGImage:(__bridge <span class="built_in">CGImageRef</span>)layer.contents];</span><br><span class="line">            [AsyncImageCache.shareCache setObject:image forKey:<span class="keyword">self</span>.imageURL.absoluteString];</span><br><span class="line"></span><br><span class="line">            [SDWebImageManager.sharedManager.imageCache removeImageForKey:<span class="keyword">self</span>.imageURL.absoluteString cacheType:SDImageCacheTypeMemory completion:<span class="literal">nil</span>];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> task;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>缓存好已渲染的图片后, 现在滚动时CPU基本保持在20%以下了. 界面相比之前更流畅了, 偶尔会有轻微卡顿.</p>
+<div align=center>
+　　<img src="/images/qq-music-cache-image.jpg" width=60% />
+</div>
+
+<p>这个版本的代码, 可以看 <code>tag v2.1</code></p>
+<h1 id="CPU的其他优化"><a href="#CPU的其他优化" class="headerlink" title="CPU的其他优化"></a>CPU的其他优化</h1><p>其他优化, 比如把xib布局换成代码布局, 而且取消自动布局, 直接手动计算frame的大小, 再缓存好, 这样就不用在滚动的时候让CPU去计算了.</p>
+<p>另外也可以考虑一下提前拉取首页图片的数据, 先渲染好并缓存起来, 这样滚动的时候就不需要再去计算了.</p>
+<p>上面说的这些预处理预渲染, 可以使用<strong>YYTransaction</strong>这个对象, 里面封装好了runloop观察者, 在runloop快要休眠的时候, 一次性处理已经提交到静态<code>transactionSet</code>集合的<strong>YYTransaction</strong>对象.</p>
+<p>当然也可以自己注册观察者, 然后弄一个队列, 每次runloop要休眠的时候就执行一下队头一个任务即可.</p>
+<p>目前我测试了一下, 滚动已经比QQ音乐流畅了, 其他的篇幅有限精力优先, 我就不做了, 本文如有错误, 还请指正谢谢.</p>
+<h1 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h1><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/72653360">关于iOS离屏渲染的深入研究</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.ibireme.com/2015/11/12/smooth_user_interfaces_for_ios/">保持界面流畅的技巧</a></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/iOS/">iOS</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/UI/">UI</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2020/03/22/2020-03-22-Implementing-a-60-frame-QQ-Music-Homepage/" data-title="实现一个60帧的QQ音乐首页(高性价比的性能优化方案) | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2020/04/11/2020-04-11-uncommon-syntax-summary-of-objc-runtime/" title="objc runtime 源码中一些少见的语法汇总">
+  <strong>上一篇：</strong><br/>
+  <span>
+  objc runtime 源码中一些少见的语法汇总</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2020/03/08/2020-03-08-sheet-view-ui-libary/"  title="CCSheetView -- 提供横竖滚动的行列视图组件">
+ <strong>下一篇：</strong><br/> 
+ <span>CCSheetView -- 提供横竖滚动的行列视图组件
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%BA%90%E7%A0%81%E4%B8%8B%E8%BD%BD"><span class="toc-number">3.</span> <span class="toc-text">源码下载</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%A6%96%E9%A1%B5%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%80%9D%E8%B7%AF"><span class="toc-number">4.</span> <span class="toc-text">首页的实现思路</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E4%BD%93UI%E7%BB%93%E6%9E%84"><span class="toc-number">4.1.</span> <span class="toc-text">整体UI结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%83%E5%B1%80%E6%96%B9%E5%BC%8F"><span class="toc-number">4.2.</span> <span class="toc-text">布局方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A6%96%E9%A1%B5%E7%B1%BB%E5%9E%8B%E5%88%92%E5%88%86"><span class="toc-number">4.3.</span> <span class="toc-text">首页类型划分</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A1%B6%E9%83%A8%E6%90%9C%E7%B4%A2%E6%A1%86"><span class="toc-number">4.3.1.</span> <span class="toc-text">顶部搜索框</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Banner"><span class="toc-number">4.3.2.</span> <span class="toc-text">Banner</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%BA%E5%AE%9A%E5%86%85%E5%AE%B9%E7%9A%84%E8%A7%86%E5%9B%BE"><span class="toc-number">4.3.3.</span> <span class="toc-text">固定内容的视图</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%AA%E5%90%91%E7%80%91%E5%B8%83%E6%B5%81"><span class="toc-number">4.3.4.</span> <span class="toc-text">横向瀑布流</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%84%E7%A7%8D%E4%B8%8D%E5%90%8C%E7%9A%84CollectionViewCell"><span class="toc-number">4.3.5.</span> <span class="toc-text">各种不同的CollectionViewCell</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96"><span class="toc-number">5.</span> <span class="toc-text">代码优化</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#GPU-%E4%BC%98%E5%8C%96"><span class="toc-number">5.1.</span> <span class="toc-text">GPU 优化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#iOS%E7%9A%84%E6%B8%B2%E6%9F%93%E8%BF%87%E7%A8%8B"><span class="toc-number">5.1.1.</span> <span class="toc-text">iOS的渲染过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%B8%B2%E6%9F%93-%E5%85%89%E6%A0%85%E5%8C%96"><span class="toc-number">5.1.2.</span> <span class="toc-text">什么是渲染? 光栅化?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFGPU%E6%B8%B2%E6%9F%93-%E4%BB%80%E4%B9%88%E6%98%AFCPU%E6%B8%B2%E6%9F%93"><span class="toc-number">5.1.3.</span> <span class="toc-text">什么是GPU渲染, 什么是CPU渲染?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BC%9A%E5%87%BA%E7%8E%B0%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93"><span class="toc-number">5.1.4.</span> <span class="toc-text">为什么会出现离屏渲染?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E4%BC%98%E5%8C%96-tag-v1"><span class="toc-number">5.1.5.</span> <span class="toc-text">开始优化 tag v1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E4%BC%98%E5%8C%96-tag-v1-1"><span class="toc-number">5.1.6.</span> <span class="toc-text">开始优化 tag v1.1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GPU%E7%9A%84%E5%85%B6%E4%BB%96%E4%BC%98%E5%8C%96"><span class="toc-number">5.1.7.</span> <span class="toc-text">GPU的其他优化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CPU-%E4%BC%98%E5%8C%96"><span class="toc-number">5.2.</span> <span class="toc-text">CPU 优化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#CPU%E7%9A%84%E5%87%A0%E7%A7%8D%E5%B8%B8%E8%A7%81%E4%BC%98%E5%8C%96%E6%80%9D%E8%B7%AF"><span class="toc-number">5.2.1.</span> <span class="toc-text">CPU的几种常见优化思路</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E4%BC%98%E5%8C%96-v2-0"><span class="toc-number">5.2.2.</span> <span class="toc-text">开始优化 v2.0</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#CPU%E7%9A%84%E5%85%B6%E4%BB%96%E4%BC%98%E5%8C%96"><span class="toc-number">6.</span> <span class="toc-text">CPU的其他优化</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="toc-number">7.</span> <span class="toc-text">参考文章</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Greedy-Algorithm/" title="Greedy Algorithm">Greedy Algorithm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2020 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

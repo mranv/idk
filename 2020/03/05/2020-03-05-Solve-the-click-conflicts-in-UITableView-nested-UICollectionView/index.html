@@ -1,0 +1,667 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>解决UITableView嵌套UICollectionView出现的点击冲突问题(实现点击穿透)的另一种思路 | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="文档更新说明 最后更新 2020年03月05日 首次更新 2020年03月06日  前言　　昨天有个同事发烧了, 然后整层楼的人都不能去上班了, 只能待在家里, 所以我寻思着最近做的东西就写了这篇文章了. 这个星期刚写的一个类似Excel的SheetView, 其中涉及到点击冲突问题, 当时查了一下网上的解决方案, 大概就是分成两种做法: 一种是重写TableViewCell的HitTest方法,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="解决UITableView嵌套UICollectionView出现的点击冲突问题(实现点击穿透)的另一种思路">
+<meta property="og:url" content="http://yoursite.com/2020/03/05/2020-03-05-Solve-the-click-conflicts-in-UITableView-nested-UICollectionView/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="文档更新说明 最后更新 2020年03月05日 首次更新 2020年03月06日  前言　　昨天有个同事发烧了, 然后整层楼的人都不能去上班了, 只能待在家里, 所以我寻思着最近做的东西就写了这篇文章了. 这个星期刚写的一个类似Excel的SheetView, 其中涉及到点击冲突问题, 当时查了一下网上的解决方案, 大概就是分成两种做法: 一种是重写TableViewCell的HitTest方法,">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-03-05T04:33:18.000Z">
+<meta property="article:modified_time" content="2020-03-06T05:05:02.000Z">
+<meta property="article:author" content="Cocos">
+<meta property="article:tag" content="UI">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2020/03/05/2020-03-05-Solve-the-click-conflicts-in-UITableView-nested-UICollectionView/" title="解决UITableView嵌套UICollectionView出现的点击冲突问题(实现点击穿透)的另一种思路" itemprop="url">解决UITableView嵌套UICollectionView出现的点击冲突问题(实现点击穿透)的另一种思路</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2020-03-05T04:33:18.000Z" itemprop="datePublished"> 发表于 2020-03-05</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BB%93%E8%AE%BA"><span class="toc-number">3.</span> <span class="toc-text">结论</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%88%86%E6%9E%90"><span class="toc-number">4.</span> <span class="toc-text">分析</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E5%87%BA%E7%8E%B0%E7%9A%84UI%E5%B0%8F%E9%97%AE%E9%A2%98"><span class="toc-number">5.</span> <span class="toc-text">解决出现的UI小问题</span></a></li></ol>
+		
+		</div>
+		
+		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
+<li>最后更新 2020年03月05日</li>
+<li>首次更新 2020年03月06日</li>
+</ul>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>　　昨天有个同事发烧了, 然后整层楼的人都不能去上班了, 只能待在家里, 所以我寻思着最近做的东西就写了这篇文章了.</p>
+<p>这个星期刚写的一个类似Excel的<strong>SheetView</strong>, 其中涉及到点击冲突问题, 当时查了一下网上的解决方案, 大概就是分成两种做法:</p>
+<p>一种是重写<strong>TableViewCell</strong>的<code>HitTest</code>方法, 屏蔽掉<strong>CollectionView</strong>的事件响应, 这个就和把<strong>CollectionView</strong>设置成<code>userInteractionEnabled=NO</code>一样粗鲁了, 这样<strong>CollectionView</strong>除了不能点击之外, 也完全没法响应滚动手势了.</p>
+<p>另一种就是监听<strong>CollectionView</strong>的<code>didSelectItemAtIndexPath</code>方法, 或者在每个<strong>CollectionViewCell</strong>上都加一个点击手势, 用户点击的时候就把事件传给TableView, 这方案也是没有办法的办法了. </p>
+<p>经过一段时间思考后, 我尝试找出了一个比较好的解决方案, 也就是今天这篇文章要说的.</p>
+<h1 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h1><p>　　分析部分会比较长, 先上结论.</p>
+<p>创建一个CollectionView的子类, <strong>CCPenetrateCollectionView</strong>, 重写四个touches方法,  把触摸事件手动抛给<strong>nextResponder</strong>, 这样就可以让TableView的<code>didSelectRowAtIndexPath</code>得到响应了. 说明一下, 直接向<code>nextResponder </code>发送触摸信息是不被苹果推荐的, 所以后面分析的时候会提到如何处理一些意料之外的问题.</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)touchesBegan:(<span class="built_in">NSSet</span>&lt;<span class="built_in">UITouch</span> *&gt; *)touches withEvent:(<span class="built_in">UIEvent</span> *)event &#123;</span><br><span class="line">    [<span class="keyword">super</span> touchesBegan:touches withEvent:event];</span><br><span class="line">    [<span class="keyword">self</span>.nextResponder touchesBegan:touches withEvent:event];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)touchesEnded:(<span class="built_in">NSSet</span>&lt;<span class="built_in">UITouch</span> *&gt; *)touches withEvent:(<span class="built_in">UIEvent</span> *)event &#123;</span><br><span class="line">    [<span class="keyword">super</span> touchesEnded:touches withEvent:event];</span><br><span class="line">    [<span class="keyword">self</span>.nextResponder touchesEnded:touches withEvent:event];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)touchesMoved:(<span class="built_in">NSSet</span>&lt;<span class="built_in">UITouch</span> *&gt; *)touches withEvent:(<span class="built_in">UIEvent</span> *)event &#123;</span><br><span class="line">    [<span class="keyword">super</span> touchesMoved:touches withEvent:event];</span><br><span class="line">    [<span class="keyword">self</span>.nextResponder touchesMoved:touches withEvent:event];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)touchesCancelled:(<span class="built_in">NSSet</span>&lt;<span class="built_in">UITouch</span> *&gt; *)touches withEvent:(<span class="keyword">nullable</span> <span class="built_in">UIEvent</span> *)event &#123;</span><br><span class="line">    [<span class="keyword">super</span> touchesCancelled:touches withEvent:event];</span><br><span class="line">    [<span class="keyword">self</span>.nextResponder touchesCancelled:touches withEvent:event];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h1><p>　　<strong>UICollectionView</strong>类继承自<strong>UIScrollView</strong>, 这两个类都有同一个特点, 均会拦截触摸事件, 不管<strong>UICollectionView</strong>的<code>allowsSelection</code>是否为<code>NO</code>, 结果都是一样的. 这就是为什么在<strong>TableViewCell</strong>上嵌套一个<strong>UICollectionView</strong>, 尽管<strong>UICollectionView</strong>本身已经被设置为<code>allowsSelection = NO</code>, 但是TableView的Cell还是不能被选中的原因.<br>　　<br>说到事件的传递, 简单复习一下. 我试试简单描述这个过程. 假设用户用一个手指触摸了屏幕, 这前后App内部的处理流程是这样的:</p>
+<ol>
+<li>由<strong>UIApplicationMain</strong>函数维护的RunLoop(一个死循环), 正处于等待唤醒的状态.</li>
+<li>用户触摸屏幕那一刻, RunLoop中会收到系统底层发来的唤醒信号, RunLoop从唤醒处开始执行下一行代码. (以下都称为UIApplicationMain的操作)</li>
+<li><strong>UIApplicationMain</strong>开始查找屏幕上能响应事件的<strong>UIWindow</strong>, 正常我们的App就一个<strong>UIWindow</strong> ,并开始调用Window上的根View的<code>hitTest:withEvent:</code>方法.</li>
+<li><code>hitTest:withEvent:</code>内部则会调用视图自身的<code>pointInside:withEvent:</code>, 确定当前这个触摸点是不是在自己的View范围内, 如果是则继续; 否则直接返回<code>nil</code>, 并且响应结束, 什么事都没有发生.</li>
+<li><code>pointInside:withEvent:</code>返回<code>YES</code>之后, <code>hitTest:withEvent:</code>方法内部会继续遍历它的子View, 重复4,5这两个步骤, 直到叶子View后, 会得到一个被点击的最上层的View, 并且一路返回给<strong>UIApplicationMain</strong></li>
+<li><strong>UIApplicationMain</strong>得到了符合响应条件的View之后, 开始调用这个View所在的<strong>UIApplication</strong>的<code>sendEvent:</code>方法, <strong>UIApplication</strong>继续调用<strong>UIWindow</strong>的<code>sendEvent:</code>, 继续逐步调用, 最后View的<code>touchesBegan:withEvent:</code>被调用了(后续还有另外三个touches方法也是一样道理), 视图开始处理事件.</li>
+<li>View处理完成事件之后, 会根据自身的视图类型来决定是否把这个事件传递给下一个响应者, 也就是View的<strong>nextResponder</strong>对象(<strong>UIView</strong>默认实现是会传给<strong>nextResponder</strong>), 一般这个<strong>nextResponder</strong>就是View的父视图, 如果是<strong>Controller</strong>管理的View, 则<strong>nextResponder</strong>会是对应的<strong>Controller</strong>. 一直把事件传到最后一个响应者就结束了.</li>
+</ol>
+<p>上面就是整个事件响应的过程了, 我是从程序调用栈中看出来的, 结合一下网上的资料总结出的, 我感觉应该是够用了. 其中第7步, 很像是web中说的<strong>事件冒泡</strong>.</p>
+<p>通过分析, 应该可以很清楚知道怎么解决CollectionView没有把点击事件传给TableViewCell的问题了, 解决的代码就是上面那样了. 由于不知道CollectionView内部的touches…方法是怎么写的, 直接把事件传给<strong>TableViewCell</strong>会引发一些UI的小问题.</p>
+<h1 id="解决出现的UI小问题"><a href="#解决出现的UI小问题" class="headerlink" title="解决出现的UI小问题"></a>解决出现的UI小问题</h1><p>　　第一个遇到的问题, 就是TableViewCell如果支持高亮的话, 可能会因为手指在CollectionView上长按后松开导致TableViewCell一直是高亮状态, 这个可以通过下面代码解决
+　　</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// 重写TableView子类</span></span><br><span class="line">- (<span class="keyword">void</span>)touchesMoved:(<span class="built_in">NSSet</span>&lt;<span class="built_in">UITouch</span> *&gt; *)touches withEvent:(<span class="built_in">UIEvent</span> *)event &#123;</span><br><span class="line">    [<span class="keyword">super</span> touchesMoved:touches withEvent:event];</span><br><span class="line">    [<span class="keyword">self</span> setHighlighted:<span class="literal">NO</span> animated:<span class="literal">YES</span>];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)touchesCancelled:(<span class="built_in">NSSet</span>&lt;<span class="built_in">UITouch</span> *&gt; *)touches withEvent:(<span class="built_in">UIEvent</span> *)event &#123;</span><br><span class="line">    [<span class="keyword">super</span> touchesCancelled:touches withEvent:event];</span><br><span class="line">    [<span class="keyword">self</span> setHighlighted:<span class="literal">NO</span> animated:<span class="literal">YES</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>第二个遇到的问题, 如果长按某一行, 之后松开点击其他行, 这个时候会触发被长按的那行的点击事件, 这个就是苹果不推荐你直接调用nextResponder的touches方法的原因的😂, 开发者不知道内部实现, 不能随便乱用, 否则会出现这样的意料之外的事. 这个问题暂时找不到怎么解决, 算是一种遗憾.</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/iOS/">iOS</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/UI/">UI</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2020/03/05/2020-03-05-Solve-the-click-conflicts-in-UITableView-nested-UICollectionView/" data-title="解决UITableView嵌套UICollectionView出现的点击冲突问题(实现点击穿透)的另一种思路 | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2020/03/08/2020-03-08-sheet-view-ui-libary/" title="CCSheetView -- 提供横竖滚动的行列视图组件">
+  <strong>上一篇：</strong><br/>
+  <span>
+  CCSheetView -- 提供横竖滚动的行列视图组件</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2020/02/26/2020-02-26-add-cocoapods-support-to-your-own-libraries/"  title="给CCTrendCharts类库加上CocoaPods支持的有趣经历">
+ <strong>下一篇：</strong><br/> 
+ <span>给CCTrendCharts类库加上CocoaPods支持的有趣经历
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BB%93%E8%AE%BA"><span class="toc-number">3.</span> <span class="toc-text">结论</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%88%86%E6%9E%90"><span class="toc-number">4.</span> <span class="toc-text">分析</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E5%87%BA%E7%8E%B0%E7%9A%84UI%E5%B0%8F%E9%97%AE%E9%A2%98"><span class="toc-number">5.</span> <span class="toc-text">解决出现的UI小问题</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Greedy-Algorithm/" title="Greedy Algorithm">Greedy Algorithm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2020 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

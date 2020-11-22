@@ -1,0 +1,673 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>业界流行的三种iOS组件化设计方案 | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="文档更新说明 最后更新 2019年07月19日 首次更新 2019年07月19日  前言　　今天想把业界流行的三种iOS组件化设计方案简述一番, 每一种方案都有其优缺点, 也不是完全绝对的设计方案, 需要根据自身项目实际情况灵活变通. 这三种方案其实网络上也有很多的文章介绍, 本文简述核心思路, 其他枝叶细节可以另行搜索学习.　　组件化设计模式主要解决多人协作中出现的功能耦合问题, 简单说就是开发">
+<meta property="og:type" content="article">
+<meta property="og:title" content="业界流行的三种iOS组件化设计方案">
+<meta property="og:url" content="http://yoursite.com/2019/07/19/2019-07-19-modular-design-in-ios/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="文档更新说明 最后更新 2019年07月19日 首次更新 2019年07月19日  前言　　今天想把业界流行的三种iOS组件化设计方案简述一番, 每一种方案都有其优缺点, 也不是完全绝对的设计方案, 需要根据自身项目实际情况灵活变通. 这三种方案其实网络上也有很多的文章介绍, 本文简述核心思路, 其他枝叶细节可以另行搜索学习.　　组件化设计模式主要解决多人协作中出现的功能耦合问题, 简单说就是开发">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-07-19T07:37:30.000Z">
+<meta property="article:modified_time" content="2019-07-19T09:07:02.000Z">
+<meta property="article:author" content="Cocos">
+<meta property="article:tag" content="iOS">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2019/07/19/2019-07-19-modular-design-in-ios/" title="业界流行的三种iOS组件化设计方案" itemprop="url">业界流行的三种iOS组件化设计方案</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2019-07-19T07:37:30.000Z" itemprop="datePublished"> 发表于 2019-07-19</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="toc-number">3.</span> <span class="toc-text">准备工作</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E7%A7%8D%E5%B8%B8%E7%94%A8%E7%9A%84%E7%BB%84%E4%BB%B6%E5%8C%96%E8%AE%BE%E8%AE%A1%E6%96%B9%E6%A1%88"><span class="toc-number">4.</span> <span class="toc-text">三种常用的组件化设计方案</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Targer-Acton"><span class="toc-number">4.1.</span> <span class="toc-text">Targer Acton</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#URL-Scheme"><span class="toc-number">4.2.</span> <span class="toc-text">URL Scheme</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Protocol-Class"><span class="toc-number">4.3.</span> <span class="toc-text">Protocol Class</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
+<li>最后更新 2019年07月19日</li>
+<li>首次更新 2019年07月19日</li>
+</ul>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>　　今天想把业界流行的三种iOS组件化设计方案简述一番, 每一种方案都有其优缺点, 也不是完全绝对的设计方案, 需要根据自身项目实际情况灵活变通. 这三种方案其实网络上也有很多的文章介绍, 本文简述核心思路, 其他枝叶细节可以另行搜索学习.<br>　　组件化设计模式主要解决多人协作中出现的功能耦合问题, 简单说就是开发者A的代码和开发者B的代码互相引用, 测试的时候需要双方都准备好代码, 没法将功能作为一个独立的程序编译测试. 解决这一问题的思路就是功能模块化,解偶,使得开发者A和开发者B负责的模块之间互不依赖, 当然解偶的方案就是增加中间件(老套路).<br>　　组件化的优势来自中间件, 缺点也来自中间件, 多了一层代码, 维护工作也就多了一层, 所以团队人少的情况下就没必要做这件事了.
+　　</p>
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><p>　　想象一下我们有这样一个场景: 程序员A负责一个新闻APP的列表页, 由名为ModularizationTableViewListVC的控制器实现; 程序员B负责APP的详情页, 由ModularizationDetailVC控制器实现. 当用户点击新闻列表页的某一行时, 程序会根据所在行的url, 调用ModularizationDetailVC, 展示详情页.<br>　　为了让程序员A,B在开发的时候可以分别独立编译测试自己的代码, 我们可以增加一个中间件, 一个叫Mediator的类, 这样A和B就可以事先商量好详情页需要对外提供哪些接口, A如何从Mediator调起详情页等. 而商量出来的解决方案, 最流行的就是本文下面要讲述的三种.
+　　</p>
+<h1 id="三种常用的组件化设计方案"><a href="#三种常用的组件化设计方案" class="headerlink" title="三种常用的组件化设计方案"></a>三种常用的组件化设计方案</h1><h2 id="Targer-Acton"><a href="#Targer-Acton" class="headerlink" title="Targer Acton"></a>Targer Acton</h2><p>　　Targer Acton, 顾名思义, 就是找到目标对象, 向它发送消息. 先看看代码.</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Mediator.h</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">Mediator</span> : <span class="title">NSObject</span></span></span><br><span class="line"><span class="comment">// 组件化之一: Target Action</span></span><br><span class="line"><span class="comment">// 这里主要注意的是, 每次有一个新功能, 就在像这样添加一个新方法~ 当然实际产品的组件化细粒度应该没有这么高, 不至于一个控制器就解偶一次.</span></span><br><span class="line"><span class="comment">// 另外也可以将组件的代码单独写到一个Mediator的分类里单独维护, 再把头文件 xxx+Mediator.h 引入当前文件即可</span></span><br><span class="line">+ (__kindof <span class="built_in">UIViewController</span> *)detailViewControllerWithTitle:(<span class="built_in">NSString</span> *)title;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Mediator.m</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#import <span class="meta-string">&quot;Mediator.h&quot;</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&lt;objc/message.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">Mediator</span></span></span><br><span class="line">+ (__kindof <span class="built_in">UIViewController</span> *)detailViewControllerWithTitle:(<span class="built_in">NSString</span> *)title &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 根据类名字符获取类对象, 申请内存空间, 再使用runtime机制发送消息初始化</span></span><br><span class="line">    <span class="built_in">UIViewController</span> *vc = [<span class="built_in">NSClassFromString</span>(<span class="string">@&quot;ModularizationDetailVC&quot;</span>) alloc];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 执行初始化方法 (需要传多个参数的, 需要把对应参数数量分别写到函数类型上)</span></span><br><span class="line">    vc = ((<span class="keyword">id</span> (*)(<span class="keyword">id</span>, SEL, <span class="keyword">id</span>))(<span class="keyword">void</span> *)objc_msgSend)(vc, sel_registerName(<span class="string">&quot;initWithTitle:&quot;</span>), title);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> vc;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>开发者A调用开发者B的组件, 可以使用下面代码实现</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ModularizationTableViewListVC.m</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 列表控制器只需要引入中间件即可, 不需要关心具体要加载的是哪一个详情界面</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&quot;Mediator.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">ModularizationTableViewListVC</span></span></span><br><span class="line">- (<span class="keyword">void</span>)tableView:(<span class="built_in">UITableView</span> *)tableView didSelectRowAtIndexPath:(<span class="built_in">NSIndexPath</span> *)indexPath &#123;</span><br><span class="line">    <span class="built_in">UIViewController</span> *vc = [Mediator detailViewControllerWithTitle:<span class="string">@&quot;组件化设计之一&quot;</span>];</span><br><span class="line">    [<span class="keyword">self</span>.navigationController pushViewController:vc animated:<span class="literal">YES</span>];</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>上面代码都比较简单, 就不多说了. 有一个问题就是Mediator这个类会随着组件越来越多, 里面的方法也越来越多, 可以通过分类解决, 负责开发组件的人, 对应的中间件代码写到Mediator的分类里, 再把头文件放入Mediator.h 即可.</p>
+<h2 id="URL-Scheme"><a href="#URL-Scheme" class="headerlink" title="URL Scheme"></a>URL Scheme</h2><p>　　URL Scheme, 看起来和系统的URL Scheme有点像, 其实本质是一样的.把APP看成整个手机, APP的各个组件看成手机里头的各个APP, 不同的组件互相调用可以看成不同APP互相跳转.<br>　　言归正传, URL Scheme组件化设计, 简单说就是各个组件事先向Mediator注册自己的scheme和启动组件的block(MediatorProcessBlock), 这样开发者A就可以通过Mediator, 传入约定好的scheme名字和相关参数, 调用开发者B的组件了. 下面看看代码:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Mediator.h</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">Mediator</span> : <span class="title">NSObject</span></span></span><br><span class="line"><span class="comment">// 组件化之二: URL Scheme</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> 传入组件的标识</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> @param scheme 标识</span></span><br><span class="line"><span class="comment"> @param block 组件自身的初始代码</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">+ (<span class="keyword">void</span>)registerScheme:(<span class="built_in">NSString</span> *)scheme processBlock:(MediatorProcessBlock)block;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> 根据url打开对应的组件, 并根据传入的参数执行MediatorProcessBlock</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> @param url 组件的url, 可携带url参数</span></span><br><span class="line"><span class="comment"> @param dic 传入MediatorProcessBlock的参数</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">+ (<span class="keyword">void</span>)openURL:(<span class="built_in">NSString</span> *)url params:(<span class="built_in">NSDictionary</span> *)dic;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Mediator.h</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">void</span>(^MediatorProcessBlock)(<span class="built_in">NSDictionary</span> *);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Mediator.m</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&quot;Mediator.h&quot;</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&lt;objc/message.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">Mediator</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> 存放MediatorProcessBlock</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> @return cache单例</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">+ (<span class="built_in">NSMutableDictionary</span> *)schemeCache &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="built_in">NSMutableDictionary</span> *schemeCache;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">static</span> <span class="built_in">dispatch_once_t</span> onceToken;</span><br><span class="line">    <span class="built_in">dispatch_once</span>(&amp;onceToken, ^&#123;</span><br><span class="line">        schemeCache = @&#123;&#125;.mutableCopy;</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">return</span> schemeCache;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+ (<span class="keyword">void</span>)registerScheme:(<span class="built_in">NSString</span> *)scheme processBlock:(MediatorProcessBlock)block &#123;</span><br><span class="line">    <span class="keyword">if</span> (scheme &amp;&amp; block) &#123;</span><br><span class="line">        [[Mediator schemeCache] setObject:block forKey:scheme];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+ (<span class="keyword">void</span>)openURL:(<span class="built_in">NSString</span> *)url params:(<span class="built_in">NSDictionary</span> *)dic &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;reveive url=%@&quot;</span>, url);</span><br><span class="line">    <span class="comment">// 从url中获取scheme, 找到对应的block, 传入参数执行; 至于url中携带的参数可以根据具体情况利用起来~</span></span><br><span class="line">    <span class="built_in">NSString</span> *scheme = [url componentsSeparatedByString:<span class="string">@&quot;://&quot;</span>][<span class="number">0</span>];</span><br><span class="line">    MediatorProcessBlock block = [[Mediator schemeCache] objectForKey:scheme];</span><br><span class="line">    <span class="keyword">if</span> (block) &#123;</span><br><span class="line">        block(dic);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>开发者B需要为自己的组件注册scheme, 代码实现如下:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//ModularizationDetailVC.h</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&quot;Mediator.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">ModularizationDetailVC</span></span></span><br><span class="line"><span class="comment">// 每一个组件都需要引入中间件, 注册自己的使用逻辑</span></span><br><span class="line">+ (<span class="keyword">void</span>)load &#123;</span><br><span class="line">    <span class="comment">// 下面定义的block没有引用任何外部变量, 为NSGlobalBlock类型, 内部所有变量都为临时变量, 用完即毁无需担心~</span></span><br><span class="line">    [Mediator registerScheme:<span class="string">@&quot;detailvc&quot;</span> processBlock:^(<span class="built_in">NSDictionary</span> *params) &#123;</span><br><span class="line">        <span class="comment">// 当然下面的参数是需要提前约定~</span></span><br><span class="line">        <span class="built_in">UINavigationController</span> *nav = params[<span class="string">@&quot;nav&quot;</span>];</span><br><span class="line">        <span class="built_in">NSString</span> *title = params[<span class="string">@&quot;title&quot;</span>];</span><br><span class="line">        assert(title != <span class="literal">nil</span> &amp;&amp; nav != <span class="literal">nil</span>);</span><br><span class="line">        </span><br><span class="line">        ModularizationDetailVC *detailVC = [[ModularizationDetailVC alloc] initWithTitle:title];</span><br><span class="line">        [nav pushViewController:detailVC animated:<span class="literal">YES</span>];</span><br><span class="line">    &#125;];</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<p>开发者A调用开发者B的组件, 可以使用下面代码实现</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ModularizationTableViewListVC.m</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 列表控制器只需要引入中间件即可, 不需要关心具体要加载的是哪一个详情界面</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&quot;Mediator.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">ModularizationTableViewListVC</span></span></span><br><span class="line">- (<span class="keyword">void</span>)tableView:(<span class="built_in">UITableView</span> *)tableView didSelectRowAtIndexPath:(<span class="built_in">NSIndexPath</span> *)indexPath &#123;</span><br><span class="line">    [Mediator openURL:<span class="string">@&quot;detailvc://hello?a=1&amp;b=2&quot;</span> params: @&#123;</span><br><span class="line">                                                            <span class="string">@&quot;nav&quot;</span>: <span class="keyword">self</span>.navigationController,</span><br><span class="line">                                                            <span class="string">@&quot;title&quot;</span>: <span class="string">@&quot;组件化设计之一&quot;</span>,</span><br><span class="line">                                                            <span class="string">@&quot;t&quot;</span>: [[<span class="built_in">NSTestOBJ</span> alloc] init]</span><br><span class="line">                                                            &#125;];</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="Protocol-Class"><a href="#Protocol-Class" class="headerlink" title="Protocol Class"></a>Protocol Class</h2><p>　　Protocol Class的方案, 倒是和第一种Targer Action有点像, 只不过具体功能的声明并不是写成Mediator类的方法, 而是写到一个协议里, 开发者A只需要从Mediator获取到实现了某个Protocol的类, 执行其中的方法即可. 具体看看下面代码:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Mediator.h</span></span><br><span class="line"><span class="comment">// 开发ModularizationDetailVC组件的人, 需要额外定义暴露给调用方的协议, 同时实现协议内容.</span></span><br><span class="line"><span class="comment">// 实际开发可以直接把代码写进独立的头文件, 这样每个队员都自己维护自己的头文件, 头文件引入公共的Mediator.h即可</span></span><br><span class="line"><span class="class"><span class="keyword">@protocol</span> <span class="title">ModularizationDetailVCProtocol</span> &lt;<span class="title">NSObject</span>&gt;</span></span><br><span class="line"></span><br><span class="line">+ (__kindof <span class="built_in">UIViewController</span> *) detailVCWith:(<span class="built_in">NSString</span> *)title;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 还可以声明其他参数</span></span><br><span class="line"><span class="comment">// 比如回调的block, 这样组件功能完成以后, 退出前执行该block可以把某些数据带给调用方</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">Mediator</span> : <span class="title">NSObject</span></span></span><br><span class="line"><span class="comment">// 组件化之三: Protocol-Class 模式</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> 注册protocol和class的关系, 这样用户就可以通过protocol获取真实的class, 进行相关操作</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> @param protol 组件的类实现了该协议</span></span><br><span class="line"><span class="comment"> @param cls 组件的类, 提供组件的功能</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">+ (<span class="keyword">void</span>)registerProtocol:(Protocol *)protol <span class="keyword">class</span>:(Class)cls;</span><br><span class="line">+ (Class)classForProtocol:(Protocol *)protol;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Mediator.m</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&quot;Mediator.h&quot;</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&lt;objc/message.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">Mediator</span></span></span><br><span class="line">+ (<span class="built_in">NSMutableDictionary</span> *)protocolCache &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="built_in">NSMutableDictionary</span> *protocolCache;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">static</span> <span class="built_in">dispatch_once_t</span> onceToken;</span><br><span class="line">    <span class="built_in">dispatch_once</span>(&amp;onceToken, ^&#123;</span><br><span class="line">        protocolCache = @&#123;&#125;.mutableCopy;</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">return</span> protocolCache;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+ (<span class="keyword">void</span>)registerProtocol:(Protocol *)protol <span class="keyword">class</span>:(Class)cls &#123;</span><br><span class="line">    <span class="keyword">if</span> (protol &amp;&amp; cls) &#123;</span><br><span class="line">        [[Mediator protocolCache] setObject:cls forKey:<span class="built_in">NSStringFromProtocol</span>(protol)];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+ (Class)classForProtocol:(Protocol *)protol &#123;</span><br><span class="line">    <span class="keyword">return</span> [[Mediator protocolCache] objectForKey:<span class="built_in">NSStringFromProtocol</span>(protol)];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>开发者B需要为自己的组件注册Protocol和Class的对应关系, 代码实现如下:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//ModularizationDetailVC.h</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#import <span class="meta-string">&quot;Mediator.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">ModularizationDetailVC</span></span></span><br><span class="line"><span class="comment">// 每一个组件都需要引入中间件, 注册自己的使用逻辑</span></span><br><span class="line">+ (<span class="keyword">void</span>)load &#123;</span><br><span class="line">    <span class="comment">// 将协议和类进行绑定</span></span><br><span class="line">    [Mediator registerProtocol:<span class="class"><span class="keyword">@protocol</span>(<span class="title">ModularizationDetailVCProtocol</span>) <span class="title">class</span>:<span class="title">self</span>.<span class="title">class</span>];</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<p>开发者A调用开发者B的组件, 可以使用下面代码实现</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ModularizationTableViewListVC.m</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 列表控制器只需要引入中间件即可, 不需要关心具体要加载的是哪一个详情界面</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&quot;Mediator.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">ModularizationTableViewListVC</span></span></span><br><span class="line">- (<span class="keyword">void</span>)tableView:(<span class="built_in">UITableView</span> *)tableView didSelectRowAtIndexPath:(<span class="built_in">NSIndexPath</span> *)indexPath &#123;</span><br><span class="line">    Class cls = [Mediator classForProtocol:<span class="class"><span class="keyword">@protocol</span>(<span class="title">ModularizationDetailVCProtocol</span>)];</span></span><br><span class="line">    [<span class="keyword">self</span>.navigationController pushViewController: [cls detailVCWith:<span class="string">@&quot;组件化设计之三&quot;</span>] animated:<span class="literal">YES</span>];</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>　　三种组件化方案, 各有优缺点, 其中URL Scheme灵活性最大, 本身支持改造成根据其他APP跳入时传入的URL, 打开指定界面. 而另外两种其实原理都是一样的, 就是风格不同.</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/%E6%9E%B6%E6%9E%84%E4%B8%8E%E8%AE%BE%E8%AE%A1/">架构与设计</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/iOS/">iOS</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2019/07/19/2019-07-19-modular-design-in-ios/" data-title="业界流行的三种iOS组件化设计方案 | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2019/07/25/2019-07-25-talking-about-design-patterns-from-cocoaLumberjack/" title="从CocoaLumberjack的高效易扩展谈为什么要学习设计模式">
+  <strong>上一篇：</strong><br/>
+  <span>
+  从CocoaLumberjack的高效易扩展谈为什么要学习设计模式</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2019/06/19/2019-06-19-NSString-in-OC-and-String-in-Swift-2/"  title="认真理解OC和Swift中的字符串">
+ <strong>下一篇：</strong><br/> 
+ <span>认真理解OC和Swift中的字符串
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="toc-number">3.</span> <span class="toc-text">准备工作</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E7%A7%8D%E5%B8%B8%E7%94%A8%E7%9A%84%E7%BB%84%E4%BB%B6%E5%8C%96%E8%AE%BE%E8%AE%A1%E6%96%B9%E6%A1%88"><span class="toc-number">4.</span> <span class="toc-text">三种常用的组件化设计方案</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Targer-Acton"><span class="toc-number">4.1.</span> <span class="toc-text">Targer Acton</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#URL-Scheme"><span class="toc-number">4.2.</span> <span class="toc-text">URL Scheme</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Protocol-Class"><span class="toc-number">4.3.</span> <span class="toc-text">Protocol Class</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Greedy-Algorithm/" title="Greedy Algorithm">Greedy Algorithm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2020 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

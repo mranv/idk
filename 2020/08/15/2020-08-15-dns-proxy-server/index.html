@@ -1,0 +1,717 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>实现DNS代理服务器 | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="文档更新说明 最后更新 2020年08月15日 首次更新 2020年08月16日  前言最近负责了一个DNS相关的网络模块开发, 做了一两个星期算是做完了, 总结一下遇到的一些经历, 功能就是实现DNS代理服务, 具体细节下文会说. 本文只设定在UDP下的DNS报文, 因为我发现Mac上的mDNSResponder进程他发的就是UDP的. 不过要记得, DNS报文实际上可以放到TCP上做. DNS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="实现DNS代理服务器">
+<meta property="og:url" content="http://yoursite.com/2020/08/15/2020-08-15-dns-proxy-server/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="文档更新说明 最后更新 2020年08月15日 首次更新 2020年08月16日  前言最近负责了一个DNS相关的网络模块开发, 做了一两个星期算是做完了, 总结一下遇到的一些经历, 功能就是实现DNS代理服务, 具体细节下文会说. 本文只设定在UDP下的DNS报文, 因为我发现Mac上的mDNSResponder进程他发的就是UDP的. 不过要记得, DNS报文实际上可以放到TCP上做. DNS">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-08-15T13:58:26.000Z">
+<meta property="article:modified_time" content="2020-08-18T14:57:36.000Z">
+<meta property="article:author" content="Cocos">
+<meta property="article:tag" content="dns">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2020/08/15/2020-08-15-dns-proxy-server/" title="实现DNS代理服务器" itemprop="url">实现DNS代理服务器</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2020-08-15T13:58:26.000Z" itemprop="datePublished"> 发表于 2020-08-15</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE"><span class="toc-number">3.</span> <span class="toc-text">网络协议</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#DNS%E5%8D%8F%E8%AE%AE%E6%8A%A5%E6%96%87%E6%A0%BC%E5%BC%8F"><span class="toc-number">3.1.</span> <span class="toc-text">DNS协议报文格式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E6%9E%90-Question-Answer-Authority-Additional"><span class="toc-number">3.1.1.</span> <span class="toc-text">解析 Question&#x2F;Answer&#x2F;Authority&#x2F;Additional</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%A7%E5%B0%8F%E7%AB%AF%E9%97%AE%E9%A2%98"><span class="toc-number">3.1.2.</span> <span class="toc-text">大小端问题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0DNS%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E7%9A%84%E7%AC%AC%E4%B8%80%E6%AD%A5-%E8%A7%A3%E6%9E%90%E6%95%B0%E6%8D%AE"><span class="toc-number">3.2.</span> <span class="toc-text">实现DNS代理服务的第一步, 解析数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5-%E8%B0%83%E6%95%B4DNS%E6%8A%A5%E6%96%87"><span class="toc-number">3.3.</span> <span class="toc-text">第二步, 调整DNS报文</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5-%E4%BF%AE%E6%94%B9DNS%E6%8A%A5%E6%96%87%E7%9A%84%E7%9B%AE%E6%A0%87%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="toc-number">3.4.</span> <span class="toc-text">第三步, 修改DNS报文的目标服务器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5-%E8%B0%83%E6%95%B4%E5%93%8D%E5%BA%94%E6%8A%A5%E6%96%87%E8%BF%94%E5%9B%9E%E7%BB%99%E8%AF%B7%E6%B1%82%E6%96%B9"><span class="toc-number">3.5.</span> <span class="toc-text">第四步, 调整响应报文返回给请求方</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8E%A8%E8%8D%90%E9%98%85%E8%AF%BB"><span class="toc-number">4.</span> <span class="toc-text">推荐阅读</span></a></li></ol>
+		
+		</div>
+		
+		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
+<li>最后更新 2020年08月15日</li>
+<li>首次更新 2020年08月16日</li>
+</ul>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近负责了一个DNS相关的网络模块开发, 做了一两个星期算是做完了, 总结一下遇到的一些经历, 功能就是实现DNS代理服务, 具体细节下文会说.</p>
+<p>本文只设定在UDP下的DNS报文, 因为我发现Mac上的mDNSResponder进程他发的就是UDP的. 不过要记得, DNS报文实际上可以放到TCP上做.</p>
+<p>DNS协议, 这个应该是大部分APP都会涉及到的协议, 简单点说就是域名到IP地址的解析, 一般会用系统自带的DNS服务解析域名, 也可能会自己定制类似DNS解析的功能, 比如常见的有HTTPDNS, 这个中大型APP都会用到的, 目的就是丰富DNS协议, 自己搭建解析服务器, 请求的时候可以带上一些APP的版本, 地理位置, 网络状态等数据, 然后根据自己公司的服务器配置特点, 返回用户访问延迟最低最合适的IP地址.</p>
+<h1 id="网络协议"><a href="#网络协议" class="headerlink" title="网络协议"></a>网络协议</h1><p>一听到网络协议, 咋一看, 可能感觉很高端, 离自己很远, 其实不然. DNS协议, 就是一个建立在UDP传输层的一套简单的不可靠协议.</p>
+<p>一个DNS报文, 要完成的工作无非就是带上域名, 请求解析服务器, 得到域名的IP地址, 而如果请求丢包, 只需要重新请求即可, 任务基本一次发送, 一个来回就可以完成, 所以DNS协议是比较简单的.</p>
+<p>打开终端输入<code>dig www.google.com</code>, 大概就可以看到下面这样, 这个工具的输出非常简洁.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">; &lt;&lt;&gt;&gt; DiG 9.10.6 &lt;&lt;&gt;&gt; www.google.com</span><br><span class="line">;; global options: +cmd</span><br><span class="line">;; Got answer:</span><br><span class="line">;; -&gt;&gt;HEADER&lt;&lt;- <span class="string">opcode: QUERY, status: NOERROR, id: 4593</span></span><br><span class="line"><span class="string">;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 3</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">;; OPT PSEUDOSECTION:</span></span><br><span class="line"><span class="string">; EDNS: version: 0, flags:; udp: 4096</span></span><br><span class="line"><span class="string">;; QUESTION SECTION:</span></span><br><span class="line"><span class="string">;www.google.com.      IN  A</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">;; ANSWER SECTION:</span></span><br><span class="line"><span class="string">www.google.com.   72  IN  A 64.13.232.149</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">;; AUTHORITY SECTION:</span></span><br><span class="line"><span class="string">google.com.   71471 IN  NS  ns1.google.com.</span></span><br><span class="line"><span class="string">google.com.   71471 IN  NS  ns3.google.com.</span></span><br><span class="line"><span class="string">google.com.   71471 IN  NS  ns4.google.com.</span></span><br><span class="line"><span class="string">google.com.   71471 IN  NS  ns2.google.com.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">;; ADDITIONAL SECTION:</span></span><br><span class="line"><span class="string">ns1.google.com.   272938  IN  A 216.239.32.10</span></span><br><span class="line"><span class="string">ns4.google.com.   267495  IN  A 216.239.38.10</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">;; Query time: 9 msec</span></span><br><span class="line"><span class="string">;; SERVER: 10.10.1.130#53(10.10.1.130)</span></span><br><span class="line"><span class="string">;; WHEN: Fri Aug 14 11:41:32 CST 2020</span></span><br><span class="line"><span class="string">;; MSG SIZE  rcvd: 163</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="DNS协议报文格式"><a href="#DNS协议报文格式" class="headerlink" title="DNS协议报文格式"></a>DNS协议报文格式</h2><p>所谓的网络协议, 其实就是端对端约定的数据格式, 大家都知道格式, 才能正确传递信息. DNS协议也是这样, 下面贴一下DNS协议报文格式.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">+--+--+--+--+--+--+--+</span><br><span class="line">|      Header        |</span><br><span class="line">+--+--+--+--+--+--+--+</span><br><span class="line">|      Question      |</span><br><span class="line">+--+--+--+--+--+--+--+</span><br><span class="line">|      Answer        |</span><br><span class="line">+--+--+--+--+--+--+--+</span><br><span class="line">|      Authority     |</span><br><span class="line">+--+--+--+--+--+--+--+</span><br><span class="line">|      Additional    |</span><br><span class="line">+--+--+--+--+--+--+--+</span><br></pre></td></tr></table></figure>
+
+<p>上图, 一共分成5个部分, 各个部分详细字节如下: </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Header format</span><br><span class="line"></span><br><span class="line">  0  1  2  3  4  5  6  7  0  1  2  3  4  5  6  7</span><br><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">|                      ID                       |</span><br><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">|QR|  opcode   |AA|TC|RD|RA|   Z    |   RCODE   |</span><br><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">|                    QDCOUNT                    |</span><br><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">|                    ANCOUNT                    |</span><br><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">|                    NSCOUNT                    |</span><br><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">|                    ARCOUNT                    |</span><br><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br></pre></td></tr></table></figure>
+
+<p>上面是头部, 一共12个字节, 接收DNS报文的时候, 如果一次读取到的数据小于12个字节的话, 说明报文格式错误, <strong>直接丢弃</strong>. </p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">rwBuff := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="number">1024</span>)</span><br><span class="line">n, err := conn.Read(rwBuff)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="comment">// 报错</span></span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> n &lt; <span class="number">12</span> &#123;</span><br><span class="line">    <span class="comment">// 丢弃</span></span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于大于12字节的报文, 根据头部QR这个bit的值, 可以知道当前报文是查询DNS(0, query)还是响应(1, respond), 其他位的含义, 比如opcode等, 有兴趣可以看文末推荐阅读<a target="_blank" rel="noopener" href="https://juejin.im/post/6844903582441963527#heading-3">DNS报文详解</a>.</p>
+<p>从第5个字节开始, 往后8个字节, 分别用作四类Section的计数, 每个Section计数占2个字节, 可以用uint16保存. 这里需要说一下四类Section分别用来做什么.</p>
+<p>QDCOUNT, 表示question section记录数量, 该section存放问题信息, 常见的比如一个域名, 期望解析获取IP地址.</p>
+<p>ANCOUNT, 表示answer section记录数量, 该section存放应答信息, 常见的比如域名对应的IP地址.</p>
+<p>NSCOUNT, 表示authority section记录数量, 该section存放应答信息, 比如权威服务器域名.</p>
+<p>ARCOUNT, 表示additional section记录数量, 该section存放应答信息, 比如权威服务器对应的IP地址.</p>
+<h3 id="解析-Question-Answer-Authority-Additional"><a href="#解析-Question-Answer-Authority-Additional" class="headerlink" title="解析 Question/Answer/Authority/Additional"></a>解析 Question/Answer/Authority/Additional</h3><p>四种section一共只有2种数据格式, 其中question独立一种, 另外3种section格式都是一样.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Question format</span><br><span class="line"></span><br><span class="line">    0  1  2  3  4  5  6  7  0  1  2  3  4  5  6  7</span><br><span class="line">  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">  |                     ...                       |</span><br><span class="line">  |                    QNAME                      |</span><br><span class="line">  |                     ...                       |</span><br><span class="line">  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">  |                    QTYPE(uint16)              |</span><br><span class="line">  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">  |                    QCLASS(uint16)             |</span><br><span class="line">  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>QNAME, 表示域名, 此时QTYPE(uint16, 下文默认2字节的整型, 都是uint16)的值是1, QCLASS通常都是1, 表示Internet, 下文默认QCLASS都是1.</p>
+<p>QNAME的格式有点复杂, 首字节由一个不大于63的数表示长度, 后面接着ascii字符, 接着继续一个不大于63的数, 后面继续表示字符, 直到遇到0结束.</p>
+<p>看一下DNS解析域名时, QNAME的格式</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">域名www.google.com, 在QNAME种是这样存放</span><br><span class="line">3 119 119 119 6 103 111 111 103 108 101 3 99 111 109 0</span><br><span class="line">其中3,6,3分别是计数, 把域名分成3部分</span><br><span class="line">119 119 119</span><br><span class="line">103 111 111 103 108 101</span><br><span class="line">99 111 109</span><br><span class="line">翻译成字符, 在每段的间隔都加一个<span class="string">&quot;.&quot;</span>, 得到的就是 www.google.com</span><br></pre></td></tr></table></figure>
+
+<p>再看IP反响解析成域名时, QNAME的存放格式</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">64.13.232.149 这个反响查询IP地址, 在QNAME中的是这样存放的</span><br><span class="line">2 54 52 2 49 51 3 50 51 50 3 49 52 57 0</span><br><span class="line">其中2,2,3,3这四个分别用来记录长度, 后面加上该段的长度, 所以IP地址一共4段, 分别是</span><br><span class="line">54 52</span><br><span class="line">49 51</span><br><span class="line">50 51 50</span><br><span class="line">49 52 57</span><br><span class="line">这些都是表示ascii码符号, 翻译过来, 每段的间隔都加一个<span class="string">&quot;.&quot;</span>, 得到的就是64.13.232.149</span><br></pre></td></tr></table></figure>
+
+
+
+<p>QNAME还有一种情况, 就是域名存放重复字符时, 会有一个压缩算法, 具体压缩就不深入讨论了.</p>
+<p>解决了QNAME的解析, 剩下的4个字节, 分别是QTYPE和QCLASS, 其中QTYPE表示当前QANNE的类型, A是域名(值1), PTR是反响查询的IP地址(值12), 类型对应的值可以查看这里<a target="_blank" rel="noopener" href="https://github.com/miekg/dns/blob/master/types.go">DNS报文类型值</a>, 这个是golang写的解包库, 后面也会用到, 很齐全. </p>
+<p>Question和下面要说的另外三种section中的<strong>类型</strong>, 大部分是共享的.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">常见的如下:</span><br><span class="line">A类型(值1), 表示IP地址; </span><br><span class="line">NS类型(值2), 表示权威服务器; </span><br><span class="line">CHAME类型(值5), 表示域名的别名;</span><br><span class="line">MX类型(值15), 表示邮件服务器域名;</span><br></pre></td></tr></table></figure>
+
+
+<p>下面再看一下Answer类型</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Answer/Authority/Additional format</span><br><span class="line"></span><br><span class="line">    0  1  2  3  4  5  6  7  0  1  2  3  4  5  6  7</span><br><span class="line">  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">  |                    NAME                       |</span><br><span class="line">  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">  |                    TYPE                       |</span><br><span class="line">  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">  |                    CLASS                      |</span><br><span class="line">  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">  |                    TTL(uint32)                |</span><br><span class="line">  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">  |                    RDLENGTH(uint16)           |</span><br><span class="line">  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">  |                    RDATA                      |</span><br><span class="line">  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br></pre></td></tr></table></figure>
+
+<p>其中NAME和QNAME的格式一样, 解析方法一样.<br>TYPE和CLASS和QTYPE,QCLASS的类型集合基本一致, 类型代表的意义也一样.<br>TTL代表缓存时长.<br>RDLENGTH代表数据部分的长度.<br>RDATA就是数据了. 当TYPE=A, CLASS=IN, 那么RDATA就是4个字节的IP地址.</p>
+<p>其他几种section格式一样, 解析方法一样, 就不多说了.</p>
+<h3 id="大小端问题"><a href="#大小端问题" class="headerlink" title="大小端问题"></a>大小端问题</h3><p>网络数据用的都是大端模式, 所以解析<strong>多字节类型</strong>时, 比如上面的QDCOUNT, 2个字节的数据转换成uint16位时, 需要把字节序转换成本地序</p>
+<p>还是简单复习一下大端模式把, 这块知识我看了无数次都记不住, 最后终于找到一个方法来记它. 所谓的大端模式, 就是把一个类型的低位放到高字节上去. 记住这一点就行, 记多了会乱.</p>
+<p>例如ANCOUNT两个字节的内容为 ancount[0x12, 0x34]; 低字节是12, 高字节是34, 解析的时候, 就得把高字节的数字当作uint16的低位处理, 低字节的数字当作uint16的高位处理;</p>
+<p>所以把2个字节转成uint16类型的代码如下</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">count = ancount[<span class="number">1</span>] + ancount[<span class="number">0</span>] &lt;&lt; <span class="number">8</span></span><br><span class="line"><span class="comment">//binary.BigEndian.Uint16(ancount)</span></span><br></pre></td></tr></table></figure>
+
+<p>其他的比如IP地址4个字节, 如果转成uint32的话, 也是一样的方法</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">addr = ip[<span class="number">3</span>] + ip[<span class="number">2</span>] &lt;&lt; <span class="number">8</span> + ip[<span class="number">1</span>] &lt;&lt; <span class="number">16</span> + ip[<span class="number">0</span>] &lt;&lt; <span class="number">24</span></span><br><span class="line"><span class="comment">//binary.BigEndian.Uint32(ancount)</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="实现DNS代理服务的第一步-解析数据"><a href="#实现DNS代理服务的第一步-解析数据" class="headerlink" title="实现DNS代理服务的第一步, 解析数据"></a>实现DNS代理服务的第一步, 解析数据</h2><p>要代理DNS请求, 第一件要做的事情肯定是解析协议. 这块知道怎么解析就行了, 别手动解析, 每种编程语言都有很多开源库用来解包DNS报文, 这些都是经过测试的, 比较稳定, 肯定比自行解析协议要靠谱. </p>
+<p>这里我用的golang的开源库<a target="_blank" rel="noopener" href="https://github.com/miekg/dns">https://github.com/miekg/dns</a>, 代码挺清晰的, 简单易懂. 里面封装好了监听UPD处理数据的逻辑, 也封装了发起DNS请求的逻辑, 具体可以看文档, 这里我都不需要这些封装, 只需要他的解包和把结构体转成原始报文这两个功能即可.</p>
+<p>简单看一下代码</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">&quot;github.com/miekg/dns&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> lc net.ListenConfig</span><br><span class="line">b := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="number">1024</span>)</span><br><span class="line">conn, err := lc.ListenPacket(context.Background(), <span class="string">&quot;udp&quot;</span>, <span class="string">&quot;:8053&quot;</span>)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">  fmt.Println(err)</span><br><span class="line">  <span class="keyword">return</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">defer</span> conn.Close()</span><br><span class="line">udpConn := conn.(*net.UDPConn)</span><br><span class="line"></span><br><span class="line">n, addr, err := udpConn.ReadFromUDP(b)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">  fmt.Println(err)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> n &lt; <span class="number">12</span> &#123;</span><br><span class="line">  <span class="keyword">return</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">msg := dns.Msg&#123;&#125;</span><br><span class="line">msg.Unpack(b)</span><br></pre></td></tr></table></figure>
+
+<p>这样就可以把dns报文解包后放到dns.Msg这个结构体上了, 非常方便.</p>
+<h2 id="第二步-调整DNS报文"><a href="#第二步-调整DNS报文" class="headerlink" title="第二步, 调整DNS报文"></a>第二步, 调整DNS报文</h2><p>这部分, 主要是根据自己的业务逻辑, 决定是否修改DNS的报文信息, 之后再用修改过的报文重新请求下一级服务器.</p>
+<h2 id="第三步-修改DNS报文的目标服务器"><a href="#第三步-修改DNS报文的目标服务器" class="headerlink" title="第三步, 修改DNS报文的目标服务器"></a>第三步, 修改DNS报文的目标服务器</h2><p>这里DNS报文的目标服务器IP, 其实是在UDP报头四元组上, 这里直接自己定义下一级DNS服务器IP地址, 建立一个socket, 就可以把报文转发出去了.</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> d net.Dialer</span><br><span class="line">d = net.Dialer&#123;Timeout: time.Second * <span class="number">3</span>&#125;</span><br><span class="line">conn2, err := d.Dial(<span class="string">&quot;udp&quot;</span>, <span class="string">&quot;10.10.1.130:53&quot;</span>)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">  fmt.Println(err)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">defer</span> conn2.Close()</span><br><span class="line"></span><br><span class="line">conn2.Write(b)</span><br><span class="line">conn2.Read(b)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 解包得到响应报文</span></span><br><span class="line">msg.Unpack(b)</span><br></pre></td></tr></table></figure>
+
+<p>代码挺简单的, 这样就可以直接把报文转发到另一台服务器了. 然后也可以得到响应的报文并解包. 当然实际开发场景肯定比这个复杂, 不过代理服务器就这个原理. 这里如果DNS报文是加密的解没法这么处理了. 加密的暂时没去搞,就不写了.</p>
+<p>这部分的意义, 其实可以理解为根据用户的一些特征, 选择最合理的解析服务器, 实际有一种服务叫HTTPDNS, 就是为了取代DNS解析服务, 自行择优解析.</p>
+<h2 id="第四步-调整响应报文返回给请求方"><a href="#第四步-调整响应报文返回给请求方" class="headerlink" title="第四步, 调整响应报文返回给请求方"></a>第四步, 调整响应报文返回给请求方</h2><p>最后还得把报文写回给请求方, 写回去之前可以任意修改, 只要符合自己的需求场景就行. </p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 对msg做一些修改, 之后写回给请求方</span></span><br><span class="line"><span class="comment">//<span class="doctag">TODO:</span>  modify msg</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 重新打包成字节数组后, 写回给请求方</span></span><br><span class="line">b, err = msg.Pack()</span><br><span class="line">udpConn.WriteToUDP(b, addr)</span><br></pre></td></tr></table></figure>
+
+<p>不过有一点要注意, 请求报文中的<code>QNAME</code>, 必须和Answer里面的<code>CHAME</code>类型的<code>NAME</code>部分保持一致, 因为这个是声明了域名的别名, DNS响应报文一般都会包含别名的IP记录. 比如<code>www.baidu.com</code>, 解析结果如下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">; &lt;&lt;&gt;&gt; DiG 9.10.6 &lt;&lt;&gt;&gt; www.baidu.com @127.0.0.1 -p 8053 -t A</span><br><span class="line">;; global options: +cmd</span><br><span class="line">;; Got answer:</span><br><span class="line">;; -&gt;&gt;HEADER&lt;&lt;- <span class="string">opcode: QUERY, status: NOERROR, id: 35122</span></span><br><span class="line"><span class="string">;; flags: qr rd ra; QUERY: 1, ANSWER: 3, AUTHORITY: 5, ADDITIONAL: 1</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">;; OPT PSEUDOSECTION:</span></span><br><span class="line"><span class="string">; EDNS: version: 0, flags:; udp: 4096</span></span><br><span class="line"><span class="string">;; QUESTION SECTION:</span></span><br><span class="line"><span class="string">;www.baidu.com.     IN  A</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">;; ANSWER SECTION:</span></span><br><span class="line"><span class="string">www.baidu.com.    1114  IN  CNAME www.a.shifen.com.</span></span><br><span class="line"><span class="string">www.a.shifen.com. 200 IN  A 14.215.177.38</span></span><br><span class="line"><span class="string">www.a.shifen.com. 200 IN  A 14.215.177.39</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">;; AUTHORITY SECTION:</span></span><br><span class="line"><span class="string">a.shifen.com.   502 IN  NS  ns4.a.shifen.com.</span></span><br><span class="line"><span class="string">a.shifen.com.   502 IN  NS  ns3.a.shifen.com.</span></span><br><span class="line"><span class="string">a.shifen.com.   502 IN  NS  ns2.a.shifen.com.</span></span><br><span class="line"><span class="string">a.shifen.com.   502 IN  NS  ns1.a.shifen.com.</span></span><br><span class="line"><span class="string">a.shifen.com.   502 IN  NS  ns5.a.shifen.com.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">;; Query time: 10 msec</span></span><br><span class="line"><span class="string">;; SERVER: 127.0.0.1#8053(127.0.0.1)</span></span><br><span class="line"><span class="string">;; WHEN: Fri Aug 14 17:12:47 CST 2020</span></span><br><span class="line"><span class="string">;; MSG SIZE  rcvd: 359</span></span><br></pre></td></tr></table></figure>
+
+<p>其中<code>ANSWER</code>包含了别名shifen, 还有别名的IP地址.</p>
+<p>我一开始就是因为对报文做了一些调整后, 没有让<code>QNAME</code>和<code>ANSWER</code>的<code>CHAME</code>保持一致, 导致请求方一直无法正确解析数据, 调试了好长时间.</p>
+<h1 id="推荐阅读"><a href="#推荐阅读" class="headerlink" title="推荐阅读"></a>推荐阅读</h1><p><a target="_blank" rel="noopener" href="https://juejin.im/post/6844903582441963527#heading-5">DNS报文详解</a><br><a target="_blank" rel="noopener" href="https://github.com/miekg/dns/blob/master/types.go">DNS报文类型值</a><br><a target="_blank" rel="noopener" href="https://github.com/miekg/dns">DNS解包库</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/97821726">大小端</a></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/dns/">dns</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2020/08/15/2020-08-15-dns-proxy-server/" data-title="实现DNS代理服务器 | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2020/09/13/2020-09-13-understanding-rebase-and-bind/" title="深入理解Mach-O文件中的Rebase和Bind">
+  <strong>上一篇：</strong><br/>
+  <span>
+  深入理解Mach-O文件中的Rebase和Bind</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2020/07/22/2020-07-22-understand-x509-certificates/"  title="理解X509标准证书及其使用方法">
+ <strong>下一篇：</strong><br/> 
+ <span>理解X509标准证书及其使用方法
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE"><span class="toc-number">3.</span> <span class="toc-text">网络协议</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#DNS%E5%8D%8F%E8%AE%AE%E6%8A%A5%E6%96%87%E6%A0%BC%E5%BC%8F"><span class="toc-number">3.1.</span> <span class="toc-text">DNS协议报文格式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E6%9E%90-Question-Answer-Authority-Additional"><span class="toc-number">3.1.1.</span> <span class="toc-text">解析 Question&#x2F;Answer&#x2F;Authority&#x2F;Additional</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%A7%E5%B0%8F%E7%AB%AF%E9%97%AE%E9%A2%98"><span class="toc-number">3.1.2.</span> <span class="toc-text">大小端问题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0DNS%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E7%9A%84%E7%AC%AC%E4%B8%80%E6%AD%A5-%E8%A7%A3%E6%9E%90%E6%95%B0%E6%8D%AE"><span class="toc-number">3.2.</span> <span class="toc-text">实现DNS代理服务的第一步, 解析数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5-%E8%B0%83%E6%95%B4DNS%E6%8A%A5%E6%96%87"><span class="toc-number">3.3.</span> <span class="toc-text">第二步, 调整DNS报文</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5-%E4%BF%AE%E6%94%B9DNS%E6%8A%A5%E6%96%87%E7%9A%84%E7%9B%AE%E6%A0%87%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="toc-number">3.4.</span> <span class="toc-text">第三步, 修改DNS报文的目标服务器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5-%E8%B0%83%E6%95%B4%E5%93%8D%E5%BA%94%E6%8A%A5%E6%96%87%E8%BF%94%E5%9B%9E%E7%BB%99%E8%AF%B7%E6%B1%82%E6%96%B9"><span class="toc-number">3.5.</span> <span class="toc-text">第四步, 调整响应报文返回给请求方</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8E%A8%E8%8D%90%E9%98%85%E8%AF%BB"><span class="toc-number">4.</span> <span class="toc-text">推荐阅读</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Greedy-Algorithm/" title="Greedy Algorithm">Greedy Algorithm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2020 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

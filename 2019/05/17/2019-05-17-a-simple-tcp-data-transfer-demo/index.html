@@ -1,0 +1,659 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>TCP数据协议设计和数据传输处理 | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="文档更新说明 最后更新 2019年05月17日 首次更新 2019年05月17日  前言　　最近在复习网络相关知识, 复习到了TCP协议, 所以写了个demo熟悉一下. 为了方便我用了golang实现的, 其实用什么语言都一样, 最重要的是理解核心知识.　　在这个例子中, 我会设计一个简单的tcp数据协议, 然后客户端根据数据协议发送数据, 服务端根据协议接收数据并打印出来, 整个过程我会模拟tc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TCP数据协议设计和数据传输处理">
+<meta property="og:url" content="http://yoursite.com/2019/05/17/2019-05-17-a-simple-tcp-data-transfer-demo/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="文档更新说明 最后更新 2019年05月17日 首次更新 2019年05月17日  前言　　最近在复习网络相关知识, 复习到了TCP协议, 所以写了个demo熟悉一下. 为了方便我用了golang实现的, 其实用什么语言都一样, 最重要的是理解核心知识.　　在这个例子中, 我会设计一个简单的tcp数据协议, 然后客户端根据数据协议发送数据, 服务端根据协议接收数据并打印出来, 整个过程我会模拟tc">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-05-17T08:43:21.000Z">
+<meta property="article:modified_time" content="2019-05-17T09:50:42.000Z">
+<meta property="article:author" content="Cocos">
+<meta property="article:tag" content="tcp">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2019/05/17/2019-05-17-a-simple-tcp-data-transfer-demo/" title="TCP数据协议设计和数据传输处理" itemprop="url">TCP数据协议设计和数据传输处理</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2019-05-17T08:43:21.000Z" itemprop="datePublished"> 发表于 2019-05-17</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%8D%8F%E8%AE%AE"><span class="toc-number">3.</span> <span class="toc-text">数据协议</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E6%95%B0%E6%8D%AE%E5%8D%8F%E8%AE%AE"><span class="toc-number">4.</span> <span class="toc-text">为什么需要数据协议</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%BB%A3%E7%A0%81"><span class="toc-number">5.</span> <span class="toc-text">服务端代码</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BB%A3%E7%A0%81"><span class="toc-number">6.</span> <span class="toc-text">客户端代码</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E7%BB%93%E6%9E%9C%E5%88%86%E6%9E%90"><span class="toc-number">7.</span> <span class="toc-text">执行结果分析</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">8.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
+<li>最后更新 2019年05月17日</li>
+<li>首次更新 2019年05月17日</li>
+</ul>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>　　最近在复习网络相关知识, 复习到了TCP协议, 所以写了个demo熟悉一下. 为了方便我用了golang实现的, 其实用什么语言都一样, 最重要的是理解核心知识.<br>　　在这个例子中, 我会设计一个简单的tcp数据协议, 然后客户端根据数据协议发送数据, 服务端根据协议接收数据并打印出来, 整个过程我会模拟tcp数据流特点, 存在粘包问题, 所以我们服务端接收数据的时候要进行数据完整性判断, 把不完整的数据, 粘包的数据在个地方存起来, 等数据完整了再继续读取.
+　　</p>
+<h1 id="数据协议"><a href="#数据协议" class="headerlink" title="数据协议"></a>数据协议</h1><p>　　我们的数据协议比较简单, 如下:</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"> --------------------</span><br><span class="line">| 头部<span class="number">4</span>字节 | Body内容 |</span><br><span class="line"> --------------------</span><br></pre></td></tr></table></figure>
+
+<p>   上面就是我们的数据协议了, 非常简单, 头部4字节表示body的长度N, 接着后面N个字节就是body的内容.当然我们可以设计复杂一些, 比如头部可以带上版本号啊, 消息类型什么的, 这个我就不弄了.</p>
+<h1 id="为什么需要数据协议"><a href="#为什么需要数据协议" class="headerlink" title="为什么需要数据协议"></a>为什么需要数据协议</h1><p>　　我们知道tcp数据的传输是以流的形式传输, 接收方接收到数据的时候并不一定是完整的, 比如我发送两句话,分别是”今天好热”, 和”啊我喜欢中国”, 这个时候服务端收到的数据可能是”今天好热啊我喜欢”, “中国”, 这样服务端其实很容易产生歧义, 也就是我们平时说的粘包问题, 因此我们需要一个数据协议, 来让通讯双方都能理解数据的含义.<br>　　比如上面的话我们设计成”[4]今天好热”, “[6]啊我喜欢中国”. 前面部分的数字表示这句话的长度, 后面就是这句话的内容. 这样尽管我们收到数据”[4]今天好热[6]啊我喜欢, “中国”, 都能清楚知道”今天好热”是一句话, 后面”啊我爱中国”是另一句话了.
+　　 </p>
+<h1 id="服务端代码"><a href="#服务端代码" class="headerlink" title="服务端代码"></a>服务端代码</h1><p>　　下面是我们的代码, 我在这里简单解释一下:<br>　　因为我们在本地传输数据少量数据, 所以比较难模拟粘包问题, 因此我们每次都从缓冲区取8个字节数据出来, 就假设是tcp数据传输的时候每次就传这么多吧, 因为8个字节很可能取到的不是一条完整的额消息, 可能是1.5条消息, 所以我们需要按照上面的数据协议对流进行处理, 并且把不够一条消息的部分数据存回我们定义的缓存数组里, 等到数据接收完毕之后再解析使用.</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;encoding/binary&quot;</span></span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;net&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">process</span><span class="params">(conn net.Conn)</span></span> &#123;</span><br><span class="line">	<span class="keyword">defer</span> conn.Close()</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 我们规定的消息投长度, 根据这个长度指定的字节数, 一次性读取我们的字节</span></span><br><span class="line">	msgHeadLen := <span class="number">4</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 已经接收的还未处理的数据总长度, 含头部部分+body部分</span></span><br><span class="line">	totalCount := <span class="number">0</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 最大容量, 表示我们接收到的数据可以存放的地方大小</span></span><br><span class="line">	maxBuf := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="number">1024</span>)</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 表示buffer放入了多少内容, 即内容偏移</span></span><br><span class="line">	bufOffset := <span class="number">0</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="comment">// 假设tcp每次传输到的数据只有8个字节, 因此我们每次最大只读取8个字节, 来模拟粘包问题</span></span><br><span class="line">		buf := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="number">8</span>)</span><br><span class="line">		n, err := conn.Read(buf)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			fmt.Println(<span class="string">&quot;read err:&quot;</span>, err)</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		fmt.Printf(<span class="string">&quot;Read %d bit\n&quot;</span>, n)</span><br><span class="line"></span><br><span class="line">		totalCount += n</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 先将数据放入大容量buffer里</span></span><br><span class="line">		<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; n; i++ &#123;</span><br><span class="line">			maxBuf[bufOffset+i] = buf[i]</span><br><span class="line">			fmt.Printf(<span class="string">&quot;byte:%v add into maxBuf[%d]\n&quot;</span>, buf[i], bufOffset+i)</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">// 数据已经存放起来了, 所以这块buf内容可以释放了</span></span><br><span class="line">		buf = <span class="literal">nil</span></span><br><span class="line">		bufOffset += n</span><br><span class="line">		</span><br><span class="line">		<span class="comment">// 当我们接受到的内容长度还不够头部长度那么长时, 说明数据不完整, 继续循环等待接下来的tcp数据流</span></span><br><span class="line">		<span class="keyword">if</span> totalCount &lt; msgHeadLen &#123;</span><br><span class="line">			fmt.Println(<span class="string">&quot;totalCount &lt; msgHeadLen&quot;</span>)</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 读取数据头部, 确认body部分长度</span></span><br><span class="line">		<span class="comment">// 注意这里我们用大端读取, 因为网络传输的数据我们规定使用大端传输.</span></span><br><span class="line">		bodyLen := binary.BigEndian.Uint32(maxBuf[<span class="number">0</span>:msgHeadLen])</span><br><span class="line">		fmt.Printf(<span class="string">&quot;msg body len is:%v\n&quot;</span>, bodyLen)</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 确定body是否已经足够长了, 如果不够则继续循环等待读取接下来的数据.</span></span><br><span class="line">		<span class="keyword">if</span> bufOffset &lt; msgHeadLen+<span class="keyword">int</span>(bodyLen) &#123;</span><br><span class="line">			fmt.Println(<span class="string">&quot;bufOffset &lt; msgHeadLen+int(bodyLen)&quot;</span>)</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 开始处理数据</span></span><br><span class="line">		<span class="comment">// 这里只是简单把数据部分一个一个字节打印出来</span></span><br><span class="line">		fmt.Printf(<span class="string">&quot;msg head = %x. body = %x\n&quot;</span>, maxBuf[<span class="number">0</span>:msgHeadLen], maxBuf[msgHeadLen:msgHeadLen+<span class="keyword">int</span>(bodyLen)])</span><br><span class="line">		<span class="keyword">for</span> i := msgHeadLen; i &lt; msgHeadLen+<span class="keyword">int</span>(bodyLen); i++ &#123;</span><br><span class="line">			fmt.Printf(<span class="string">&quot;%v &quot;</span>, maxBuf[i])</span><br><span class="line">		&#125;</span><br><span class="line">		fmt.Println(<span class="string">&quot;\nprint content done&quot;</span>)</span><br><span class="line">		</span><br><span class="line">		<span class="comment">// 因为我们可能读取到1.5条数据, 所以剩下的不完整数据, 需要返回缓冲数组, 等下一个循环读取到数据, 再拼一起构成新的完整数据</span></span><br><span class="line">		newOffset := <span class="number">0</span></span><br><span class="line">		<span class="keyword">for</span> i := msgHeadLen + <span class="keyword">int</span>(bodyLen); i &lt; totalCount; i++ &#123;</span><br><span class="line">			maxBuf[newOffset] = maxBuf[i]</span><br><span class="line">			fmt.Printf(<span class="string">&quot;byte:%v add into maxBuf[%d]\n&quot;</span>, maxBuf[i], newOffset)</span><br><span class="line">			newOffset++</span><br><span class="line">		&#125;</span><br><span class="line">		bufOffset = newOffset</span><br><span class="line">		totalCount = newOffset</span><br><span class="line">		fmt.Println(<span class="string">&quot;newOffser = &quot;</span>, bufOffset)</span><br><span class="line">		fmt.Println()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	fmt.Println(<span class="string">&quot;server start...&quot;</span>)</span><br><span class="line">	listen, err := net.Listen(<span class="string">&quot;tcp&quot;</span>, <span class="string">&quot;127.0.0.1:8081&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">&quot;listen failed, err:&quot;</span>, err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		conn, err := listen.Accept()</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			fmt.Println(<span class="string">&quot;accept failed, err:&quot;</span>, err)</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">go</span> process(conn)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h1 id="客户端代码"><a href="#客户端代码" class="headerlink" title="客户端代码"></a>客户端代码</h1><p>　　下面是我们的客户端代码, 为了模拟真实的数据传输, 我们将数据按照定义好的数据协议格式发送出去, 而且故意把数据分成多段, 一段一段发出, 看看服务端是如何处理的</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;net&quot;</span></span><br><span class="line">	<span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	fmt.Printf(<span class="string">&quot;Dial...\n&quot;</span>)</span><br><span class="line">	conn, err := net.Dial(<span class="string">&quot;tcp&quot;</span>, <span class="string">&quot;127.0.0.1:8081&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">&quot;err dialing:&quot;</span>, err.Error())</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Printf(<span class="string">&quot;Dial Success...\n&quot;</span>)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">defer</span> conn.Close()</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 下面就是我们的数据, 分成好几段发出吗, 完整的数据是这样</span></span><br><span class="line">	<span class="comment">// 头部:0, 0, 0, 2  内容:1, 2</span></span><br><span class="line">	<span class="comment">// 头部:0, 0, 0, 5  内容:101, 102, 103, 104, 105</span></span><br><span class="line">	<span class="comment">// 头部:0, 0, 0, 1  内容:108</span></span><br><span class="line"></span><br><span class="line">	_, err = conn.Write([]<span class="keyword">byte</span>&#123;<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">5</span>, <span class="number">101</span>&#125;)</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		time.Sleep(<span class="number">3</span> * time.Second)</span><br><span class="line">		conn.Write([]<span class="keyword">byte</span>&#123;<span class="number">102</span>, <span class="number">103</span>, <span class="number">104</span>, <span class="number">105</span>, <span class="number">0</span>, <span class="number">0</span>&#125;)</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		time.Sleep(<span class="number">6</span> * time.Second)</span><br><span class="line">		conn.Write([]<span class="keyword">byte</span>&#123;<span class="number">0</span>&#125;)</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		time.Sleep(<span class="number">9</span> * time.Second)</span><br><span class="line">		conn.Write([]<span class="keyword">byte</span>&#123;<span class="number">1</span>, <span class="number">108</span>&#125;)</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">&quot;err conn.write:&quot;</span>, err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	time.Sleep(<span class="number">1000</span> * time.Second)</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h1 id="执行结果分析"><a href="#执行结果分析" class="headerlink" title="执行结果分析"></a>执行结果分析</h1><p>　　下面看一下服务端是否能把数据解析出来</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">server start...</span><br><span class="line">Read <span class="number">8</span> bit <span class="comment">// 第一次读取到8个字节</span></span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">0</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">1</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">2</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">2</span> add into maxBuf[<span class="number">3</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">1</span> add into maxBuf[<span class="number">4</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">2</span> add into maxBuf[<span class="number">5</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">6</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">7</span>]</span><br><span class="line">msg body <span class="built_in">len</span> is:<span class="number">2</span></span><br><span class="line">msg head = <span class="number">00000002.</span> body = <span class="number">0102</span></span><br><span class="line"><span class="number">1</span> <span class="number">2</span>  <span class="comment">//这里读取到第一条消息, 内容是1,2, 正确</span></span><br><span class="line"><span class="built_in">print</span> content done</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">0</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">1</span>]</span><br><span class="line">newOffser =  <span class="number">2</span> <span class="comment">// 读取了8个字节解析了第一条消息, 一共用去了6个字节, 剩下2个字节放回缓冲数组</span></span><br><span class="line"></span><br><span class="line">Read <span class="number">3</span> bit <span class="comment">// 第二次读取到3个字节, 加上上面剩余的2个一共就有5个字节</span></span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">2</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">5</span> add into maxBuf[<span class="number">3</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">101</span> add into maxBuf[<span class="number">4</span>]</span><br><span class="line">msg body <span class="built_in">len</span> is:<span class="number">5</span></span><br><span class="line">bufOffset &lt; msgHeadLen+<span class="keyword">int</span>(bodyLen) <span class="comment">// 程序解析得到第二条消息的body长度是5, 完整的数据就是4+5=9个字节, 而我们才5个字节明显不够, 继续等待新数据的到来</span></span><br><span class="line"></span><br><span class="line">Read <span class="number">6</span> bit <span class="comment">// 第三次读取, 读取到6个字节</span></span><br><span class="line"><span class="keyword">byte</span>:<span class="number">102</span> add into maxBuf[<span class="number">5</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">103</span> add into maxBuf[<span class="number">6</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">104</span> add into maxBuf[<span class="number">7</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">105</span> add into maxBuf[<span class="number">8</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">9</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">10</span>]</span><br><span class="line">msg body <span class="built_in">len</span> is:<span class="number">5</span></span><br><span class="line">msg head = <span class="number">00000005.</span> body = <span class="number">6566676869</span></span><br><span class="line"><span class="number">101</span> <span class="number">102</span> <span class="number">103</span> <span class="number">104</span> <span class="number">105</span> <span class="comment">// 解析得到第二条消息的内容101,102,103,104,105, 正确</span></span><br><span class="line"><span class="built_in">print</span> content done</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">0</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">1</span>]</span><br><span class="line">newOffser =  <span class="number">2</span> <span class="comment">//将剩余的2个字节放回缓冲数组</span></span><br><span class="line"></span><br><span class="line">Read <span class="number">1</span> bit <span class="comment">// 第4次读取到1个字节, 加上上面剩余的2个一共3个</span></span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">2</span>]</span><br><span class="line">totalCount &lt; msgHeadLen <span class="comment">// 3个字节很明显不够一条消息的头部长度, 继续等待读取</span></span><br><span class="line"></span><br><span class="line">Read <span class="number">2</span> bit <span class="comment">// 第5次读取到2个字节, 加上上面剩余的3个, 一共5个字节</span></span><br><span class="line"><span class="keyword">byte</span>:<span class="number">1</span> add into maxBuf[<span class="number">3</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">108</span> add into maxBuf[<span class="number">4</span>]</span><br><span class="line">msg body <span class="built_in">len</span> is:<span class="number">1</span></span><br><span class="line">msg head = <span class="number">00000001.</span> body = <span class="number">6</span>c</span><br><span class="line"><span class="number">108</span>  <span class="comment">// 解析得到第三条消息内容是108, 正确</span></span><br><span class="line"><span class="built_in">print</span> content done</span><br><span class="line">newOffser =  <span class="number">0</span> <span class="comment">// 刚好5个字节都用完了, 剩余0个字节.</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>　　上面服务端已经正确处理了客户端发送的3条消息了, 只不过我们可以看出, 服务端实际上一共读取了5次数据, 而客户端是分4次发出的.<br>　　我们模拟出了出现粘包的情况, 也就是接收到超过一条消息的长度, 我们的处理方法是读取第一条, 剩余的放回缓冲数组继续等待新数据的到来. 还有接收到的数据还不够数据部那么长时的处理方法, 我们的处理方法是继续等待新数据的到来.</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Golang/">Golang</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/tcp/">tcp</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2019/05/17/2019-05-17-a-simple-tcp-data-transfer-demo/" data-title="TCP数据协议设计和数据传输处理 | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2019/06/19/2019-06-19-NSString-in-OC-and-String-in-Swift-2/" title="认真理解OC和Swift中的字符串">
+  <strong>上一篇：</strong><br/>
+  <span>
+  认真理解OC和Swift中的字符串</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2019/04/01/2019-04-01-understanding-of-delegate-extensions-in-reactive-flatcocoa/"  title="深入理解RxSwift中的代理扩展原理--FlatCocoa">
+ <strong>下一篇：</strong><br/> 
+ <span>深入理解RxSwift中的代理扩展原理--FlatCocoa
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%8D%8F%E8%AE%AE"><span class="toc-number">3.</span> <span class="toc-text">数据协议</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E6%95%B0%E6%8D%AE%E5%8D%8F%E8%AE%AE"><span class="toc-number">4.</span> <span class="toc-text">为什么需要数据协议</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%BB%A3%E7%A0%81"><span class="toc-number">5.</span> <span class="toc-text">服务端代码</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BB%A3%E7%A0%81"><span class="toc-number">6.</span> <span class="toc-text">客户端代码</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E7%BB%93%E6%9E%9C%E5%88%86%E6%9E%90"><span class="toc-number">7.</span> <span class="toc-text">执行结果分析</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">8.</span> <span class="toc-text">总结</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Greedy-Algorithm/" title="Greedy Algorithm">Greedy Algorithm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2020 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

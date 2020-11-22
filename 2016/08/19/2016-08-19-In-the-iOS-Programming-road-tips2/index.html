@@ -1,0 +1,774 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>在iOS编程路上走过的坑 - Tips2 | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="文档更新说明 第五次更新 2017年4月11日 第四次更新 2016年12月22日 第三次更新 2016年10月23日 第二次更新 2016年09月05日 首次更新 2016年08月19日  背景 　　本文为”记录我在iOS开发路上遇到的坑”系列第二篇文章,主要用来记录我在iOS编程的第二个阶段所遇到的问题.  UI相关CAGradientLayer如何实现径向渐变? 　　这个标题纯属吸引搜索的.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在iOS编程路上走过的坑 - Tips2">
+<meta property="og:url" content="http://yoursite.com/2016/08/19/2016-08-19-In-the-iOS-Programming-road-tips2/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="文档更新说明 第五次更新 2017年4月11日 第四次更新 2016年12月22日 第三次更新 2016年10月23日 第二次更新 2016年09月05日 首次更新 2016年08月19日  背景 　　本文为”记录我在iOS开发路上遇到的坑”系列第二篇文章,主要用来记录我在iOS编程的第二个阶段所遇到的问题.  UI相关CAGradientLayer如何实现径向渐变? 　　这个标题纯属吸引搜索的.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/images/TableView-in-View.png">
+<meta property="og:image" content="http://yoursite.com/images/ipad-run-in-iphone-model.png">
+<meta property="og:image" content="http://yoursite.com/images/ipad-run-in-iphone-model2.png">
+<meta property="og:image" content="http://yoursite.com/images/UITextFieldCrash-1.png">
+<meta property="og:image" content="http://yoursite.com/images/UITextFieldCrash-2.png">
+<meta property="og:image" content="http://yoursite.com/images/color-setting.png">
+<meta property="og:image" content="http://yoursite.com/images/UIPickerView-indicator.PNG">
+<meta property="og:image" content="http://yoursite.com/images/xcode-copy-json.png">
+<meta property="article:published_time" content="2016-08-19T06:37:58.000Z">
+<meta property="article:modified_time" content="2017-05-11T09:33:02.000Z">
+<meta property="article:author" content="Cocos">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/images/TableView-in-View.png">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/08/19/2016-08-19-In-the-iOS-Programming-road-tips2/" title="在iOS编程路上走过的坑 - Tips2" itemprop="url">在iOS编程路上走过的坑 - Tips2</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2016-08-19T06:37:58.000Z" itemprop="datePublished"> 发表于 2016-08-19</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">2.</span> <span class="toc-text">背景</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#UI%E7%9B%B8%E5%85%B3"><span class="toc-number">2.1.</span> <span class="toc-text">UI相关</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#CAGradientLayer%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E5%BE%84%E5%90%91%E6%B8%90%E5%8F%98"><span class="toc-number">2.1.1.</span> <span class="toc-text">CAGradientLayer如何实现径向渐变?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E4%BB%A3%E7%A0%81%E5%88%9B%E5%BB%BAUIButton%E5%AF%B9%E8%B1%A1%E9%9C%80%E8%A6%81%E6%B3%A8%E6%84%8F%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">2.1.2.</span> <span class="toc-text">用代码创建UIButton对象需要注意的问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#UIImageView%E4%B8%8D%E6%8E%A5%E5%8F%97%E7%82%B9%E5%87%BB%E4%BA%8B%E4%BB%B6"><span class="toc-number">2.1.3.</span> <span class="toc-text">UIImageView不接受点击事件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%8A%A0%E8%BD%BD%E5%85%B6%E4%BB%96Boundle%E4%B8%AD%E7%9A%84%E5%9B%BE%E7%89%87%E8%B5%84%E6%BA%90"><span class="toc-number">2.1.4.</span> <span class="toc-text">如何加载其他Boundle中的图片资源</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AE%E6%8C%89%E9%92%AE%E4%B8%8D%E5%90%8C%E7%8A%B6%E6%80%81%E7%9A%84%E9%A2%9C%E8%89%B2"><span class="toc-number">2.1.5.</span> <span class="toc-text">设置按钮不同状态的颜色</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TableView%E7%9A%84didSelectRowAtIndexPath%E6%96%B9%E6%B3%95%E4%B8%8D%E8%A2%AB%E8%A7%A6%E5%8F%91%E7%9A%84%E5%8F%AF%E8%83%BD%E5%8E%9F%E5%9B%A0"><span class="toc-number">2.1.6.</span> <span class="toc-text">TableView的didSelectRowAtIndexPath方法不被触发的可能原因</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A7%BB%E5%8A%A8TableViewCell%E7%9A%84%E5%88%86%E5%89%B2%E7%BA%BF%E8%87%B3%E5%B1%8F%E5%B9%95%E5%A4%96"><span class="toc-number">2.1.7.</span> <span class="toc-text">移动TableViewCell的分割线至屏幕外</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A4%E6%96%ADWKWebView%E6%98%AF%E5%90%A6%E5%8A%A0%E8%BD%BD%E5%AE%8C%E6%88%90"><span class="toc-number">2.1.8.</span> <span class="toc-text">判断WKWebView是否加载完成</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Ipad%E8%BF%90%E8%A1%8CIphone%E6%A8%A1%E5%BC%8F%E7%9A%84APP-%E5%AF%BC%E8%88%AA%E6%A0%8F%E8%BF%87%E5%8E%9A%E9%97%AE%E9%A2%98"><span class="toc-number">2.1.9.</span> <span class="toc-text">Ipad运行Iphone模式的APP,导航栏过厚问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#shouldChangeTextInRange%E6%96%B9%E6%B3%95%E4%B8%8D%E8%A2%AB%E8%B0%83%E7%94%A8%E7%9A%84%E6%83%85%E5%86%B5"><span class="toc-number">2.1.10.</span> <span class="toc-text">shouldChangeTextInRange方法不被调用的情况</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#UITextField%E8%BE%93%E5%85%A5%E6%95%B0%E5%AD%97%E5%AD%97%E7%AC%A6%E9%97%AA%E9%80%80"><span class="toc-number">2.1.11.</span> <span class="toc-text">UITextField输入数字字符闪退</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A7%E5%88%B6TableView%E7%9A%84HeaderView%E6%82%AC%E6%B5%AE%E6%83%85%E5%86%B5"><span class="toc-number">2.1.12.</span> <span class="toc-text">控制TableView的HeaderView悬浮情况</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%87%E7%BA%A7Xcode8%E4%B9%8B%E5%90%8E%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AE%BE%E7%BD%AE%E7%9A%84%E9%A2%9C%E8%89%B2%E4%B8%8E%E5%AE%9E%E9%99%85%E8%BF%90%E8%A1%8C%E6%95%88%E6%9E%9C%E4%B8%8D%E7%AC%A6%E5%90%88"><span class="toc-number">2.1.13.</span> <span class="toc-text">升级Xcode8之后可视化设置的颜色与实际运行效果不符合.</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96StoryBoard%E4%B8%AD%E7%9A%84%E6%8E%A7%E5%88%B6%E5%99%A8"><span class="toc-number">2.1.14.</span> <span class="toc-text">获取StoryBoard中的控制器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A9TableView%E4%BB%8E%E5%B1%8F%E5%B9%95%E7%9A%84%E9%A1%B6%E9%83%A8%E5%BC%80%E5%A7%8B%E6%98%BE%E7%A4%BA-%E5%9C%A8%E7%8A%B6%E6%80%81%E6%A0%8F%E4%B8%8B%E9%9D%A2%E5%BC%80%E5%A7%8B%E6%98%BE%E7%A4%BA"><span class="toc-number">2.1.15.</span> <span class="toc-text">让TableView从屏幕的顶部开始显示(在状态栏下面开始显示)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A9%E4%B8%80%E4%B8%AA%E5%B0%8F%E5%9B%BE%E7%89%87%E5%A1%AB%E5%85%85%E6%95%B4%E4%B8%AA%E6%8C%89%E9%92%AE%E7%9A%84%E6%96%B9%E6%B3%95"><span class="toc-number">2.1.16.</span> <span class="toc-text">让一个小图片填充整个按钮的方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96%E5%B8%A6%E6%9C%89%E7%BA%A6%E6%9D%9F%E7%9A%84%E8%A7%86%E5%9B%BE%E7%9C%9F%E6%98%AF%E7%9A%84Frame"><span class="toc-number">2.1.17.</span> <span class="toc-text">获取带有约束的视图真是的Frame</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#UITextField%E6%96%87%E5%AD%97%E4%BF%AE%E6%94%B9%E4%BA%86%E4%BD%86%E6%98%AF%E4%B8%8D%E8%A7%A6%E5%8F%91%E7%9B%91%E5%90%AC%E4%BA%8B%E4%BB%B6"><span class="toc-number">2.1.18.</span> <span class="toc-text">UITextField文字修改了但是不触发监听事件.</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#UITableView%E7%9A%84reloadData%E6%93%8D%E4%BD%9C%E4%BC%9A%E5%BC%95%E8%B5%B7%E9%94%AE%E7%9B%98%E6%B6%88%E5%A4%B1"><span class="toc-number">2.1.19.</span> <span class="toc-text">UITableView的reloadData操作会引起键盘消失.</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#becomeFirstResponder%E5%A4%B1%E6%95%88"><span class="toc-number">2.1.20.</span> <span class="toc-text">becomeFirstResponder失效</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AEUITableViewHeaderFooterView%E8%83%8C%E6%99%AF%E9%A2%9C%E8%89%B2%E6%97%A0%E6%95%88"><span class="toc-number">2.1.21.</span> <span class="toc-text">设置UITableViewHeaderFooterView背景颜色无效</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#UIPickerView%E6%97%A0%E6%B3%95%E6%98%BE%E7%A4%BA%E9%80%89%E4%B8%AD%E8%A1%8C%E6%8C%87%E7%A4%BA%E8%A7%86%E5%9B%BE"><span class="toc-number">2.1.22.</span> <span class="toc-text">UIPickerView无法显示选中行指示视图</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%9B%B8%E5%85%B3"><span class="toc-number">2.2.</span> <span class="toc-text">数据相关</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%A0%E6%B3%95%E8%AF%BB%E5%8F%96mainBoundle%E4%B8%AD%E7%9A%84-json%E6%96%87%E4%BB%B6"><span class="toc-number">2.2.1.</span> <span class="toc-text">无法读取mainBoundle中的.json文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A8%E9%80%81%E8%AF%81%E4%B9%A6p12%E8%BD%ACpem%E5%85%8D%E5%AF%86%E7%A0%81%E8%AE%BE%E7%BD%AE%E6%96%B9%E6%B3%95"><span class="toc-number">2.2.2.</span> <span class="toc-text">推送证书p12转pem免密码设置方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%82%B9%E5%87%BB%E6%8E%A8%E9%80%81%E8%BF%9B%E5%85%A5APP%E7%9A%84%E7%9B%B8%E5%85%B3%E5%A4%84%E7%90%86%E6%96%B9%E6%A1%88"><span class="toc-number">2.2.3.</span> <span class="toc-text">点击推送进入APP的相关处理方案</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#isEqualToString%E6%96%B9%E6%B3%95%E5%A4%B1%E7%81%B5%E4%BA%86"><span class="toc-number">2.2.4.</span> <span class="toc-text">isEqualToString方法失灵了</span></a></li></ol></li></ol></li></ol>
+		
+		</div>
+		
+		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
+<li>第五次更新 2017年4月11日</li>
+<li>第四次更新 2016年12月22日</li>
+<li>第三次更新 2016年10月23日</li>
+<li>第二次更新 2016年09月05日</li>
+<li>首次更新 2016年08月19日</li>
+</ul>
+<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><blockquote>
+<p>　　本文为”记录我在iOS开发路上遇到的坑”系列第二篇文章,主要用来记录我在iOS编程的第二个阶段所遇到的问题.</p>
+</blockquote>
+<h2 id="UI相关"><a href="#UI相关" class="headerlink" title="UI相关"></a>UI相关</h2><h3 id="CAGradientLayer如何实现径向渐变"><a href="#CAGradientLayer如何实现径向渐变" class="headerlink" title="CAGradientLayer如何实现径向渐变?"></a>CAGradientLayer如何实现径向渐变?</h3><blockquote>
+<p>　　这个标题纯属吸引搜索的.因为CAGradientLayer这个类并不支持径向径向渐变.CAGradientLayer虽然提供一个属性type,只是他就提供一种类型kCAGradientLayerAxial(轴向渐变).所以想要在iOS中实现径向渐变,只能使用更加底层的类CGGradientRef了.<br>　　<strong>解决方案:具体使用代码参考后面给的文章,有详细介绍如何使用CGGradientRef进行径向渐变处理,这里详细介绍一下绘制渐变的方法CGContextDrawRadialGradient的相关参数含义</strong></p>
+</blockquote>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">CGContextDrawRadialGradient</span></span><br><span class="line"></span><br><span class="line">*  context </span><br><span class="line">A Quartz graphics context.</span><br><span class="line"></span><br><span class="line">*  gradient    </span><br><span class="line">A <span class="built_in">CGGradient</span> object.</span><br><span class="line"></span><br><span class="line">*  startCenter </span><br><span class="line">The coordinate that defines the center of the starting circle. 这个就是渐变起点的中心点</span><br><span class="line"></span><br><span class="line">*  startRadius </span><br><span class="line">The radius of the starting circle. (这个就是渐变的中心的圆的半径,通俗点说,如果这个设置<span class="number">10</span>,那么在以渐变起点的中心点为圆心,<span class="number">10</span>为半径的中心圆里都不会出现渐变,也就是说不会被画上内容,在中心圆之外的地方才会开始渐变.)</span><br><span class="line"></span><br><span class="line">*  endCenter   </span><br><span class="line">The coordinate that defines the center of the ending circle.</span><br><span class="line"></span><br><span class="line">*  endRadius   </span><br><span class="line">The radius of the ending circle.</span><br><span class="line"></span><br><span class="line">*  options </span><br><span class="line">Option flags (kCGGradientDrawsBeforeStartLocation or kCGGradientDrawsAfterEndLocation) that control whether the gradient is drawn before the starting circle or after the ending circle.</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><a target="_blank" rel="noopener" href="http://iandrew.space/2015/11/19/shi-yong-quartz-2dshi-xian-jing-xiang-jian-bian/">使用Quartz 2D实现径向渐变</a></p>
+<h3 id="用代码创建UIButton对象需要注意的问题"><a href="#用代码创建UIButton对象需要注意的问题" class="headerlink" title="用代码创建UIButton对象需要注意的问题"></a>用代码创建UIButton对象需要注意的问题</h3><blockquote>
+<p>　　创建UIButton对象时,Apple推荐使用实例方法代替init方法.<br>　　<strong>解决方案:使用实例方法创建按钮.UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem]; 其中buttonWithType:System类型的按钮自带了一些系统效果,如果不需要,可以使用UIButtonTypeCustom,创建自定义按钮.</strong></p>
+</blockquote>
+<h3 id="UIImageView不接受点击事件"><a href="#UIImageView不接受点击事件" class="headerlink" title="UIImageView不接受点击事件"></a>UIImageView不接受点击事件</h3><blockquote>
+<p>　　这个问题应该比较场景,UIImageView默认是不响应用户触摸事件的.<br>　　<strong>解决方案:设置它的userInteractionEnabled为YES即可</strong></p>
+</blockquote>
+<h3 id="如何加载其他Boundle中的图片资源"><a href="#如何加载其他Boundle中的图片资源" class="headerlink" title="如何加载其他Boundle中的图片资源"></a>如何加载其他Boundle中的图片资源</h3><blockquote>
+<p>　　如果是当前APP的Boundle,加载图片非常简单,直接[UIImage imageNamed:@”HomeSelc”]就可以加载到当前Boundle中的对应图片了.加载其他Boundle则不同.<br>　　<strong>解决方案:详细代码如下</strong></p>
+</blockquote>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSBundle</span> *bundle = [<span class="built_in">NSBundle</span> bundleForClass:[SVProgressHUD <span class="keyword">class</span>]];</span><br><span class="line"><span class="built_in">NSURL</span> *url = [bundle URLForResource:<span class="string">@&quot;SVProgressHUD&quot;</span> withExtension:<span class="string">@&quot;bundle&quot;</span>];</span><br><span class="line"><span class="built_in">NSBundle</span> *imageBundle = [<span class="built_in">NSBundle</span> bundleWithURL:url];</span><br><span class="line"><span class="built_in">UIImage</span>* infoImage = [<span class="built_in">UIImage</span> imageWithContentsOfFile:[imageBundle pathForResource:<span class="string">@&quot;info&quot;</span> ofType:<span class="string">@&quot;png&quot;</span>]];</span><br></pre></td></tr></table></figure>
+
+<h3 id="设置按钮不同状态的颜色"><a href="#设置按钮不同状态的颜色" class="headerlink" title="设置按钮不同状态的颜色"></a>设置按钮不同状态的颜色</h3><blockquote>
+<p>　　按钮颜色如果要针对不同状态(比如高亮,不可用)等去设置颜色,只能通过设置按钮的背景图去实现.<br>　　<strong>解决方案:下面提供颜色转UIImage的方案,方便设置按钮不同状态的颜色</strong></p>
+</blockquote>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//- setBackgroundImage:forState: 配合下面代码实现</span></span><br><span class="line">+ (<span class="built_in">UIImage</span> *)imageWithColor:(<span class="built_in">UIColor</span> *)color &#123;</span><br><span class="line">    <span class="built_in">CGRect</span> rect = <span class="built_in">CGRectMake</span>(<span class="number">0.0</span>f, <span class="number">0.0</span>f, <span class="number">1.0</span>f, <span class="number">1.0</span>f);</span><br><span class="line">    <span class="built_in">UIGraphicsBeginImageContext</span>(rect.size);</span><br><span class="line">    <span class="built_in">CGContextRef</span> context = <span class="built_in">UIGraphicsGetCurrentContext</span>();</span><br><span class="line">    <span class="built_in">CGContextSetFillColorWithColor</span>(context, [color <span class="built_in">CGColor</span>]);</span><br><span class="line">    <span class="built_in">CGContextFillRect</span>(context, rect);</span><br><span class="line">    <span class="built_in">UIImage</span> *image = <span class="built_in">UIGraphicsGetImageFromCurrentImageContext</span>();</span><br><span class="line">    <span class="built_in">UIGraphicsEndImageContext</span>();    </span><br><span class="line">    <span class="keyword">return</span> image;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="TableView的didSelectRowAtIndexPath方法不被触发的可能原因"><a href="#TableView的didSelectRowAtIndexPath方法不被触发的可能原因" class="headerlink" title="TableView的didSelectRowAtIndexPath方法不被触发的可能原因"></a>TableView的didSelectRowAtIndexPath方法不被触发的可能原因</h3><blockquote>
+<p>　　TableView的点击事件不会被响应的可能原因非常多,常见的也是比较低级的错误比如没有代理,frame超出的父视图的frame等.<br>这里主要记录一种比较隐蔽的情况.想一下这样一种情况,有一个TableView以一个小于父视图的尺寸被添加到View上,比如这个图片</p>
+</blockquote>
+<img src="/images/TableView-in-View.png" class="" width="150" height="150" title="TableView-in-View">
+<p>图片中的邮箱列表就是一个TableView,加到了控制器的View上.因为这个是登录界面,点击输入框会弹出键盘,所以我在View上加了一个点击手势,点击到View就收起键盘.就是这样一个场景,导致TableView中的didSelectRowAtIndexPath不会被触发.<br>先来分析一下原因,点击事件是从控制器View向子视图传递的,由于View上的手势识别到了事件,所以就拦截不向上传递,所以TableView没法接收到事件.</p>
+<blockquote>
+<p>　　<strong>解决方案1:第一种解决方案是实现UIGestureRecognizerDelegate的代理方法- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch,自己判断是不是要让手势接收事件,代码如下:</strong></p>
+</blockquote>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="built_in">BOOL</span>)gestureRecognizer:(<span class="built_in">UIGestureRecognizer</span> *)gestureRecognizer shouldReceiveTouch:(<span class="built_in">UITouch</span> *)touch&#123;</span><br><span class="line">    <span class="keyword">if</span> ([<span class="built_in">NSStringFromClass</span>([touch.view <span class="keyword">class</span>]) isEqualToString:<span class="string">@&quot;UITableViewCellContentView&quot;</span>]) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span>  <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>　　<strong>解决方案2:第二种解决方案比较直接简单,设置一下UITapGestureRecognizer的cancelsTouchesInView = NO即可.意思是如果这个点击事件被手势识别了,那还要不要取消传递给View(A Boolean value affecting whether touches are delivered to a view when a gesture is recognized.),所以我们成NO,默认是YES也就是取消传递给View.</strong></p>
+</blockquote>
+<h3 id="移动TableViewCell的分割线至屏幕外"><a href="#移动TableViewCell的分割线至屏幕外" class="headerlink" title="移动TableViewCell的分割线至屏幕外"></a>移动TableViewCell的分割线至屏幕外</h3><blockquote>
+<p>　　TabelView可以给Cell加上分割线,默认的分割线距离Cell左边有一定距离,有时候我们希望分割线从Cell的最左边开始,有时候希望某些Cell的分割线不要出现(不出现还可以参考上一篇文章Tips).系统提供一个接口separatorInset用来设置分割线的位置,不过直接使用会发现达不到预期效果.<br>　　<strong>解决方案:正确的做法是使用下的代码进行设置</strong></p>
+</blockquote>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cell.layoutMargins = <span class="built_in">UIEdgeInsetsZero</span>;</span><br><span class="line">cell.preservesSuperviewLayoutMargins = <span class="literal">NO</span>;</span><br><span class="line">cell.separatorInset = <span class="built_in">UIEdgeInsetsMake</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="判断WKWebView是否加载完成"><a href="#判断WKWebView是否加载完成" class="headerlink" title="判断WKWebView是否加载完成"></a>判断WKWebView是否加载完成</h3><blockquote>
+<p>　　WKWebView里面有一个delegate是WKNavigationDelegate,实现了这个代理可以判断链接的加载情况,但是这个代理非常不准确,某些情况可能加载完成了却没有调用Finish方法.(具体情况忘记了,但一定有.)<br>　　<strong>解决方案:使用KVO方法,监听webView的loading属性可以做到准确识别加载情况.</strong></p>
+</blockquote>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="keyword">self</span>.webView addObserver:<span class="keyword">self</span> forKeyPath:<span class="string">@&quot;loading&quot;</span> options:<span class="built_in">NSKeyValueObservingOptionNew</span> context:<span class="literal">NULL</span>];</span><br></pre></td></tr></table></figure>
+
+<h3 id="Ipad运行Iphone模式的APP-导航栏过厚问题"><a href="#Ipad运行Iphone模式的APP-导航栏过厚问题" class="headerlink" title="Ipad运行Iphone模式的APP,导航栏过厚问题"></a>Ipad运行Iphone模式的APP,导航栏过厚问题</h3><blockquote>
+<p>　　这个问题先看下图</p>
+</blockquote>
+<img src="/images/ipad-run-in-iphone-model.png" class="" width="150" height="150" title="ipad-run-in-iphone-model">
+<p>　　图中可以很明显看到由于ipad把状态栏放到顶部了,所以导航栏看起来非常厚.通过下面的解决方案可以让系统将导航栏顶部原本状态栏位置变成黑色.(效果如下图)</p>
+<img src="/images/ipad-run-in-iphone-model2.png" class="" width="150" height="150" title="ipad-run-in-iphone-model2">
+<blockquote>
+<p>　　<strong>解决方案:先在plist中设置状态栏样式由控制器控制(加入并设置View controller-based status bar appearance设置为YES),接下来比较复杂,需要重写所有用到的控制器,再将原来的控制器继承自重写过的控制器,在重写的控制器中加入如下代码:</strong></p>
+</blockquote>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)viewDidLoad &#123;</span><br><span class="line">    [<span class="keyword">super</span> viewDidLoad];</span><br><span class="line">    <span class="comment">// Do any additional setup after loading the view.</span></span><br><span class="line">    </span><br><span class="line">    [<span class="keyword">self</span> setNeedsStatusBarAppearanceUpdate];</span><br><span class="line">&#125;</span><br><span class="line">- (<span class="built_in">UIStatusBarStyle</span>)preferredStatusBarStyle&#123;</span><br><span class="line">    <span class="comment">//下面返回内容自行决定即可</span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">UIStatusBarStyleLightContent</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><em>注意,如果UIViewController控制器被设置为UINavigationController的根控制器,则需要重写UINavigationController,而不是重写UIViewController</em></p>
+<h3 id="shouldChangeTextInRange方法不被调用的情况"><a href="#shouldChangeTextInRange方法不被调用的情况" class="headerlink" title="shouldChangeTextInRange方法不被调用的情况"></a>shouldChangeTextInRange方法不被调用的情况</h3><blockquote>
+<p>　　目前发现一种情况导致UITextViewDelegate代理方法不被调用:如果用户使用输入法的推荐输入时,则该方法不被调用.根据业务需求,例如限制字符等,该方法不被调用则会影响实际功能.<br>　　<strong>解决方案:使用输入法推荐输入时,textViewDidChange:会被调用.所以可以在这个方法中对超出长度限制部分的字符对一个截取操作.比如,[textView.text substringToIndex:300],限制300个字符</strong></p>
+</blockquote>
+<h3 id="UITextField输入数字字符闪退"><a href="#UITextField输入数字字符闪退" class="headerlink" title="UITextField输入数字字符闪退"></a>UITextField输入数字字符闪退</h3><blockquote>
+<p>　　这个BUG比较奇怪,我也不知道是怎么出现了.一开始输入没问题,但是后面就报错了,提示-[NSNull length]: unrecognized selector sent to instance云云.翻阅了Google得到如下解决方案,在这里记录一下,因为这个问题确实值得留意.出现的原因就是我不小心点击了下图这个地方,然后没有填写数据就取消编辑导致的.</p>
+</blockquote>
+<img src="/images/UITextFieldCrash-1.png" class="" width="150" height="150" title="UITextFieldCrash-1"> <img src="/images/UITextFieldCrash-2.png" class="" width="150" height="150" title="UITextFieldCrash-1">
+<blockquote>
+<p>　　<strong>解决方案:解决方案参考这里<a target="_blank" rel="noopener" href="http://stackoverflow.com/questions/26633242/what-is-causing-nsnull-length-unrecognized-selector-keycommand-error/32147542#32147542">What is causing NSNull length unrecognized selector keyCommand error</a> 删除Storyboard源码里面的下面代码,重新运行,输入正常了~😆</strong></p>
+</blockquote>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;keyCommands&gt;</span><br><span class="line">    &lt;keyCommand/&gt;</span><br><span class="line">&lt;/keyCommands&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="控制TableView的HeaderView悬浮情况"><a href="#控制TableView的HeaderView悬浮情况" class="headerlink" title="控制TableView的HeaderView悬浮情况"></a>控制TableView的HeaderView悬浮情况</h3><blockquote>
+<p>　　headerView有一个特性,随着tableView的滚动,在tableView最上方默认总会有一个headerView(当前tableView最顶部显示的Cell所属的Section的headerView)悬浮并且固定在最顶部,这个特性很好,但是有时候需要关闭.<br>　　<strong>解决方案:设置tableView的Style即可控制悬浮情况.Style分别可设置为Plain,与Grouped.Plain也是默认的类型,支持悬浮.Grouped不支持悬浮</strong></p>
+</blockquote>
+<h3 id="升级Xcode8之后可视化设置的颜色与实际运行效果不符合"><a href="#升级Xcode8之后可视化设置的颜色与实际运行效果不符合" class="headerlink" title="升级Xcode8之后可视化设置的颜色与实际运行效果不符合."></a>升级Xcode8之后可视化设置的颜色与实际运行效果不符合.</h3><blockquote>
+<p>　　之前在Xcode7保存的颜色,在Xcode8上使用时,会发现颜色有一些偏差,这可能是因为Xcode采用新的颜色方案所致.<br>　　<strong>解决方案:在Xcode中使用sRGB IEC61966-2.1配置为标准导致的,所以需要对颜色配置进行修改,如下图:</strong></p>
+</blockquote>
+<img src="/images/color-setting.png" class="" width="150" height="150" title="color-setting">
+
+<h3 id="获取StoryBoard中的控制器"><a href="#获取StoryBoard中的控制器" class="headerlink" title="获取StoryBoard中的控制器"></a>获取StoryBoard中的控制器</h3><blockquote>
+<p>　　<strong>解决方案:使用下方代码即可</strong></p>
+</blockquote>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">+ (<span class="keyword">id</span>)loadViewController:(<span class="built_in">NSString</span> *)identifier from:(<span class="built_in">NSString</span> *)storyboardName &#123;</span><br><span class="line">    <span class="built_in">UIStoryboard</span> *sb = [<span class="built_in">UIStoryboard</span> storyboardWithName:storyboardName bundle:<span class="literal">nil</span>];</span><br><span class="line">    <span class="keyword">if</span> (identifier == <span class="literal">nil</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> sb.instantiateInitialViewController;</span><br><span class="line">    &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> [sb instantiateViewControllerWithIdentifier:identifier];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="让TableView从屏幕的顶部开始显示-在状态栏下面开始显示"><a href="#让TableView从屏幕的顶部开始显示-在状态栏下面开始显示" class="headerlink" title="让TableView从屏幕的顶部开始显示(在状态栏下面开始显示)"></a>让TableView从屏幕的顶部开始显示(在状态栏下面开始显示)</h3><blockquote>
+<p>　　<strong>解决方案:设置tableview的automaticallyAdjustsScrollViewInsets = NO,然后约束到顶部就可以了.</strong></p>
+</blockquote>
+<h3 id="让一个小图片填充整个按钮的方法"><a href="#让一个小图片填充整个按钮的方法" class="headerlink" title="让一个小图片填充整个按钮的方法"></a>让一个小图片填充整个按钮的方法</h3><blockquote>
+<p>　　<strong>解决方案:可以使用如下代码实现</strong></p>
+</blockquote>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">weixinBtn.layer.contents = (__bridge <span class="keyword">id</span>)[<span class="built_in">UIImage</span> imageNamed:<span class="string">@&quot;WeiXinIcon&quot;</span>].CGImage;</span><br></pre></td></tr></table></figure>
+
+<h3 id="获取带有约束的视图真是的Frame"><a href="#获取带有约束的视图真是的Frame" class="headerlink" title="获取带有约束的视图真是的Frame"></a>获取带有约束的视图真是的Frame</h3><blockquote>
+<p>　　对于有约束的视图,如果直接在控制器加载完成后获取其Frame,得到的值可能是约束还未生效时值,所以获取到的值很可能是不准确的.<br>　　<strong>解决方案:要准确获取约束视图的Frame,可以先调用view的layoutifneeded,然后就能准确拿到view的Frame了</strong></p>
+</blockquote>
+<h3 id="UITextField文字修改了但是不触发监听事件"><a href="#UITextField文字修改了但是不触发监听事件" class="headerlink" title="UITextField文字修改了但是不触发监听事件."></a>UITextField文字修改了但是不触发监听事件.</h3><blockquote>
+<p>　　对UITextField.text的修改主要有两种方法,通过代码修改和键盘输入修改.使用KVO只能监听到代码修改引起的变化,而使用NSNotificationCenter监听UITextFieldTextDidChangeNotification事件,只只能监听到由键盘引起的输入.<br>　　<strong>解决方案:可以对UITextField同时执行两种监听,才能同时得到满足代码和键盘修改引起的变化通知.</strong></p>
+</blockquote>
+<h3 id="UITableView的reloadData操作会引起键盘消失"><a href="#UITableView的reloadData操作会引起键盘消失" class="headerlink" title="UITableView的reloadData操作会引起键盘消失."></a>UITableView的reloadData操作会引起键盘消失.</h3><blockquote>
+<p>　　<strong>解决方案:某些情况下,不想让键盘消失,可以使用 - reloadRowsAtIndexPaths:withRowAnimation:方法代替,避免重载到正在编辑的视图.</strong></p>
+</blockquote>
+<h3 id="becomeFirstResponder失效"><a href="#becomeFirstResponder失效" class="headerlink" title="becomeFirstResponder失效"></a>becomeFirstResponder失效</h3><blockquote>
+<p>　　becomeFirstResponder失效的可能原因是当前的textview等视图还没加载好导致的.<br>　　<strong>解决方案:可以考虑使用延时代码,延迟执行becomeFirstResponder方法</strong></p>
+</blockquote>
+<h3 id="设置UITableViewHeaderFooterView背景颜色无效"><a href="#设置UITableViewHeaderFooterView背景颜色无效" class="headerlink" title="设置UITableViewHeaderFooterView背景颜色无效"></a>设置UITableViewHeaderFooterView背景颜色无效</h3><blockquote>
+<p>　　自从iOS9之后,设置UITableViewHeaderFooterView的背景只能设置在contentView属性中,一般出现设置无效的可能原因是使用了xib布局视图,然后在视图中设置背景导致的.iOS9中哪怕在UserDefinedRuntimeAttritubes中设置contentView.backgroundColor都不行,这是因为iOS9中Xib的视图最终并不会被放入contentView里(iOS10则无此问题,iOS10系统下Xib里面的视图都会被放入contentView中).<br>　　<strong>解决方案:不使用xib布局,或者在xib里面加一层自己的view覆盖原来的UITableViewHeaderFooterView,然后在自己的view里面设置颜色</strong></p>
+</blockquote>
+<h3 id="UIPickerView无法显示选中行指示视图"><a href="#UIPickerView无法显示选中行指示视图" class="headerlink" title="UIPickerView无法显示选中行指示视图"></a>UIPickerView无法显示选中行指示视图</h3><blockquote>
+<p>　　先看下面图片,图中选中行上下有两条黑边,这个是能正常显示的样子.但是如果创建视图后从未执行过selectRow:inComponent:animated:这个方法,这不会出现黑边(iOS10下,iOS9无此问题)</p>
+</blockquote>
+<img src="/images/UIPickerView-indicator.PNG" class="" width="150" height="300" title="UIPickerView-indicator">
+<blockquote>
+<p>　　<strong>解决方案:创建好UIPickerView之后额外执行一次[pickerView selectRow:2 inComponent:1 animated:NO]即可解决问题</strong></p>
+</blockquote>
+<h2 id="数据相关"><a href="#数据相关" class="headerlink" title="数据相关"></a>数据相关</h2><h3 id="无法读取mainBoundle中的-json文件"><a href="#无法读取mainBoundle中的-json文件" class="headerlink" title="无法读取mainBoundle中的.json文件"></a>无法读取mainBoundle中的.json文件</h3><blockquote>
+<p>　　json后缀的文件比较特殊,第一次加入xcode之后,编译时可能不会被打包到APP中.<br>　　<strong>解决方案:对于.json或其他类似格式的文件,需要自己在Xcode中的Targets-&gt;Build Phases-&gt;Copy Bundle Resources中将.json文件选入.</strong></p>
+</blockquote>
+<img src="/images/xcode-copy-json.png" class="" width="150" height="150" title="xcode-copy-json">
+
+<h3 id="推送证书p12转pem免密码设置方法"><a href="#推送证书p12转pem免密码设置方法" class="headerlink" title="推送证书p12转pem免密码设置方法"></a>推送证书p12转pem免密码设置方法</h3><blockquote>
+<p>　　具体做法参考这篇文章:<a target="_blank" rel="noopener" href="http://www.saitjr.com/ios/ios-export-remote-notification-p12-pem-file.html">导出 p12 或 pem 文件</a>,这里主要说明一下如何在将p12转成pem的时候允许免密码操作(使用推荐的文章里面的指令转换时,key部分无法免密码).<br>　　<strong>解决方案:使用如下指令</strong></p>
+</blockquote>
+<pre><code>openssl pkcs12 -in CertificateName.p12 -out CertificateName.pem -nodes</code></pre>
+<h3 id="点击推送进入APP的相关处理方案"><a href="#点击推送进入APP的相关处理方案" class="headerlink" title="点击推送进入APP的相关处理方案"></a>点击推送进入APP的相关处理方案</h3><blockquote>
+<p>　　点击推送信息进入APP的时候,APP可能有两种状态,一种是已经在后台运行,另一种则是以启动的时候开始运行.所以点击推送信息进入APP要处理的,就必须针对这两种情况做处理.<br>　　<strong>解决方案:当APP已经在后台运行时,点击推送信息进入APP,将会触发AppDelegate中的- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo方法,推送信息附带在userInfo对象里面</strong><br>　　<strong>当APP以启动的方式运行,则不会触发上面的方法,但是推送数据会在- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions 中传入APP,此时可以通过[launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey]方法获取推送数据,为NSDictionary类型.</strong><br>　　<strong>最后需要注意的是,如果APP在前台运行时收到推送信息,didReceiveRemoteNotification方法也会被调用,这个时候根据业务需要,可以通过application.applicationState == UIApplicationStateInactive来区分APP是否在前台运行,进而做不同的业务逻辑.</strong></p>
+</blockquote>
+<h3 id="isEqualToString方法失灵了"><a href="#isEqualToString方法失灵了" class="headerlink" title="isEqualToString方法失灵了"></a>isEqualToString方法失灵了</h3><blockquote>
+<p>　　isEqualToString方法用于判断两个字符串是否相等.但是有时候会出现两个明明相同的字符串,对比起来却不同.这是有原因的,从官方文档中可以得到答案,详情参考<a target="_blank" rel="noopener" href="http://stackoverflow.com/questions/16215439/ios-isequaltostring-not-working">iOS isEqualToString Not Working</a><br>　　<strong>解决方案:使用(NSOrderedSame == [string1 localizedCompare:string2])代替</strong></p>
+</blockquote>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/iOS/">iOS</a>
+</div>
+
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2016/08/19/2016-08-19-In-the-iOS-Programming-road-tips2/" data-title="在iOS编程路上走过的坑 - Tips2 | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/08/24/2016-08-24-touch-event-and-responder-chain/" title="iOS中的触摸事件和响应者链">
+  <strong>上一篇：</strong><br/>
+  <span>
+  iOS中的触摸事件和响应者链</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/07/12/2016-07-12-the-error-about-QQ-SDK-i386/"  title="集成QQ互联SDK或者友盟社会化分享SDK出现Undefined symbols for architecture i386的分析">
+ <strong>下一篇：</strong><br/> 
+ <span>集成QQ互联SDK或者友盟社会化分享SDK出现Undefined symbols for architecture i386的分析
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">2.</span> <span class="toc-text">背景</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#UI%E7%9B%B8%E5%85%B3"><span class="toc-number">2.1.</span> <span class="toc-text">UI相关</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#CAGradientLayer%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E5%BE%84%E5%90%91%E6%B8%90%E5%8F%98"><span class="toc-number">2.1.1.</span> <span class="toc-text">CAGradientLayer如何实现径向渐变?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E4%BB%A3%E7%A0%81%E5%88%9B%E5%BB%BAUIButton%E5%AF%B9%E8%B1%A1%E9%9C%80%E8%A6%81%E6%B3%A8%E6%84%8F%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">2.1.2.</span> <span class="toc-text">用代码创建UIButton对象需要注意的问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#UIImageView%E4%B8%8D%E6%8E%A5%E5%8F%97%E7%82%B9%E5%87%BB%E4%BA%8B%E4%BB%B6"><span class="toc-number">2.1.3.</span> <span class="toc-text">UIImageView不接受点击事件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%8A%A0%E8%BD%BD%E5%85%B6%E4%BB%96Boundle%E4%B8%AD%E7%9A%84%E5%9B%BE%E7%89%87%E8%B5%84%E6%BA%90"><span class="toc-number">2.1.4.</span> <span class="toc-text">如何加载其他Boundle中的图片资源</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AE%E6%8C%89%E9%92%AE%E4%B8%8D%E5%90%8C%E7%8A%B6%E6%80%81%E7%9A%84%E9%A2%9C%E8%89%B2"><span class="toc-number">2.1.5.</span> <span class="toc-text">设置按钮不同状态的颜色</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TableView%E7%9A%84didSelectRowAtIndexPath%E6%96%B9%E6%B3%95%E4%B8%8D%E8%A2%AB%E8%A7%A6%E5%8F%91%E7%9A%84%E5%8F%AF%E8%83%BD%E5%8E%9F%E5%9B%A0"><span class="toc-number">2.1.6.</span> <span class="toc-text">TableView的didSelectRowAtIndexPath方法不被触发的可能原因</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A7%BB%E5%8A%A8TableViewCell%E7%9A%84%E5%88%86%E5%89%B2%E7%BA%BF%E8%87%B3%E5%B1%8F%E5%B9%95%E5%A4%96"><span class="toc-number">2.1.7.</span> <span class="toc-text">移动TableViewCell的分割线至屏幕外</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A4%E6%96%ADWKWebView%E6%98%AF%E5%90%A6%E5%8A%A0%E8%BD%BD%E5%AE%8C%E6%88%90"><span class="toc-number">2.1.8.</span> <span class="toc-text">判断WKWebView是否加载完成</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Ipad%E8%BF%90%E8%A1%8CIphone%E6%A8%A1%E5%BC%8F%E7%9A%84APP-%E5%AF%BC%E8%88%AA%E6%A0%8F%E8%BF%87%E5%8E%9A%E9%97%AE%E9%A2%98"><span class="toc-number">2.1.9.</span> <span class="toc-text">Ipad运行Iphone模式的APP,导航栏过厚问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#shouldChangeTextInRange%E6%96%B9%E6%B3%95%E4%B8%8D%E8%A2%AB%E8%B0%83%E7%94%A8%E7%9A%84%E6%83%85%E5%86%B5"><span class="toc-number">2.1.10.</span> <span class="toc-text">shouldChangeTextInRange方法不被调用的情况</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#UITextField%E8%BE%93%E5%85%A5%E6%95%B0%E5%AD%97%E5%AD%97%E7%AC%A6%E9%97%AA%E9%80%80"><span class="toc-number">2.1.11.</span> <span class="toc-text">UITextField输入数字字符闪退</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A7%E5%88%B6TableView%E7%9A%84HeaderView%E6%82%AC%E6%B5%AE%E6%83%85%E5%86%B5"><span class="toc-number">2.1.12.</span> <span class="toc-text">控制TableView的HeaderView悬浮情况</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%87%E7%BA%A7Xcode8%E4%B9%8B%E5%90%8E%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AE%BE%E7%BD%AE%E7%9A%84%E9%A2%9C%E8%89%B2%E4%B8%8E%E5%AE%9E%E9%99%85%E8%BF%90%E8%A1%8C%E6%95%88%E6%9E%9C%E4%B8%8D%E7%AC%A6%E5%90%88"><span class="toc-number">2.1.13.</span> <span class="toc-text">升级Xcode8之后可视化设置的颜色与实际运行效果不符合.</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96StoryBoard%E4%B8%AD%E7%9A%84%E6%8E%A7%E5%88%B6%E5%99%A8"><span class="toc-number">2.1.14.</span> <span class="toc-text">获取StoryBoard中的控制器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A9TableView%E4%BB%8E%E5%B1%8F%E5%B9%95%E7%9A%84%E9%A1%B6%E9%83%A8%E5%BC%80%E5%A7%8B%E6%98%BE%E7%A4%BA-%E5%9C%A8%E7%8A%B6%E6%80%81%E6%A0%8F%E4%B8%8B%E9%9D%A2%E5%BC%80%E5%A7%8B%E6%98%BE%E7%A4%BA"><span class="toc-number">2.1.15.</span> <span class="toc-text">让TableView从屏幕的顶部开始显示(在状态栏下面开始显示)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A9%E4%B8%80%E4%B8%AA%E5%B0%8F%E5%9B%BE%E7%89%87%E5%A1%AB%E5%85%85%E6%95%B4%E4%B8%AA%E6%8C%89%E9%92%AE%E7%9A%84%E6%96%B9%E6%B3%95"><span class="toc-number">2.1.16.</span> <span class="toc-text">让一个小图片填充整个按钮的方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96%E5%B8%A6%E6%9C%89%E7%BA%A6%E6%9D%9F%E7%9A%84%E8%A7%86%E5%9B%BE%E7%9C%9F%E6%98%AF%E7%9A%84Frame"><span class="toc-number">2.1.17.</span> <span class="toc-text">获取带有约束的视图真是的Frame</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#UITextField%E6%96%87%E5%AD%97%E4%BF%AE%E6%94%B9%E4%BA%86%E4%BD%86%E6%98%AF%E4%B8%8D%E8%A7%A6%E5%8F%91%E7%9B%91%E5%90%AC%E4%BA%8B%E4%BB%B6"><span class="toc-number">2.1.18.</span> <span class="toc-text">UITextField文字修改了但是不触发监听事件.</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#UITableView%E7%9A%84reloadData%E6%93%8D%E4%BD%9C%E4%BC%9A%E5%BC%95%E8%B5%B7%E9%94%AE%E7%9B%98%E6%B6%88%E5%A4%B1"><span class="toc-number">2.1.19.</span> <span class="toc-text">UITableView的reloadData操作会引起键盘消失.</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#becomeFirstResponder%E5%A4%B1%E6%95%88"><span class="toc-number">2.1.20.</span> <span class="toc-text">becomeFirstResponder失效</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AEUITableViewHeaderFooterView%E8%83%8C%E6%99%AF%E9%A2%9C%E8%89%B2%E6%97%A0%E6%95%88"><span class="toc-number">2.1.21.</span> <span class="toc-text">设置UITableViewHeaderFooterView背景颜色无效</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#UIPickerView%E6%97%A0%E6%B3%95%E6%98%BE%E7%A4%BA%E9%80%89%E4%B8%AD%E8%A1%8C%E6%8C%87%E7%A4%BA%E8%A7%86%E5%9B%BE"><span class="toc-number">2.1.22.</span> <span class="toc-text">UIPickerView无法显示选中行指示视图</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%9B%B8%E5%85%B3"><span class="toc-number">2.2.</span> <span class="toc-text">数据相关</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%A0%E6%B3%95%E8%AF%BB%E5%8F%96mainBoundle%E4%B8%AD%E7%9A%84-json%E6%96%87%E4%BB%B6"><span class="toc-number">2.2.1.</span> <span class="toc-text">无法读取mainBoundle中的.json文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A8%E9%80%81%E8%AF%81%E4%B9%A6p12%E8%BD%ACpem%E5%85%8D%E5%AF%86%E7%A0%81%E8%AE%BE%E7%BD%AE%E6%96%B9%E6%B3%95"><span class="toc-number">2.2.2.</span> <span class="toc-text">推送证书p12转pem免密码设置方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%82%B9%E5%87%BB%E6%8E%A8%E9%80%81%E8%BF%9B%E5%85%A5APP%E7%9A%84%E7%9B%B8%E5%85%B3%E5%A4%84%E7%90%86%E6%96%B9%E6%A1%88"><span class="toc-number">2.2.3.</span> <span class="toc-text">点击推送进入APP的相关处理方案</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#isEqualToString%E6%96%B9%E6%B3%95%E5%A4%B1%E7%81%B5%E4%BA%86"><span class="toc-number">2.2.4.</span> <span class="toc-text">isEqualToString方法失灵了</span></a></li></ol></li></ol></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Greedy-Algorithm/" title="Greedy Algorithm">Greedy Algorithm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2020 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

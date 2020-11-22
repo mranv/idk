@@ -1,0 +1,689 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>正确获取OC对象和CF对象的引用计数 | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="文档更新说明 最后更新 2020年04月19日 首次更新 2020年04月19日  前言　　平时的开发里, CoreFoundtion框架虽然说用的不多, 不过还是会经常接触到, 由于CoreFoundtion框架不支持ARC, 涉及到的相关代码都需要手动管理引用计数, 所以还是有必要了解一下CF对象的引用计数和OC对象的引用计数是如何正确获取到的. 　　 OC对象和CF对象的关系苹果实现了一套技">
+<meta property="og:type" content="article">
+<meta property="og:title" content="正确获取OC对象和CF对象的引用计数">
+<meta property="og:url" content="http://yoursite.com/2020/04/19/2020-04-19-correctly-get-the-reference-count-of-oc-object-and-cf-object/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="文档更新说明 最后更新 2020年04月19日 首次更新 2020年04月19日  前言　　平时的开发里, CoreFoundtion框架虽然说用的不多, 不过还是会经常接触到, 由于CoreFoundtion框架不支持ARC, 涉及到的相关代码都需要手动管理引用计数, 所以还是有必要了解一下CF对象的引用计数和OC对象的引用计数是如何正确获取到的. 　　 OC对象和CF对象的关系苹果实现了一套技">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/images/cf_msgSend_RetainCount.png">
+<meta property="og:image" content="http://yoursite.com/images/nsobjc-retaincount.png">
+<meta property="og:image" content="http://yoursite.com/images/objc_rootRetainCount.png">
+<meta property="og:image" content="http://yoursite.com/images/objc_object-rootRetain.png">
+<meta property="og:image" content="http://yoursite.com/images/objc_object-release.png">
+<meta property="article:published_time" content="2020-04-19T09:57:15.000Z">
+<meta property="article:modified_time" content="2020-04-20T13:54:42.000Z">
+<meta property="article:author" content="Cocos">
+<meta property="article:tag" content="runtime">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/images/cf_msgSend_RetainCount.png">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2020/04/19/2020-04-19-correctly-get-the-reference-count-of-oc-object-and-cf-object/" title="正确获取OC对象和CF对象的引用计数" itemprop="url">正确获取OC对象和CF对象的引用计数</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2020-04-19T09:57:15.000Z" itemprop="datePublished"> 发表于 2020-04-19</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#OC%E5%AF%B9%E8%B1%A1%E5%92%8CCF%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-number">3.</span> <span class="toc-text">OC对象和CF对象的关系</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AD%A3%E7%A1%AE%E8%8E%B7%E5%8F%96%E5%BC%95%E7%94%A8%E8%AE%A1%E6%95%B0"><span class="toc-number">4.</span> <span class="toc-text">正确获取引用计数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%BF%9B%E4%B8%80%E6%AD%A5%E7%90%86%E8%A7%A3TFB%E6%8A%80%E6%9C%AF"><span class="toc-number">5.</span> <span class="toc-text">进一步理解TFB技术</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%89%A9%E5%B1%95%E5%88%B0Release-Retain%E6%96%B9%E6%B3%95"><span class="toc-number">6.</span> <span class="toc-text">扩展到Release, Retain方法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Retain%E6%93%8D%E4%BD%9C%E4%B9%9F%E6%98%AF%E7%9B%B8%E5%90%8C%E7%9A%84%E5%8E%9F%E7%90%86"><span class="toc-number">6.1.</span> <span class="toc-text">Retain操作也是相同的原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Release%E6%93%8D%E4%BD%9C%E4%B9%9F%E6%98%AF%E7%9B%B8%E5%90%8C%E7%9A%84%E5%8E%9F%E7%90%86"><span class="toc-number">6.2.</span> <span class="toc-text">Release操作也是相同的原理</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E4%BA%9B%E7%96%91%E6%83%91"><span class="toc-number">7.</span> <span class="toc-text">一些疑惑</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8E%A8%E8%8D%90%E9%98%85%E8%AF%BB"><span class="toc-number">8.</span> <span class="toc-text">推荐阅读</span></a></li></ol>
+		
+		</div>
+		
+		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
+<li>最后更新 2020年04月19日</li>
+<li>首次更新 2020年04月19日</li>
+</ul>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>　　平时的开发里, CoreFoundtion框架虽然说用的不多, 不过还是会经常接触到, 由于CoreFoundtion框架不支持ARC, 涉及到的相关代码都需要手动管理引用计数, 所以还是有必要了解一下CF对象的引用计数和OC对象的引用计数是如何正确获取到的.
+　　</p>
+<h1 id="OC对象和CF对象的关系"><a href="#OC对象和CF对象的关系" class="headerlink" title="OC对象和CF对象的关系"></a>OC对象和CF对象的关系</h1><p>苹果实现了一套技术, Toll-Free Bridging, 允许让部分OC对象和CF对象互相转换, 这部分技术不是本文讨论的重点就不说了. 其中OC对象和CF对象都有各自的引用计数存储方法, 下面写上对应的源码简单了解一下</p>
+<p>OC对象的引用计数存储方式</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> uintptr_t </span><br><span class="line">objc_object::rootRetainCount()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (isTaggedPointer()) <span class="keyword">return</span> (uintptr_t)<span class="keyword">this</span>;</span><br><span class="line"></span><br><span class="line">    sidetable_lock();</span><br><span class="line">    isa_t bits = LoadExclusive(&amp;isa.bits);</span><br><span class="line">    ClearExclusive(&amp;isa.bits);</span><br><span class="line">    <span class="keyword">if</span> (bits.nonpointer) &#123;</span><br><span class="line">        uintptr_t rc = <span class="number">1</span> + bits.extra_rc;</span><br><span class="line">        <span class="keyword">if</span> (bits.has_sidetable_rc) &#123;</span><br><span class="line">            rc += sidetable_getExtraRC_nolock();</span><br><span class="line">        &#125;</span><br><span class="line">        sidetable_unlock();</span><br><span class="line">        <span class="keyword">return</span> rc;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    sidetable_unlock();</span><br><span class="line">    <span class="keyword">return</span> sidetable_retainCount();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>CF对象引用计数存储方法</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">CFIndex <span class="title">CFGetRetainCount</span><span class="params">(CFTypeRef cf)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="literal">NULL</span> == cf) &#123; CRSetCrashLogMessage(<span class="string">&quot;*** CFGetRetainCount() called with NULL ***&quot;</span>); HALT; &#125;</span><br><span class="line">    <span class="keyword">uint32_t</span> cfinfo = *(<span class="keyword">uint32_t</span> *)&amp;(((CFRuntimeBase *)cf)-&gt;_cfinfo);</span><br><span class="line">    <span class="keyword">if</span> (cfinfo &amp; <span class="number">0x800000</span>) &#123; <span class="comment">// custom ref counting for object</span></span><br><span class="line">        CFTypeID typeID = (cfinfo &gt;&gt; <span class="number">8</span>) &amp; <span class="number">0x03FF</span>; <span class="comment">// mask up to 0x0FFF</span></span><br><span class="line">        CFRuntimeClass *cfClass = __CFRuntimeClassTable[typeID];</span><br><span class="line">        <span class="keyword">uint32_t</span> (*refcount)(<span class="keyword">intptr_t</span>, CFTypeRef) = cfClass-&gt;refcount;</span><br><span class="line">        <span class="keyword">if</span> (!refcount || !(cfClass-&gt;version &amp; _kCFRuntimeCustomRefCount) || (((CFRuntimeBase *)cf)-&gt;_cfinfo[CF_RC_BITS] != <span class="number">0xFF</span>)) &#123;</span><br><span class="line">            HALT; <span class="comment">// bogus object</span></span><br><span class="line">        &#125;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> __LP64__</span></span><br><span class="line">        <span class="keyword">if</span> (((CFRuntimeBase *)cf)-&gt;_rc != <span class="number">0xFFFFFFFF</span>U) &#123;</span><br><span class="line">            HALT; <span class="comment">// bogus object</span></span><br><span class="line">        &#125;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">        <span class="keyword">uint32_t</span> rc = refcount(<span class="number">0</span>, cf);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> __LP64__</span></span><br><span class="line">        <span class="keyword">return</span> (CFIndex)rc;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">        <span class="keyword">return</span> (rc &lt; LONG_MAX) ? (CFIndex)rc : (CFIndex)LONG_MAX;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">uint64_t</span> rc = __CFGetFullRetainCount(cf);</span><br><span class="line">    <span class="keyword">return</span> (rc &lt; (<span class="keyword">uint64_t</span>)LONG_MAX) ? (CFIndex)rc : (CFIndex)LONG_MAX;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="正确获取引用计数"><a href="#正确获取引用计数" class="headerlink" title="正确获取引用计数"></a>正确获取引用计数</h1><p>上面两处代码展示了OC对象和CF对象完全不同的引用技术存储方式, 那么如何正确获取两种类型的对象的引用计数呢? </p>
+<p>实际测试可以得到下面的结论</p>
+<p>CF层的对象, 只能通过CFGetRetainCount方法获取正确的引用计数.</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 需要声明方法后才能使用, 毕竟没有引入头文件的</span></span><br><span class="line"><span class="keyword">extern</span> uintptr_t _objc_rootRetainCount(<span class="keyword">id</span> obj);</span><br><span class="line"></span><br><span class="line"><span class="built_in">CFStringRef</span> strs[] = &#123;<span class="built_in">CFSTR</span>(<span class="string">&quot;1&quot;</span>), <span class="built_in">CFSTR</span>(<span class="string">&quot;2&quot;</span>)&#125;;</span><br><span class="line"><span class="built_in">CFArrayRef</span> cfArr = <span class="built_in">CFArrayCreate</span>(kCFAllocatorDefault, (<span class="keyword">void</span> *)strs, <span class="number">2</span>, <span class="literal">NULL</span>);</span><br><span class="line"><span class="built_in">CFRetain</span>(cfArr);</span><br><span class="line"><span class="built_in">CFRetain</span>(cfArr);</span><br><span class="line"><span class="built_in">CFRetain</span>(cfArr);</span><br><span class="line"><span class="built_in">NSArray</span> *arr = (__bridge <span class="built_in">NSArray</span> *)(cfArr);</span><br><span class="line"><span class="built_in">NSArray</span> *arr2 = arr;</span><br><span class="line"></span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;retainCount:%ld&quot;</span>, (<span class="keyword">long</span>)<span class="built_in">CFGetRetainCount</span>(cfArr)); <span class="comment">// retainCount:6</span></span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;retainCount:%lu&quot;</span>, _objc_rootRetainCount(arr)); <span class="comment">//retainCount:1</span></span><br></pre></td></tr></table></figure>
+
+<p>OC层对象, 可以通过_objc_rootRetainCount这个方法得到正确的引用计数, 也可以通过CFGetRetainCount方法.</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSArray</span> *arr = @[@<span class="number">11111</span>];</span><br><span class="line"><span class="built_in">NSArray</span> *arr2 = arr;</span><br><span class="line"><span class="built_in">NSArray</span> *arr3 = arr;</span><br><span class="line"><span class="built_in">CFArrayRef</span> cfArr = (__bridge <span class="built_in">CFTypeRef</span>)(arr);</span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;retainCount:%ld&quot;</span>, (<span class="keyword">long</span>)<span class="built_in">CFGetRetainCount</span>((__bridge <span class="built_in">CFTypeRef</span>)(arr))); <span class="comment">// retainCount:3</span></span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;retainCount:%lu&quot;</span>, _objc_rootRetainCount(arr)); <span class="comment">// retainCount:3</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="进一步理解TFB技术"><a href="#进一步理解TFB技术" class="headerlink" title="进一步理解TFB技术"></a>进一步理解TFB技术</h1><p>上面的结论看起来很神奇, 为什么OC对象能通过CFGetRetainCount方法获取引用计数呢? 原来<code>CFGetRetainCount</code>方法内部会判断当前传入的对象是不是OC对象, 如果是的话会直接调用OC对象的retainCount方法, 最终<code>objc_object::rootRetainCount</code>方法会被调用, 所以就有了上面的结论. </p>
+<p>为了进一步证明这个说法, 我在对应方法上都打了断点, 证明了上面的推测.</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(lldb) breakpoint set --name <span class="built_in">CFGetRetainCount</span></span><br><span class="line">Breakpoint <span class="number">4</span>: where = CoreFoundation`<span class="built_in">CFGetRetainCount</span>, address = <span class="number">0x00007fff35eca184</span></span><br><span class="line">(lldb) breakpoint set --method rootRetainCount</span><br><span class="line">Breakpoint <span class="number">5</span>: where = libobjc.A.dylib`objc_object::rootRetainCount() + <span class="number">20</span> at objc-object.h:<span class="number">713</span>:<span class="number">9</span>, address = <span class="number">0x00000001003921a4</span></span><br></pre></td></tr></table></figure>
+
+<p>调用CFGetRetainCount方法, 内部会判断当前对象的类型是不是真正的CF类型, 如果不是则会调用向对象发送retainCount消息, 走OC运行时那套逻辑</p>
+<p><img src="/images/cf_msgSend_RetainCount.png" alt="retaincount"></p>
+<p>下面是<code>objc_object::rootRetainCount()</code>断点处的调用栈</p>
+<p><img src="/images/nsobjc-retaincount.png" alt="nsobjc-retaincount"></p>
+<p>下面是直接调用全局函数<code>_objc_rootRetainCount</code>的调用栈</p>
+<p><img src="/images/objc_rootRetainCount.png" alt="objc_rootRetainCount"></p>
+<h1 id="扩展到Release-Retain方法"><a href="#扩展到Release-Retain方法" class="headerlink" title="扩展到Release, Retain方法"></a>扩展到Release, Retain方法</h1><h2 id="Retain操作也是相同的原理"><a href="#Retain操作也是相同的原理" class="headerlink" title="Retain操作也是相同的原理"></a>Retain操作也是相同的原理</h2><p>调用CFRetain方法, 传入一个NSArray对象, (提前打好打断点如下)</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(lldb) breakpoint set --method rootRetain</span><br><span class="line">Breakpoint <span class="number">4</span>: <span class="number">7</span> locations.</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/objc_object-rootRetain.png" alt="objc_object-rootRetain"></p>
+<p>可以看到执行CFRetain方法, 会跳到objc_object::rootRetain方法上, 说明CFRetain内部同样是判断了类型, 如果属于OC对象的, 则还是走OC运行时这一套</p>
+<p>如果对象真的是CF类型的话, 则不会跳到objc_object::rootRetain上, 而是走CF自己的一套计数逻辑</p>
+<h2 id="Release操作也是相同的原理"><a href="#Release操作也是相同的原理" class="headerlink" title="Release操作也是相同的原理"></a>Release操作也是相同的原理</h2><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(lldb) breakpoint set --method objc_object::release</span><br><span class="line">Breakpoint <span class="number">4</span>: where = libobjc.A.dylib`objc_object::release() + <span class="number">32</span> at objc-object.h:<span class="number">530</span>:<span class="number">5</span>, address = <span class="number">0x00000001003912f0</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/objc_object-release.png" alt="objc_object-release"></p>
+<p>这里就不多说了, 情况和Retain是一模一样的</p>
+<h1 id="一些疑惑"><a href="#一些疑惑" class="headerlink" title="一些疑惑"></a>一些疑惑</h1><p>上面写出的<code>CFGetRetainCount</code>纯C源码, 其实我看了很久也没看出来他哪里判断了对象类型然后确认是OC对象就调用msgSend函数发送OC消息, 但是实际上运行确实是如此, 包括下文的CFRetain, Release方法都有同样的疑惑. </p>
+<p>也有可能是我拿的CF源码不是目前系统运行的版本, 知道的朋友可以指点一下我.</p>
+<h1 id="推荐阅读"><a href="#推荐阅读" class="headerlink" title="推荐阅读"></a>推荐阅读</h1><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/Hello_Hwc/article/details/80094632">深入理解Toll-Free Bridging</a></p>
+<p><a target="_blank" rel="noopener" href="https://opensource.apple.com/tarballs/CF/">CoreFoundation源码</a></p>
+<p><a target="_blank" rel="noopener" href="https://opensource.apple.com/tarballs/objc4/">OC Runtime源码</a></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/iOS/">iOS</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/runtime/">runtime</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2020/04/19/2020-04-19-correctly-get-the-reference-count-of-oc-object-and-cf-object/" data-title="正确获取OC对象和CF对象的引用计数 | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2020/05/06/2020-05-06-was-laid-off-in-2020/" title="在2020年被裁员了">
+  <strong>上一篇：</strong><br/>
+  <span>
+  在2020年被裁员了</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2020/04/11/2020-04-11-uncommon-syntax-summary-of-objc-runtime/"  title="objc runtime 源码中一些少见的语法汇总">
+ <strong>下一篇：</strong><br/> 
+ <span>objc runtime 源码中一些少见的语法汇总
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#OC%E5%AF%B9%E8%B1%A1%E5%92%8CCF%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-number">3.</span> <span class="toc-text">OC对象和CF对象的关系</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AD%A3%E7%A1%AE%E8%8E%B7%E5%8F%96%E5%BC%95%E7%94%A8%E8%AE%A1%E6%95%B0"><span class="toc-number">4.</span> <span class="toc-text">正确获取引用计数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%BF%9B%E4%B8%80%E6%AD%A5%E7%90%86%E8%A7%A3TFB%E6%8A%80%E6%9C%AF"><span class="toc-number">5.</span> <span class="toc-text">进一步理解TFB技术</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%89%A9%E5%B1%95%E5%88%B0Release-Retain%E6%96%B9%E6%B3%95"><span class="toc-number">6.</span> <span class="toc-text">扩展到Release, Retain方法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Retain%E6%93%8D%E4%BD%9C%E4%B9%9F%E6%98%AF%E7%9B%B8%E5%90%8C%E7%9A%84%E5%8E%9F%E7%90%86"><span class="toc-number">6.1.</span> <span class="toc-text">Retain操作也是相同的原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Release%E6%93%8D%E4%BD%9C%E4%B9%9F%E6%98%AF%E7%9B%B8%E5%90%8C%E7%9A%84%E5%8E%9F%E7%90%86"><span class="toc-number">6.2.</span> <span class="toc-text">Release操作也是相同的原理</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E4%BA%9B%E7%96%91%E6%83%91"><span class="toc-number">7.</span> <span class="toc-text">一些疑惑</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8E%A8%E8%8D%90%E9%98%85%E8%AF%BB"><span class="toc-number">8.</span> <span class="toc-text">推荐阅读</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Greedy-Algorithm/" title="Greedy Algorithm">Greedy Algorithm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2020 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

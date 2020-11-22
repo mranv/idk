@@ -1,0 +1,703 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>理解X509标准证书及其使用方法 | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="文档更新说明 最后更新 2020年07月22日 首次更新 2020年07月22日  前言入职安全公司一个月了, 很忙, 只剩下周日才有空(这句话可以细心品味一下😂), 周日还要去看房, 生活胖若两人. 趁今晚任务开发得差不多了, 抽空写一下博文, 算是对近一个月部分工作内容做个总结吧. 目前我负责MacOS桌面级服务进程的开发, 还有Mac GUI开发, 开发技术栈用的OC, C, 还有Gola">
+<meta property="og:type" content="article">
+<meta property="og:title" content="理解X509标准证书及其使用方法">
+<meta property="og:url" content="http://yoursite.com/2020/07/22/2020-07-22-understand-x509-certificates/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="文档更新说明 最后更新 2020年07月22日 首次更新 2020年07月22日  前言入职安全公司一个月了, 很忙, 只剩下周日才有空(这句话可以细心品味一下😂), 周日还要去看房, 生活胖若两人. 趁今晚任务开发得差不多了, 抽空写一下博文, 算是对近一个月部分工作内容做个总结吧. 目前我负责MacOS桌面级服务进程的开发, 还有Mac GUI开发, 开发技术栈用的OC, C, 还有Gola">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-07-22T15:20:31.000Z">
+<meta property="article:modified_time" content="2020-07-22T15:36:40.000Z">
+<meta property="article:author" content="Cocos">
+<meta property="article:tag" content="安全">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2020/07/22/2020-07-22-understand-x509-certificates/" title="理解X509标准证书及其使用方法" itemprop="url">理解X509标准证书及其使用方法</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2020-07-22T15:20:31.000Z" itemprop="datePublished"> 发表于 2020-07-22</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AD%A3%E6%96%87"><span class="toc-number">3.</span> <span class="toc-text">正文</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#X509%E8%AF%81%E4%B9%A6%E8%AE%A4%E8%AF%81%E9%80%BB%E8%BE%91"><span class="toc-number">3.1.</span> <span class="toc-text">X509证书认证逻辑</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E6%96%87%E4%BB%B6%E6%89%A9%E5%B1%95%E5%90%8D%E7%9A%84%E5%90%AB%E4%B9%89"><span class="toc-number">3.2.</span> <span class="toc-text">相关文件扩展名的含义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%81%E4%B9%A6%E7%9A%84%E5%88%B6%E4%BD%9C"><span class="toc-number">3.3.</span> <span class="toc-text">证书的制作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5-%E7%94%9F%E6%88%90%E7%A7%81%E9%92%A5-%E8%AF%B7%E6%B1%82%E6%96%87%E4%BB%B6"><span class="toc-number">3.3.1.</span> <span class="toc-text">第一步, 生成私钥+请求文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5-%E7%94%9F%E6%88%90CA%E8%AF%81%E4%B9%A6"><span class="toc-number">3.3.2.</span> <span class="toc-text">第二步, 生成CA证书</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5-%E7%AD%BE%E5%8F%91%E4%B8%8B%E7%BA%A7%E8%AF%81%E4%B9%A6"><span class="toc-number">3.3.3.</span> <span class="toc-text">第二步, 签发下级证书</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5-%E5%A6%82%E4%BD%95%E6%A0%A1%E9%AA%8C%E8%AF%81%E4%B9%A6%E7%9A%84%E5%90%88%E6%B3%95%E6%80%A7"><span class="toc-number">3.3.4.</span> <span class="toc-text">第三步, 如何校验证书的合法性</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%80%E5%8F%91%E4%B8%AD%E5%A6%82%E4%BD%95%E5%88%A9%E7%94%A8X509"><span class="toc-number">3.4.</span> <span class="toc-text">开发中如何利用X509</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E5%A4%A7%E6%A6%82%E5%8F%AF%E4%BB%A5%E8%BF%99%E4%B9%88%E5%86%99"><span class="toc-number">3.4.1.</span> <span class="toc-text">代码大概可以这么写</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81%E7%9A%84%E6%80%9D%E8%B7%AF"><span class="toc-number">3.4.2.</span> <span class="toc-text">安全认证的思路</span></a></li></ol></li></ol></li></ol>
+		
+		</div>
+		
+		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
+<li>最后更新 2020年07月22日</li>
+<li>首次更新 2020年07月22日</li>
+</ul>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>入职安全公司一个月了, 很忙, 只剩下周日才有空(这句话可以细心品味一下😂), 周日还要去看房, 生活胖若两人. 趁今晚任务开发得差不多了, 抽空写一下博文, 算是对近一个月部分工作内容做个总结吧.</p>
+<p>目前我负责MacOS桌面级服务进程的开发, 还有Mac GUI开发, 开发技术栈用的OC, C, 还有Golang, 接触的大部分都是之前做iOS没接触过的, 团队人数也挺多的, 基本上是对我以前短板的技能做一个的补充, 补充的技能包括: 参与中大型项目,多人协作,git管理,TCP/UDP通讯,多进程开发等, 对于之前做多了iOS应用层开发的我来说, 还是有很大进步的.</p>
+<p>客户端用Golang? 这个我之前确实没想到, Golang一般是用在服务端的, 但是他在桌面服务进程上也能很好的发挥他的优势, 除了没有操作数据库之外, 其他都和服务端开发类似, 挺不错, 公司很多C++项目都慢慢转撑Golang了, 这算是以前学习Golang误打误撞, 变成今天工作利器了.</p>
+<h1 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h1><p>说了这么多, 开始正文吧, 本文主要是总结一下近期用到的X509标准加密通讯, 这个标准确实是很不错, 很方便多端安全通讯, 实现起来也不复杂.</p>
+<h2 id="X509证书认证逻辑"><a href="#X509证书认证逻辑" class="headerlink" title="X509证书认证逻辑"></a>X509证书认证逻辑</h2><p>可能有些人不知道什么是X509, 那应该知道HTTPS, TLS吧? 这两个协议用的就是X509证书认证原理, 还有平时做iOS开发用的那些证书杀的, 俗称数字签名, 用的都是X509这套东西, 我之前大多数是停留在理论知识的学习, 还有HTTPS这些的使用, 今天就来总结一下证书的生成, 自签名等逻辑, 以及在实际开发中如何发挥X509的威力!</p>
+<h2 id="相关文件扩展名的含义"><a href="#相关文件扩展名的含义" class="headerlink" title="相关文件扩展名的含义"></a>相关文件扩展名的含义</h2><p>先来说清楚X509体系里面一些不同格式的数据到底代表什么. 这部分摘自网络</p>
+<p>我们已经知道有PEM和DER这两种编码格式,但文件扩展名并不一定就叫”PEM”或者”DER”,常见的扩展名除了PEM和DER还有以下这些,它们除了编码格式可能不同之外,内容也有差别,但大多数都能相互转换编码格式.</p>
+<p><strong>CRT</strong> - CRT应该是certificate的三个字母,其实还是证书的意思,常见于*NIX系统,有可能是PEM编码,也有可能是DER编码,大多数应该是PEM编码,相信你已经知道怎么辨别.</p>
+<p><strong>CER</strong> - 还是certificate,还是证书,常见于Windows系统,同样的,可能是PEM编码,也可能是DER编码,大多数应该是DER编码.</p>
+<p><strong>KEY</strong> - 通常用来存放一个公钥或者私钥,并非X.509证书,编码同样的,可能是PEM,也可能是DER.</p>
+<p><strong>JKS</strong> - 即Java Key Storage,这是Java的专利,跟OpenSSL关系不大,利用Java的一个叫”keytool”的工具,可以将PFX转为JKS,当然了,keytool也能直接生成JKS,不过在此就不多表了.</p>
+<p>上面到两种编码格式, PEM是base64格式, DER则是二进制格式, 后续实例中, 我全部用的PEM格式, PEM格式比较方便在多端传输.</p>
+<h2 id="证书的制作"><a href="#证书的制作" class="headerlink" title="证书的制作"></a>证书的制作</h2><p>下面全部用OpenSSL示例, 具体对于到代码里怎么写,不同语言有不同的处理库, 只要用OpenSSL验证过, 基本没什么大问题</p>
+<h3 id="第一步-生成私钥-请求文件"><a href="#第一步-生成私钥-请求文件" class="headerlink" title="第一步, 生成私钥+请求文件"></a>第一步, 生成私钥+请求文件</h3><p>生成2048位私钥</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl genrsa -out ca.key 2048</span><br></pre></td></tr></table></figure>
+
+<p>请求文件对于做iOS的估计很熟悉, 一般申请APP的开发证书, 苹果要你传一个证书请求文件上去, 就是这个了.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl req -new -sha256 -key ca.key -out ca.csr -subj <span class="string">&quot;/C=CN/ST=GuangDong/L=ShenZhen/O=ROOT/OU=dc/CN=ROOT/emailAddress=test@xx.com&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>subj字段的内容其实就是证书发行者的一些信息, 规定使用sha256算法, 也是目前啊最可靠的散列算法了. </p>
+<p>其中CN字段对应的是公司名字, 或者HTTPS常见的网站域名, 不过这个都不重要, 后续我们如果是客户端对服务端通讯的话, 可以直接把CN省略, 或者验证的时候忽略掉即可.</p>
+<h3 id="第二步-生成CA证书"><a href="#第二步-生成CA证书" class="headerlink" title="第二步, 生成CA证书"></a>第二步, 生成CA证书</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl x509 -req -<span class="keyword">in</span> ca.csr -out ca.crt -signkey ca.key -days 3650 -sha256 -extfile v3.ext </span><br></pre></td></tr></table></figure>
+
+<p>上面的-extfile是可选的, 如果指定扩展了信息, 则会生成V3版本证书. 需要先创建文件 v3.ext, 内容如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">authorityKeyIdentifier&#x3D;keyid,issuer</span><br><span class="line">basicConstraints&#x3D;CA:TRUE</span><br><span class="line">keyUsage &#x3D; digitalSignature, keyCertSign #具有keyCertSign用途的证书才能签发下级证书</span><br></pre></td></tr></table></figure>
+
+<p>ext信息具体可以怎么填写, 可以参考这个文档, 说得很清楚<a target="_blank" rel="noopener" href="https://www.openssl.org/docs/manmaster/man5/x509v3_config.html">https://www.openssl.org/docs/manmaster/man5/x509v3_config.html</a></p>
+<p>到这里, 就可以得到一个具备签发其他证书的权威CA根证书了, 接着就可以用这个证书来签发一级证书, 二级证书等.</p>
+<h3 id="第二步-签发下级证书"><a href="#第二步-签发下级证书" class="headerlink" title="第二步, 签发下级证书"></a>第二步, 签发下级证书</h3><p>证书签发原理, 之前写的HTTPS原理的文章有说到, 现在是站在实战的角度来看.</p>
+<p>记得一开始的生成CA证书的时候输入了私钥吗? 其实这种叫做自签名, 而且没有指定生成证书的CA参数, 这样生成的证书里头, Subject(发行者)和Issuer(签发者)是<strong>同一个人</strong>, 而且还用CA证书自己的私钥为自己签名了(其实签名不签名都可以, 因为发行者和签发者是同一个人, 则证书的公钥默认就是发行者的有效公钥, 无需后续验证)</p>
+<p>这了假设生成服务端证书, 还是一样先生成私钥和请求文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">openssl genrsa -out server.key 2048</span><br><span class="line">openssl req -new -sha256 -out server.csr -key server.key -subj <span class="string">&quot;/C=CN/ST=GuangDong/L=ShenZhen/O=Server/OU=dc/CN=Server/emailAddress=test@datacloak.com&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>利用CA证书, 为服务端证书做一个签名</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl x509 -req -<span class="keyword">in</span> server.csr -out server.crt -CA ca.crt -CAkey ca.key -CAcreateserial -days 3650 -sha256 -extfile v3.ext</span><br></pre></td></tr></table></figure>
+
+<p>这里可以看出, 签发下级证书是需要上级证书的, 这里上级证书就是ca.crt, 这样服务端证书的Subject是服务端, 但是Issuer是CA证书的发行者. 到时候要认证服务端证书是否合法, 就要靠上级ca证书了</p>
+<p>上面提到的签名, 数字签名的原理, 就是对一段数据, 这里是服务端证书数据部分, 做一次sha256散列运算, 得到256位运算结果, 再用上级CAkey进行加密后, 附在证书上. </p>
+<p>到时候要认证服务端证书是否有效的人(比如浏览器), 就需要拿到签发者的公钥解密证书签名部分, 结合自己对服务端数据部分做sha256运算得到的值, 做一个比较, 如果结果一样, 那么服务端证书就是可信的. 这里应该说得很清楚了. HTTPS证书校验的核心原理也就是这块了.</p>
+<p><em>注意: 如果ca证书不是根证书(也就是发行者和签发者不是同一个人), 那么就需要用同样的原理验证ca证书的合法性.</em></p>
+<h3 id="第三步-如何校验证书的合法性"><a href="#第三步-如何校验证书的合法性" class="headerlink" title="第三步, 如何校验证书的合法性"></a>第三步, 如何校验证书的合法性</h3><p>这一步是最重要的, 我们上面做了那么多证书, 目的就是为了验证合法性, 这样才能确定和自己通讯的一端是否是合法的.</p>
+<p>验证二级证书是否合法, 只需要一个根证书即可验证</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">openssl verify -CAfile ca.crt server.crt</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>如果是验证多级证书是否合法, 则需要把证书的全部上级证书链都放进来一起验证</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 如果有多个证书链, 则需要把每个上级证书的文件名改成 hash值.0(比如7a191709.0), 并且指定整个目录</span></span><br><span class="line">openssl x509 -<span class="built_in">hash</span> -<span class="keyword">in</span> ca.crt  <span class="comment">#输出第一行8个字符就是哈希值</span></span><br><span class="line">openssl verify -CApath ./ server.crt</span><br><span class="line"><span class="comment"># 或者把证书链都合并到证书内容里, 证书看起来就有多个begin-end标志</span></span><br></pre></td></tr></table></figure>
+<p>上面说的把多个证书合并在一起, 合并的顺序看不同编程语言的要求. 如果是控制台用openssl的话, 上级证书放顶部, 如果是某些golang的库, 则上级证书放底部, 具体看文档说明.</p>
+<h2 id="开发中如何利用X509"><a href="#开发中如何利用X509" class="headerlink" title="开发中如何利用X509"></a>开发中如何利用X509</h2><h3 id="代码大概可以这么写"><a href="#代码大概可以这么写" class="headerlink" title="代码大概可以这么写"></a>代码大概可以这么写</h3><p>上面说的是证书怎么制作, 具体到怎么用具体编程语言来动态生成证书, 这个还得具体看文档才知道. 我只做过golang版本的, 下面直接贴代码吧, 利用已经有的CA证书, 签发新的下级证书:</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> internal</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;crypto&quot;</span></span><br><span class="line">    <span class="string">&quot;crypto/rand&quot;</span></span><br><span class="line">    <span class="string">&quot;crypto/rsa&quot;</span></span><br><span class="line">    <span class="string">&quot;crypto/sha256&quot;</span></span><br><span class="line">    <span class="string">&quot;crypto/x509&quot;</span></span><br><span class="line">    <span class="string">&quot;crypto/x509/pkix&quot;</span></span><br><span class="line">    <span class="string">&quot;encoding/pem&quot;</span></span><br><span class="line">    <span class="string">&quot;errors&quot;</span></span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;math/big&quot;</span></span><br><span class="line">    rd <span class="string">&quot;math/rand&quot;</span></span><br><span class="line">    <span class="string">&quot;strings&quot;</span></span><br><span class="line">    <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> CertInformation <span class="keyword">struct</span> &#123;</span><br><span class="line">    Country            []<span class="keyword">string</span></span><br><span class="line">    Organization       []<span class="keyword">string</span></span><br><span class="line">    OrganizationalUnit []<span class="keyword">string</span></span><br><span class="line">    EmailAddress       []<span class="keyword">string</span></span><br><span class="line">    Province           []<span class="keyword">string</span></span><br><span class="line">    Locality           []<span class="keyword">string</span></span><br><span class="line">    CommonName         <span class="keyword">string</span></span><br><span class="line">    IsCA               <span class="keyword">bool</span></span><br><span class="line">    Names              []pkix.AttributeTypeAndValue</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">newCertificate</span><span class="params">(info CertInformation)</span> *<span class="title">x509</span>.<span class="title">Certificate</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> &amp;x509.Certificate&#123;</span><br><span class="line">        SerialNumber: big.NewInt(rd.Int63()),</span><br><span class="line">        Subject: pkix.Name&#123;</span><br><span class="line">            Country:            info.Country,</span><br><span class="line">            Organization:       info.Organization,</span><br><span class="line">            OrganizationalUnit: info.OrganizationalUnit,</span><br><span class="line">            Province:           info.Province,</span><br><span class="line">            CommonName:         info.CommonName,</span><br><span class="line">            Locality:           info.Locality,</span><br><span class="line">            ExtraNames:         info.Names,</span><br><span class="line">        &#125;,</span><br><span class="line">        NotBefore:             time.Now(),                                                                 <span class="comment">//证书的开始时间</span></span><br><span class="line">        NotAfter:              time.Now().AddDate(<span class="number">20</span>, <span class="number">0</span>, <span class="number">0</span>),                                               <span class="comment">//证书的结束时间</span></span><br><span class="line">        BasicConstraintsValid: <span class="literal">true</span>,                                                                       <span class="comment">//基本的有效性约束</span></span><br><span class="line">        IsCA:                  info.IsCA,                                                                  <span class="comment">//是否是根证书</span></span><br><span class="line">        ExtKeyUsage:           []x509.ExtKeyUsage&#123;x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth&#125;, <span class="comment">//证书用途</span></span><br><span class="line">        KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,</span><br><span class="line">        EmailAddresses:        info.EmailAddress,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// CreateCRTByPublicKey .</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">CreateCRTByPublicKey</span><span class="params">(RootCa *x509.Certificate, RootKey *rsa.PrivateKey, publicKey *rsa.PublicKey, info CertInformation)</span> <span class="params">(<span class="keyword">string</span>, error)</span></span> &#123;</span><br><span class="line">    Crt := newCertificate(info)</span><br><span class="line">    <span class="keyword">var</span> err error</span><br><span class="line">    <span class="keyword">var</span> buf []<span class="keyword">byte</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//使用根证书签名</span></span><br><span class="line">    buf, err = x509.CreateCertificate(rand.Reader, Crt, RootCa, publicKey, RootKey)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;&quot;</span>, err</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 把证书转成pem格式, 并返回</span></span><br><span class="line">    <span class="keyword">var</span> b *pem.Block = &amp;pem.Block&#123;Bytes: buf, Type: <span class="string">&quot;CERTIFICATE&quot;</span>&#125;</span><br><span class="line">    cert := pem.EncodeToMemory(b)</span><br><span class="line">    <span class="keyword">if</span> cert == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;&quot;</span>, errors.New(<span class="string">&quot;An error was encountered while converting pem format&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">string</span>(cert), <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ParseCrt pem格式证书转换成Certificate实例</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ParseCrt</span><span class="params">(buf []<span class="keyword">byte</span>)</span> <span class="params">(*x509.Certificate, error)</span></span> &#123;</span><br><span class="line">    p := &amp;pem.Block&#123;&#125;</span><br><span class="line">    p, _ = pem.Decode(buf)</span><br><span class="line">    <span class="keyword">return</span> x509.ParseCertificate(p.Bytes)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ParsePublicKey 转换pem格式的公钥为PublicKey实例</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ParsePublicKey</span><span class="params">(pemBuf []<span class="keyword">byte</span>)</span> <span class="params">(*rsa.PublicKey, error)</span></span> &#123;</span><br><span class="line">    <span class="comment">// 获取dproxy传入的公钥</span></span><br><span class="line">    block, _ := pem.Decode([]<span class="keyword">byte</span>(pemBuf))</span><br><span class="line">    <span class="keyword">if</span> block == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, fmt.Errorf(<span class="string">&quot;pemBuf error&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    pub, err := x509.ParsePKIXPublicKey(block.Bytes)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> !strings.Contains(err.Error(), <span class="string">&quot;ParsePKCS1PublicKey&quot;</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> x509.ParsePKCS1PublicKey(block.Bytes)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    _, ok := pub.(*rsa.PublicKey)</span><br><span class="line">    <span class="keyword">if</span> !ok &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, fmt.Errorf(<span class="string">&quot;It is no a rsa public key&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> pub.(*rsa.PublicKey), <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ParseKey 转换pem格式私钥</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ParseKey</span><span class="params">(buf []<span class="keyword">byte</span>)</span> <span class="params">(*rsa.PrivateKey, error)</span></span> &#123;</span><br><span class="line">    p, _ := pem.Decode(buf)</span><br><span class="line">    <span class="keyword">return</span> x509.ParsePKCS1PrivateKey(p.Bytes)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">X509CertToPEMString</span><span class="params">(cert *x509.Certificate)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> b *pem.Block = &amp;pem.Block&#123;Bytes: cert.Raw, Type: <span class="string">&quot;CERTIFICATE&quot;</span>&#125;</span><br><span class="line">    parentPemCert := pem.EncodeToMemory(b)</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">string</span>(parentPemCert)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Sign 签名数据, 返回签名结果</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Sign</span><span class="params">(data []<span class="keyword">byte</span>, pri *rsa.PrivateKey)</span> <span class="params">([]<span class="keyword">byte</span>, error)</span></span> &#123;</span><br><span class="line">    <span class="comment">// 计算hash值, 然后用私钥签名</span></span><br><span class="line">    h := sha256.New()</span><br><span class="line">    h.Write(data)</span><br><span class="line">    digest := h.Sum(<span class="literal">nil</span>)</span><br><span class="line">    <span class="keyword">var</span> opts rsa.PSSOptions</span><br><span class="line">    opts.SaltLength = rsa.PSSSaltLengthEqualsHash</span><br><span class="line">    opts.Hash = crypto.SHA256</span><br><span class="line">    signData, err := pri.Sign(rand.Reader, digest, &amp;opts)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        Logger.Error(fmt.Sprintf(<span class="string">&quot;sign err:%s&quot;</span>, err))</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> signData, err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用方法, 就是直接调用<code>CreateCRTByPublicKey</code>函数, 传入要签发的公钥和CA证书+私钥. 另外的一些函数都是一些格式换行函数. </p>
+<p>其中PEM格式是base64, 也就是字符串, 传参的时候直接把每一个字符都看成一个byte而已, 其实就是[]byte(“xxxxx”).</p>
+<p>上面一大坨代码, 看不懂也无所谓, 查查文档就懂了. 重点是证书签发的流程.</p>
+<h3 id="安全认证的思路"><a href="#安全认证的思路" class="headerlink" title="安全认证的思路"></a>安全认证的思路</h3><p>认证思路, 总结起来大概就是几点</p>
+<p>第一种, 数字签名</p>
+<ol>
+<li>对数据做数字摘要, 用私钥加密, 也就是数字签名. </li>
+<li>接收方收到数据, 结合发送放的证书信息, 提取公钥解密, 解密签名信息, 再和数据部分对比较, 确认数据完整性.</li>
+</ol>
+<p>这种可以用在文件下载上, 对请求方做一个签名验证. 也可以用在对文件有效性判断上, 比如苹果系统用的最多的数字签名验证.</p>
+<p>第二种, 可信任校验</p>
+<p>这个就是HTTPS那种, 是实现TLS层的基石, 本质就是校验对方公钥是否可信, 从而明确是否信任对方, 并用对方的公钥解密数据, 可以做单向校验或者双向校验.</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/%E5%AE%89%E5%85%A8/">安全</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/安全/">安全</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2020/07/22/2020-07-22-understand-x509-certificates/" data-title="理解X509标准证书及其使用方法 | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2020/08/15/2020-08-15-dns-proxy-server/" title="实现DNS代理服务器">
+  <strong>上一篇：</strong><br/>
+  <span>
+  实现DNS代理服务器</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2020/06/14/2020-06-14-new-start-for-2020/"  title="新的开始(2020)">
+ <strong>下一篇：</strong><br/> 
+ <span>新的开始(2020)
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AD%A3%E6%96%87"><span class="toc-number">3.</span> <span class="toc-text">正文</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#X509%E8%AF%81%E4%B9%A6%E8%AE%A4%E8%AF%81%E9%80%BB%E8%BE%91"><span class="toc-number">3.1.</span> <span class="toc-text">X509证书认证逻辑</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E6%96%87%E4%BB%B6%E6%89%A9%E5%B1%95%E5%90%8D%E7%9A%84%E5%90%AB%E4%B9%89"><span class="toc-number">3.2.</span> <span class="toc-text">相关文件扩展名的含义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%81%E4%B9%A6%E7%9A%84%E5%88%B6%E4%BD%9C"><span class="toc-number">3.3.</span> <span class="toc-text">证书的制作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5-%E7%94%9F%E6%88%90%E7%A7%81%E9%92%A5-%E8%AF%B7%E6%B1%82%E6%96%87%E4%BB%B6"><span class="toc-number">3.3.1.</span> <span class="toc-text">第一步, 生成私钥+请求文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5-%E7%94%9F%E6%88%90CA%E8%AF%81%E4%B9%A6"><span class="toc-number">3.3.2.</span> <span class="toc-text">第二步, 生成CA证书</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5-%E7%AD%BE%E5%8F%91%E4%B8%8B%E7%BA%A7%E8%AF%81%E4%B9%A6"><span class="toc-number">3.3.3.</span> <span class="toc-text">第二步, 签发下级证书</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5-%E5%A6%82%E4%BD%95%E6%A0%A1%E9%AA%8C%E8%AF%81%E4%B9%A6%E7%9A%84%E5%90%88%E6%B3%95%E6%80%A7"><span class="toc-number">3.3.4.</span> <span class="toc-text">第三步, 如何校验证书的合法性</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%80%E5%8F%91%E4%B8%AD%E5%A6%82%E4%BD%95%E5%88%A9%E7%94%A8X509"><span class="toc-number">3.4.</span> <span class="toc-text">开发中如何利用X509</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E5%A4%A7%E6%A6%82%E5%8F%AF%E4%BB%A5%E8%BF%99%E4%B9%88%E5%86%99"><span class="toc-number">3.4.1.</span> <span class="toc-text">代码大概可以这么写</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81%E7%9A%84%E6%80%9D%E8%B7%AF"><span class="toc-number">3.4.2.</span> <span class="toc-text">安全认证的思路</span></a></li></ol></li></ol></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Greedy-Algorithm/" title="Greedy Algorithm">Greedy Algorithm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2020 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

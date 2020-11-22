@@ -1,0 +1,699 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>实现iOS复杂联动界面, 手势冲突界面的一些思路 | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="文档更新说明 最后更新 2019年09月05日 首次更新 2019年09月03日  前言　　最近有个需求, 要实现一个类似excel那样的表格展示视图, 视图又要支持上下拉刷新功能同时还要支持整屏滚动功能, 其实说白了, 就是需要用到界面联合滚动和解决手势冲突问题. 本文就是想结合最近做的UI总结出这个可以应用到其他更复杂界面上的套路出来. 关于手势冲突这里不是说UIGestureRecogniz">
+<meta property="og:type" content="article">
+<meta property="og:title" content="实现iOS复杂联动界面, 手势冲突界面的一些思路">
+<meta property="og:url" content="http://yoursite.com/2019/09/03/2019-09-03-some-ideas-for-implementing-complex-linkage-interface-and-gesture-conflict-interface/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="文档更新说明 最后更新 2019年09月05日 首次更新 2019年09月03日  前言　　最近有个需求, 要实现一个类似excel那样的表格展示视图, 视图又要支持上下拉刷新功能同时还要支持整屏滚动功能, 其实说白了, 就是需要用到界面联合滚动和解决手势冲突问题. 本文就是想结合最近做的UI总结出这个可以应用到其他更复杂界面上的套路出来. 关于手势冲突这里不是说UIGestureRecogniz">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/images/interface-ideas.gif">
+<meta property="og:image" content="http://yoursite.com/images/interface-ideas-layout.png">
+<meta property="og:image" content="http://yoursite.com/images/interface-ideas2.gif">
+<meta property="og:image" content="http://yoursite.com/images/interface-ideas3.gif">
+<meta property="article:published_time" content="2019-09-03T07:48:20.000Z">
+<meta property="article:modified_time" content="2019-09-05T01:58:38.000Z">
+<meta property="article:author" content="Cocos">
+<meta property="article:tag" content="iOS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/images/interface-ideas.gif">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2019/09/03/2019-09-03-some-ideas-for-implementing-complex-linkage-interface-and-gesture-conflict-interface/" title="实现iOS复杂联动界面, 手势冲突界面的一些思路" itemprop="url">实现iOS复杂联动界面, 手势冲突界面的一些思路</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2019-09-03T07:48:20.000Z" itemprop="datePublished"> 发表于 2019-09-03</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BE%8B%E5%AD%90"><span class="toc-number">3.</span> <span class="toc-text">例子</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF"><span class="toc-number">4.</span> <span class="toc-text">思路</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E8%A7%86%E5%9B%BE%E8%81%94%E5%8A%A8"><span class="toc-number">5.</span> <span class="toc-text">实现视图联动</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%89%8B%E5%8A%BF%E5%86%B2%E7%AA%81"><span class="toc-number">6.</span> <span class="toc-text">解决手势冲突</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%90%84%E7%A7%8D%E6%96%B9%E6%A1%88%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-number">7.</span> <span class="toc-text">各种方案的优缺点</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="toc-number">8.</span> <span class="toc-text">具体实现</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%95%8C%E9%9D%A2%E8%81%94%E5%8A%A8"><span class="toc-number">8.1.</span> <span class="toc-text">界面联动</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%BB%9A%E5%8A%A8%E5%86%B2%E7%AA%81"><span class="toc-number">8.2.</span> <span class="toc-text">解决滚动冲突</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">9.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
+<li>最后更新 2019年09月05日</li>
+<li>首次更新 2019年09月03日</li>
+</ul>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>　　最近有个需求, 要实现一个类似excel那样的<strong>表格展示</strong>视图, 视图又要支持<strong>上下拉</strong>刷新功能同时还要支持<strong>整屏滚动</strong>功能, 其实说白了, 就是需要用到界面联合滚动和解决手势冲突问题. 本文就是想结合最近做的UI总结出这个可以应用到其他更复杂界面上的套路出来.</p>
+<p>关于手势冲突这里不是说<code>UIGestureRecognizer</code>的使用和他的代理<code>UIGestureRecognizerDelegate</code>提供的手势冲突解决方法, 而是说一些其他的, 下面再说.</p>
+<h1 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h1><p>　　就从我就近做的需求开始讲起, 先简单看一下界面的实际效果GIF.</p>
+<div align=center><img src="/images/interface-ideas.gif" width=300 height=600 /></div>
+
+<p>再复杂的界面, 无非都是由一些简单的部件组成, 再结合手势, 位置同步等手段让它们协调工作起来, 以至于看起来就是一个整体. 这些简单的界面大概就是有UIView, UIScrollView, UITableView, UICollectionView, 组合的时候就是多个UITableView互相嵌套, 或者是UIScrollView嵌套UITableView, 又或者是一个ScrollView放一侧, 另一个TableView放一侧等方式. 本例的组件命名为<code>FMMachineListView</code></p>
+<h1 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h1><p>　　上面的界面可以做如下分解:</p>
+<div align=center><img src="/images/interface-ideas-layout.png" /></div>
+
+<p>先介绍一下这几个基本视图对应的功能:</p>
+<p><strong>蓝色</strong>和<strong>绿色</strong>两个视图可以用约束布局或者代码布局, 确保他们按照一定比例分配即可. 如果把整个表格功能封装成一个组件, 绿色视图其实就是这个组件的根视图.当然如果需要<code>Interface Builder</code>直接摆放视图的话, 可以先放一个普通的View, View里再放组件根视图即可, 灵活变通.</p>
+<p><strong>红色</strong>视图本身不一定要设置为ScrollView, 但是为了能兼容<code>MJRefresh</code>上下拉刷新组件, 我使用了更为复杂的ScrollView来做, 这样就可以方便地往它身上加入上下拉视图了. 红色视图的<code>contentSize</code>应该和绿色视图一样, 这样可以固定住白色视图.</p>
+<p><strong>灰色视图</strong>是一个ScrolView, 主要目的是为了让表格除第一列之外其他列可以左右滚动, 这样才能添加更多的列进来. 灰色视图里面的小矩形视图, 我这里为了复杂起见, 每一列都是一个TableView, 不过如果改成只有一个TableView, 然后在每一个Cell里去控制每一行的数据也是可以的. 对了别忘了, 灰色视图的<code>contentSize</code>高度应该等于红色视图, 因为他不需要上下滚动, 不过<code>contentSize</code>的宽度就要看具体有多少列, 这样才能实现左右滚动.</p>
+<h1 id="实现视图联动"><a href="#实现视图联动" class="headerlink" title="实现视图联动"></a>实现视图联动</h1><p>　　为了让整个组件看起来就是一个整体, 比如每一列本身都是一个TableView, 那用户滚动的时候肯定只是滚动了其中一列, 这样就需要做联动, 把滚动的信息传递给其他TableView, 这样看起来才不会像下面GIF这样.<br>　　<div align=center><img src="/images/interface-ideas2.gif" width=300 height=600 /></div></p>
+<p>所以说, 组合的界面, 联动这个思路是比较常见的. 具体联动怎么实现, 放到下面说.</p>
+<h1 id="解决手势冲突"><a href="#解决手势冲突" class="headerlink" title="解决手势冲突"></a>解决手势冲突</h1><p>　　本例中, 主要的手势冲突有以下几个:<br>　　<br><strong>列表</strong>视图和<strong>红色</strong>视图有冲突. 列表视图需要支持上下滚动展示更多行, 而红色视图需要支持上下滚动来实现数据刷新功能, 我们知道iOS中多个相同类型的手势, 比如pan手势, 默认只会响应其中一个, 所以列表视图的pan手势响应了之后红色视图的pan手势不会触发了. 注意这里pan手势都是scrollView自带的, 不像开发者自己添加的手势可以通过<code>UIGestureRecognizerDelegate</code>解决多手势响应问题.</p>
+<p><strong>列表</strong>视图和<strong>蓝色</strong>视图的冲突, 蓝色视图也需要向上滚动到屏外, 所以也需要一个比较好的解决方案.</p>
+<p>上面两个问题的解决思路, 我觉得可以这样来做:</p>
+<ol>
+<li><p>首先让多个嵌套的scrollView(红色, 灰白色: 灰色和白色的统称)只有一个支持上下滚动, 这里就有两种选择, 一种是让灰白色都不支持上下滚动, 让红色支持上下滚动, 这样滚动时响应的是红色视图的pan手势.</p>
+</li>
+<li><p>不需要红色支持上下滚动, 但是让灰色白色支持上下滚动, 然后在灰白色滚动的同时, 根据一定算法判断是否停止滚动灰白色, 用算法模拟滚动红色(实际上用的还是灰白色的pan手势), 下面会有代码具体演示一下.</p>
+</li>
+<li><p>蓝色视图这部分的冲突, 本例的需求其实可以像上面设计图那样让蓝色视图直接放到控制器的view上, 接着<strong>观察列表组件的滚动情况, 列表上拉到顶部了则蓝色视图用动画滚到屏外, 列表组件从顶部下拉的时候, 蓝色视图滚回原位</strong>. 如果有需要, 还可以让蓝色部分也支持响应滚动手势的话, 可以直接把白色视图的pan手势添加到控制器的view上, 这样整个控制器都能响应pan手势, 而且白色视图又能正确滚动, 又能让蓝色视图观察到滚动情况从而也就可以在蓝色视图上响应滚动事件了. (如果是方案1那就是操作红色视图的pan手势), 他的效果就像下面GIF演示的:<br>　　<div align=center><img src="/images/interface-ideas3.gif" width=300 height=600 /></div></p>
+</li>
+</ol>
+<h1 id="各种方案的优缺点"><a href="#各种方案的优缺点" class="headerlink" title="各种方案的优缺点"></a>各种方案的优缺点</h1><p>　　上面提到的解决手势冲突的方案, 第三种严格说也算不上, 这里主要就说1和2的优缺点. </p>
+<p><strong>方案1</strong></p>
+<p><strong>优点</strong>是实现比较简单, ScrollView里面嵌套TableView(或者其他ScrollView子类视图), 让TableView把全部内容都显示出来, 只需要简单计算一下TableView有多少row,多少section以及具体的高度汇总就是整个TableView的内容高度了,这样TableView的<code>frame.size</code>等于TableView的<code>contentSize</code>, 本质上就退化成一个普通的UIView, 滚动的是外部的ScrollView, 所以可以解决手势冲突.</p>
+<p><strong>缺点</strong>也比较明显, TableView失去原有的复用机制, 每一次都把全部的Cell都加载出来放到内存里, 把全部Cell的视图都渲染出来, 占用内存变大, 因此此方案只适合行数较少的场景, 我测试了一下大概1000行之后就会有很明显的卡顿了.</p>
+<p><strong>方案2</strong><br><strong>优点</strong>是性能正常, ScrollView里面嵌套TableView, 内部的TableView本身还是支持滚动的, 这也就支持了视图的复用机制, 占用内存少, 支持任意数据量.</p>
+<p><strong>缺点</strong>是编码比方案1复杂, 因为需要在内部的TableView滚动到合适的位置的时(比如顶部或底部), 通过算法让TableView的<code>contentOffset</code>固定住, 然后根据滚动的偏移量直接去设置外层ScrollView的contentOffset, 这样就可以实现看上去内部的TableView停止滚动了外部的ScrollView开始滚动的样子, 这样也可以解决手势冲突. 这部分下文会有代码演示, 看不明白的可以继续往下看.</p>
+<h1 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h1><h2 id="界面联动"><a href="#界面联动" class="headerlink" title="界面联动"></a>界面联动</h2><p>　　界面联动的实现方式有多种, 本文主要是讲思路, 所以这里讲最简单的实现, 能看懂就好, 后面可能会再发一篇文章专门论述如何优雅实现界面联合滚动.<br>　　<br>首先是白色,灰色视图这样的列需要同步滚动, 那么就在每一个列对应的TableView子类里定义一个协议, 这里就叫<code>FMSyncDelegate</code>, 协议内容如下:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// FMDataTableView.h</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@protocol</span> <span class="title">FMSyncDelegate</span> &lt;<span class="title">NSObject</span>&gt;</span></span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)dataTableView:(<span class="built_in">UITableView</span> *)tableView contentOffSet:(<span class="built_in">CGPoint</span>)contentOffSet;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)dataTableView:(<span class="built_in">UITableView</span> *)tableView didSelected:(<span class="built_in">NSIndexPath</span> *)indexPath;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)dataTableView:(<span class="built_in">UITableView</span> *)tableView didDeSelected:(<span class="built_in">NSIndexPath</span> *)indexPath;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)dataTableViewDidEndDragging:(<span class="built_in">UITableView</span> *)tableView;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)dataTableViewBeganDragging:(<span class="built_in">UITableView</span> *)tableView;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<p>具体功能就不用介绍了看名字已经很清晰了, 目的就是把tableView内部具体发生事情回调给实现了<code>FMSyncDelegate</code>协议的对象. 同步滚动的时候, 只需要把组件设置为列表视图的代理, 然后实现即可. 本例中整个协议的方法都要实现, 因为要支持点击某一行跳进详情页, 也要知道手指什么时候触摸列表什么时候离开列表好实现上下拉功能. 协议还需要支持其他什么功能这个具体看情况而定即可.</p>
+<p>下面再说一下同步滚动这个功能的简单实现. 在组件对应的类里(绿色视图)实现列表的同步代理, 监听到某一个列滚动时, 把信号也发给其他列, 让其他列跟着滚动即可.</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// FMMachineListView.h</span></span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)dataTableView:(<span class="built_in">UITableView</span> *)tableView contentOffSet:(<span class="built_in">CGPoint</span>)contentOffSet &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="built_in">BOOL</span> stopSync = <span class="literal">NO</span>;</span><br><span class="line">    <span class="keyword">if</span> (stopSync == <span class="literal">YES</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    stopSync = <span class="literal">YES</span>;</span><br><span class="line">    </span><br><span class="line">    FMDataTableView *headTV = (FMDataTableView *)_headView.subviews[<span class="number">0</span>];    </span><br><span class="line">    [headTV setTableViewContentOffSet:contentOffSet];</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="built_in">UIView</span> *subView <span class="keyword">in</span> _scroll.subviews) &#123;</span><br><span class="line">        <span class="keyword">if</span> ([subView isKindOfClass:[FMDataTableView <span class="keyword">class</span>]]) &#123;</span><br><span class="line">            [(FMDataTableView *)subView setContentOffSet:contentOffSet];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (subView == _scroll.subviews.lastObject) &#123;</span><br><span class="line">            <span class="comment">// 本轮数据同步最后一个对象结束之后, 才允许下一轮同步, 这样可以避免重复的同步操作</span></span><br><span class="line">            stopSync = <span class="literal">NO</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中stopSync是为了防止重复同步, 毕竟这里对每一个tableView都调用了<code>setContentOffSet:</code>, 这样就又会导致<code>- (void)dataTableView:(UITableView *)tableView contentOffSet:(CGPoint)contentOffSet</code>方法被触发一次, 所以每一轮同步只有第一个事件能起作用, 其他同一轮的事件都直接忽略, 直到最后一个列表被同步之后才允许新一轮同步.
+　　</p>
+<h2 id="解决滚动冲突"><a href="#解决滚动冲突" class="headerlink" title="解决滚动冲突"></a>解决滚动冲突</h2><p>　　这里只讲方案2, 红色视图不需要响应上下滚动手势, 灰白色需要. 下面给出滚动灰白色视图, 固定灰白色视图的位置滚动红色视图, 以及如何上下滑动蓝色视图的代码.</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// FMMachineListView.h</span></span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)dataTableView:(<span class="built_in">UITableView</span> *)tableView contentOffSet:(<span class="built_in">CGPoint</span>)contentOffSet &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="built_in">BOOL</span> stopSync = <span class="literal">NO</span>;</span><br><span class="line">    <span class="keyword">if</span> (stopSync == <span class="literal">YES</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    stopSync = <span class="literal">YES</span>;</span><br><span class="line">    </span><br><span class="line">    FMDataTableView *headTV = (FMDataTableView *)_headView.subviews[<span class="number">0</span>];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 注意如果contentSize还没有tableview本身大的话, 说明数据太少了tableView都不需要滚动, 也就不需要加载下一页了, 也不需要通知上下滚的事件.</span></span><br><span class="line">    <span class="built_in">BOOL</span> isLongPage = <span class="literal">NO</span>;</span><br><span class="line">    <span class="keyword">if</span> (headTV.contentSize.height &gt; headTV.frame.size.height) &#123;</span><br><span class="line">        isLongPage = <span class="literal">YES</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">     <span class="comment">// 注意如果contentSize还没有tableview本身大的话, 说明数据太少了tableView都不需要滚动, 也就不需要加载下一页了, 也不需要通知上下滚的事件.</span></span><br><span class="line">    <span class="built_in">BOOL</span> isLongPage = <span class="literal">NO</span>;</span><br><span class="line">    <span class="keyword">if</span> (headTV.contentSize.height &gt; headTV.frame.size.height) &#123;</span><br><span class="line">        isLongPage = <span class="literal">YES</span>;</span><br><span class="line">    &#125;</span><br><span class="line">        </span><br><span class="line">    <span class="comment">// 可使用tableView.isDragging控制是否只在拉动状态触发</span></span><br><span class="line">    <span class="keyword">if</span> (isLongPage) &#123;</span><br><span class="line">        <span class="keyword">if</span> (contentOffSet.y &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="built_in">NSLog</span>(<span class="string">@&quot;向下滚动了&quot;</span>);</span><br><span class="line">            <span class="comment">// 列表向下滚动(展示上面内容), 通知代理</span></span><br><span class="line">            <span class="keyword">if</span> ([<span class="keyword">self</span>.delegate respondsToSelector:<span class="keyword">@selector</span>(machineListScrollDown)]) &#123;</span><br><span class="line">                [<span class="keyword">self</span>.delegate machineListScrollDown];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (contentOffSet.y &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="built_in">NSLog</span>(<span class="string">@&quot;向上滚动了&quot;</span>);</span><br><span class="line">            <span class="comment">// 列表向上滚动(展示下面内容)</span></span><br><span class="line">            <span class="keyword">if</span> ([<span class="keyword">self</span>.delegate respondsToSelector:<span class="keyword">@selector</span>(machineListScrollUp)]) &#123;</span><br><span class="line">                [<span class="keyword">self</span>.delegate machineListScrollUp];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (contentOffSet.y &lt;= <span class="number">0</span> &amp;&amp; ((FMDataTableRefreshNormalHeader *)<span class="keyword">self</span>.panelScrollView.mj_header).dragging == <span class="literal">YES</span>) &#123;</span><br><span class="line">        <span class="comment">// 当列表滚动到顶部时, 让contentOffset.y保持在0位置, 同时调整panelScrollView的contentOffset, 让下拉刷新控件露出来</span></span><br><span class="line">        <span class="comment">// 同时要处理拖动列表之后松手的事件, 让contentOffset复原!</span></span><br><span class="line">        <span class="keyword">self</span>.panelScrollView.contentOffset = <span class="built_in">CGPointMake</span>(<span class="number">0</span>, <span class="keyword">self</span>.panelScrollView.contentOffset.y + (contentOffSet.y / <span class="number">2</span>));</span><br><span class="line">        </span><br><span class="line">        contentOffSet.y = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 处理滑动到底部直接加载下一页数据</span></span><br><span class="line">    <span class="comment">// 滚动到底部时, y的座标刚好是contentSize高度减去视图本身高度</span></span><br><span class="line">    <span class="comment">// 不过要注意如果contentSize还没有tableview本身大的话, 说明数据太少了tableView都不需要滚动, 也就不需要加载下一页了</span></span><br><span class="line">    <span class="keyword">if</span> (isLongPage) &#123;</span><br><span class="line">        <span class="built_in">CGFloat</span> happendY = headTV.contentSize.height - headTV.frame.size.height;</span><br><span class="line">        <span class="keyword">if</span> (contentOffSet.y &gt;= happendY) &#123;</span><br><span class="line">            <span class="keyword">self</span>.panelScrollView.contentOffset = <span class="built_in">CGPointMake</span>(<span class="number">0</span>, <span class="keyword">self</span>.panelScrollView.contentOffset.y + ((contentOffSet.y - happendY) / <span class="number">2</span>));</span><br><span class="line">            contentOffSet.y = happendY;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    [headTV setTableViewContentOffSet:contentOffSet];</span><br><span class="line">    <span class="keyword">for</span> (<span class="built_in">UIView</span> *subView <span class="keyword">in</span> _scroll.subviews)&#123;</span><br><span class="line">        <span class="keyword">if</span> ([subView isKindOfClass:[FMDataTableView <span class="keyword">class</span>]]) &#123;</span><br><span class="line">            [(FMDataTableView *)subView setTableViewContentOffSet:contentOffSet];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (subView == _scroll.subviews.lastObject) &#123;</span><br><span class="line">            <span class="comment">// 本轮数据同步最后一个对象结束之后, 才允许下一轮同步, 这样可以避免重复的同步操作</span></span><br><span class="line">            stopSync = <span class="literal">NO</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)dataTableViewDidEndDragging:(<span class="built_in">UITableView</span> *)tableView &#123;</span><br><span class="line">    ((FMDataTableRefreshNormalHeader *)<span class="keyword">self</span>.panelScrollView.mj_header).dragging = <span class="literal">NO</span>;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">self</span>.panelScrollView.contentOffset.y != <span class="number">0</span>) &#123;</span><br><span class="line">        [<span class="keyword">self</span>.panelScrollView setContentOffset:<span class="built_in">CGPointMake</span>(<span class="number">0</span>, <span class="number">0</span>) animated:<span class="literal">YES</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)dataTableViewBeganDragging:(<span class="built_in">UITableView</span> *)tableView &#123;</span><br><span class="line">    ((FMDataTableRefreshNormalHeader *)<span class="keyword">self</span>.panelScrollView.mj_header).dragging = <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>具体代码作用看注释, 其中panelScrollView就是本例的红色视图.</p>
+<p>最后要说的就是如何让蓝色视图也能滚动, 实现的原理就是让控制器实现组件的协议, 协议内容如下:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// FMMachineListView.h</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@protocol</span> <span class="title">FMMachineListViewDelegate</span> &lt;<span class="title">NSObject</span>&gt;</span></span><br><span class="line"><span class="keyword">@optional</span></span><br><span class="line">- (<span class="keyword">void</span>)machineListViewDidSelected:(<span class="built_in">NSIndexPath</span> *)indexPath;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)machineListViewDidLongPress:(<span class="built_in">NSIndexPath</span> *)indexPath;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)machineListScrollUp;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)machineListScrollDown;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<p>其中<code>machineListScrollUp</code>和<code>machineListScrollDown</code>两个方法会在组件从顶部上拉或者顶部下拉时被调用. 组件内部具体实现的代码就是下面这段:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// FMMachineListView.h</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 注意如果contentSize还没有tableview本身大的话, 说明数据太少了tableView都不需要滚动, 也就不需要加载下一页了, 也不需要通知上下滚的事件.</span></span><br><span class="line">    <span class="built_in">BOOL</span> isLongPage = <span class="literal">NO</span>;</span><br><span class="line">    <span class="keyword">if</span> (headTV.contentSize.height &gt; headTV.frame.size.height) &#123;</span><br><span class="line">        isLongPage = <span class="literal">YES</span>;</span><br><span class="line">    &#125;</span><br><span class="line">        </span><br><span class="line">    <span class="comment">// 可使用tableView.isDragging控制是否只在拉动状态触发</span></span><br><span class="line">    <span class="keyword">if</span> (isLongPage) &#123;</span><br><span class="line">        <span class="keyword">if</span> (contentOffSet.y &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="built_in">NSLog</span>(<span class="string">@&quot;向下滚动了&quot;</span>);</span><br><span class="line">            <span class="comment">// 列表向下滚动(展示上面内容), 通知代理</span></span><br><span class="line">            <span class="keyword">if</span> ([<span class="keyword">self</span>.delegate respondsToSelector:<span class="keyword">@selector</span>(machineListScrollDown)]) &#123;</span><br><span class="line">                [<span class="keyword">self</span>.delegate machineListScrollDown];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (contentOffSet.y &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="built_in">NSLog</span>(<span class="string">@&quot;向上滚动了&quot;</span>);</span><br><span class="line">            <span class="comment">// 列表向上滚动(展示下面内容)</span></span><br><span class="line">            <span class="keyword">if</span> ([<span class="keyword">self</span>.delegate respondsToSelector:<span class="keyword">@selector</span>(machineListScrollUp)]) &#123;</span><br><span class="line">                [<span class="keyword">self</span>.delegate machineListScrollUp];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>控制器只要实现了<code>machineListScrollUp </code>和<code>machineListScrollDown </code>这两个方法, 就可以控制蓝色视图滚动的时机了, 最终效果就是本文开头GIF演示那样子.</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>　　至此就把本文开头的例子的实现讲完了. 本文实现一个无法直接用系统自带视图实现的界面, 通过组合多个列表视图和滚动视图, 讲述了这类需求的主要问题, 也就是联合滚动, 手势冲突这些, 并给出了解决方案, 目的就是希望能把复杂界面的实现思路理清楚, 不管遇到什么样的界面, 百变不离其宗, 只要稍加灵活变通即可实现, 性能也会太差 : )</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/iOS/">iOS</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/iOS/">iOS</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2019/09/03/2019-09-03-some-ideas-for-implementing-complex-linkage-interface-and-gesture-conflict-interface/" data-title="实现iOS复杂联动界面, 手势冲突界面的一些思路 | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2019/11/29/2019-11-29-trend-chart-development-record/" title="金融趋势图CCTrendChart的开发记录">
+  <strong>上一篇：</strong><br/>
+  <span>
+  金融趋势图CCTrendChart的开发记录</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2019/08/22/2019-08-22-nstimer-weak-proxy/"  title="实现NSTimer弱引用代理, 一劳永逸解决引用循环问题">
+ <strong>下一篇：</strong><br/> 
+ <span>实现NSTimer弱引用代理, 一劳永逸解决引用循环问题
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BE%8B%E5%AD%90"><span class="toc-number">3.</span> <span class="toc-text">例子</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF"><span class="toc-number">4.</span> <span class="toc-text">思路</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E8%A7%86%E5%9B%BE%E8%81%94%E5%8A%A8"><span class="toc-number">5.</span> <span class="toc-text">实现视图联动</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%89%8B%E5%8A%BF%E5%86%B2%E7%AA%81"><span class="toc-number">6.</span> <span class="toc-text">解决手势冲突</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%90%84%E7%A7%8D%E6%96%B9%E6%A1%88%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-number">7.</span> <span class="toc-text">各种方案的优缺点</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="toc-number">8.</span> <span class="toc-text">具体实现</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%95%8C%E9%9D%A2%E8%81%94%E5%8A%A8"><span class="toc-number">8.1.</span> <span class="toc-text">界面联动</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%BB%9A%E5%8A%A8%E5%86%B2%E7%AA%81"><span class="toc-number">8.2.</span> <span class="toc-text">解决滚动冲突</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">9.</span> <span class="toc-text">总结</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Greedy-Algorithm/" title="Greedy Algorithm">Greedy Algorithm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2020 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

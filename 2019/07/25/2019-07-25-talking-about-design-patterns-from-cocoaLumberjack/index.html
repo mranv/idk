@@ -1,0 +1,676 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>从CocoaLumberjack的高效易扩展谈为什么要学习设计模式 | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="文档更新说明 最后更新 2019年07月25日 首次更新 2019年07月25日  前言　　在编程领域里, 听的多做得少的就是设计模式. 很多程序员都听说过设计模式, 但是却很少自己手动实现一些真正意义上的设计模式, 这几天刚好在复习设计模式, 然后今天又看了iOS上流行的以灵活,扩展性高著称的开源日志框架CocoaLumberjack的源码, 有感而发, 下面我想好好谈谈心得, 一步一步揭开这个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从CocoaLumberjack的高效易扩展谈为什么要学习设计模式">
+<meta property="og:url" content="http://yoursite.com/2019/07/25/2019-07-25-talking-about-design-patterns-from-cocoaLumberjack/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="文档更新说明 最后更新 2019年07月25日 首次更新 2019年07月25日  前言　　在编程领域里, 听的多做得少的就是设计模式. 很多程序员都听说过设计模式, 但是却很少自己手动实现一些真正意义上的设计模式, 这几天刚好在复习设计模式, 然后今天又看了iOS上流行的以灵活,扩展性高著称的开源日志框架CocoaLumberjack的源码, 有感而发, 下面我想好好谈谈心得, 一步一步揭开这个">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-07-25T07:12:30.000Z">
+<meta property="article:modified_time" content="2019-07-25T09:04:57.000Z">
+<meta property="article:author" content="Cocos">
+<meta property="article:tag" content="可扩展">
+<meta property="article:tag" content="iOS">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2019/07/25/2019-07-25-talking-about-design-patterns-from-cocoaLumberjack/" title="从CocoaLumberjack的高效易扩展谈为什么要学习设计模式" itemprop="url">从CocoaLumberjack的高效易扩展谈为什么要学习设计模式</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2019-07-25T07:12:30.000Z" itemprop="datePublished"> 发表于 2019-07-25</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#CocoaLumberjack%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="toc-number">3.</span> <span class="toc-text">CocoaLumberjack的使用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#CocoaLumberjack%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90"><span class="toc-number">4.</span> <span class="toc-text">CocoaLumberjack源码分析</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F"><span class="toc-number">5.</span> <span class="toc-text">桥接模式</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%89%A9%E5%B1%95CocoaLumberjack"><span class="toc-number">6.</span> <span class="toc-text">扩展CocoaLumberjack</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">7.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
+<li>最后更新 2019年07月25日</li>
+<li>首次更新 2019年07月25日</li>
+</ul>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>　　在编程领域里, 听的多做得少的就是设计模式. 很多程序员都听说过设计模式, 但是却很少自己手动实现一些真正意义上的设计模式, 这几天刚好在复习设计模式, 然后今天又看了iOS上流行的以灵活,扩展性高著称的开源日志框架CocoaLumberjack的源码, 有感而发, 下面我想好好谈谈心得, 一步一步揭开这个高度灵活的框架是如何设计的.
+　　</p>
+<h1 id="CocoaLumberjack的使用"><a href="#CocoaLumberjack的使用" class="headerlink" title="CocoaLumberjack的使用"></a>CocoaLumberjack的使用</h1><p>　　先来简单看一下CocoaLumberjack的使用. CocoaLumberjack为用户提供了几种日志模式, 有控制台, 系统日志, 沙盒日志, 此外还有日志不可或缺的格式化功能Formatter. 下面例子以最复杂的沙盒日志为例:
+　　</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 自己需要定义这个变量, 确定实际上需要的日志级别.</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> DDLogLevel ddLogLevel = DDLogLevelDebug;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 先创建一个文件日志, 定义好相关配置信息</span></span><br><span class="line">DDFileLogger *fileLogger = [[DDFileLogger alloc] init]; <span class="comment">// File Logger</span></span><br><span class="line">fileLogger.logFormatter = [[DDDispatchQueueLogFormatter alloc] init];</span><br><span class="line">    </span><br><span class="line">fileLogger.rollingFrequency = <span class="number">60</span> * <span class="number">60</span> * <span class="number">24</span>; <span class="comment">// 24 hour rolling</span></span><br><span class="line">fileLogger.logFileManager.maximumNumberOfLogFiles = <span class="number">7</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 添加一个logger</span></span><br><span class="line">[DDLog addLogger:fileLogger];</span><br><span class="line"></span><br><span class="line"><span class="comment">// 可以同时加入多个, 比如再加入一个控制台logger, 这样文件和控制台都会有日志信息输出</span></span><br><span class="line">DDTTYLogger *log2 = [DDTTYLogger sharedInstance];</span><br><span class="line">log2.logFormatter = [[CCLogFormatter alloc] init];</span><br><span class="line">[DDLog addLogger:log2];</span><br><span class="line"></span><br><span class="line"><span class="comment">// 直接使用内置的宏即可开始记录日志</span></span><br><span class="line">DDLogDebug(<span class="string">@&quot;Debug&quot;</span>);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>上面简单的代码,就完成了日志格式的定制, 日志的输出定制, 日志的沙盒文件配置等功能, 灵活设置. 此外还演示了用户自行扩展的格式化类, 用于自行格式化输出内容, 像这样灵活的设计, 确实很值得赞赏, 下面一起来看看源码, 这是如何实现.</p>
+<h1 id="CocoaLumberjack源码分析"><a href="#CocoaLumberjack源码分析" class="headerlink" title="CocoaLumberjack源码分析"></a>CocoaLumberjack源码分析</h1><p>　　展开宏之后得到下面的真实执行入口, 下面主要分析沙盒日志源码</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[DDLog</span><br><span class="line">         log:<span class="literal">NO</span></span><br><span class="line">       level:ddLogLevel</span><br><span class="line">        flag:DDLogFlagDebug</span><br><span class="line">     context:<span class="number">0</span></span><br><span class="line">        file:__FILE__</span><br><span class="line">    function:__FUNCTION__</span><br><span class="line">        line:__LINE__</span><br><span class="line">         tag:<span class="literal">nil</span></span><br><span class="line">      format:<span class="string">@&quot;Debug&quot;</span></span><br><span class="line">];</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>上面这个类方法, 一层一层调用下去, 直到下面代码:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// DDLog.m</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 将参数封装成</span></span><br><span class="line">[<span class="keyword">self</span>.sharedInstance log:asynchronous message:message level:level flag:flag context:context file:file function:function line:line tag:tag];</span><br></pre></td></tr></table></figure>
+<p>这是遇到的第一个设计模式, 也是最常见的, 单例, 没什么好说的, 接着往下执行:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// DDLog.m</span></span><br><span class="line"><span class="comment">// 程序开始调用下面方法, 进入初始化完成后的阶段</span></span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)queueLogMessage:(DDLogMessage *)logMessage asynchronously:(<span class="built_in">BOOL</span>)asyncFlag &#123;</span><br><span class="line">	 <span class="comment">///省略其他代码</span></span><br><span class="line">	[<span class="keyword">self</span> lt_log:logMessage];</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>程序执行了lt_log方法, 把消息传进去, 接着往下执行:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// DDLog.m</span></span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)lt_log:(DDLogMessage *)logMessage &#123;</span><br><span class="line">    <span class="comment">///省略其他代码</span></span><br><span class="line">    <span class="keyword">for</span> (DDLoggerNode *loggerNode <span class="keyword">in</span> <span class="keyword">self</span>._loggers) &#123;</span><br><span class="line">        <span class="comment">// skip the loggers that shouldn&#x27;t write this message based on the log level</span></span><br><span class="line">        <span class="comment">// 从当前的DDLog实例里取出所有存入的logger节点, 里面就有我传入的logger对象</span></span><br><span class="line">	    <span class="keyword">if</span> (!(logMessage-&gt;_flag &amp; loggerNode-&gt;_level)) &#123;</span><br><span class="line">	        <span class="keyword">continue</span>;</span><br><span class="line">	    &#125;</span><br><span class="line">	</span><br><span class="line">	    dispatch_group_async(_loggingGroup, loggerNode-&gt;_loggerQueue, ^&#123; <span class="keyword">@autoreleasepool</span> &#123;</span><br><span class="line">	        [loggerNode-&gt;_logger logMessage:logMessage];</span><br><span class="line">	    &#125; &#125;);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>上面代码, 注意需要注意的是 _logger的类型是<code>id &lt;DDLogger&gt;</code>, 这就是我要讲的第二种编程模式, 针对抽象编程, 也就是代码只关心对象实现了那些接口, 只要实现了规定的接口, 下面就可以安全调用接口即可, 不关心对象具体的类型. 继续往下执行:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// DDFileLogger.m</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 这里分析的Logger是沙盒日志</span></span><br><span class="line">- (<span class="keyword">void</span>)logMessage:(DDLogMessage *)logMessage &#123;</span><br><span class="line">	<span class="comment">/// 省略其他代码</span></span><br><span class="line">	<span class="comment">// 这里可以看到框架开始使用我传入的Formatter对象了</span></span><br><span class="line">	<span class="keyword">if</span> (_logFormatter != <span class="literal">nil</span>) &#123;</span><br><span class="line">        message = [_logFormatter formatLogMessage:logMessage];</span><br><span class="line">        isFormatted = message != logMessage-&gt;_message;</span><br><span class="line">    &#125;</span><br><span class="line">    [<span class="keyword">self</span> lt_logData:[message dataUsingEncoding:<span class="built_in">NSUTF8StringEncoding</span>]];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面代码, 需要注意的地方是_logFormatter这个变量的类型是<code>id &lt;DDLogFormatter&gt;</code>, 和上一步提到的原理一样, 这里其实也是第三种设计模式: 桥接模式(有点像策略模式, 后面解释).<br>框架最后执行到了<code>lt_logData:</code>方法后, 才开始真正写日志.通过上面的分析, 可以知道我传入的Logger和Formatter是如何起作用的, 也可以看出来框架底层采用接口编程这个套路, 兼容了传入的任何适合的Logger和Formatter, 让用户可以灵活扩展自己的日志需求.</p>
+<h1 id="桥接模式"><a href="#桥接模式" class="headerlink" title="桥接模式"></a>桥接模式</h1><p>　　写到这里我其实也不管100%告诉你CocoaLumberjack主要利用桥接模式实现可扩展高度灵活的功能, 因为有好几种设计模式都是类似这样的, 我也不是写论文似的分析, 姑且就叫桥接模式吧.<br>　　实际上桥接模式和策略模式是有点像, 策略模式更多的应该是表示行为算法, 本身实现了某个策略的类被聚合进主类中时, 更多的是提供简单的无状态算法功能. 而CocoaLumberjack框架可以看到, 像Formatter和Logger这些类本身是包含比较复杂的逻辑和内部对象属性, 所以我觉得更适合把他们叫做桥接模式.<br>　　说了这么多, 那什么是桥接模式呢? 具体定义可以自行谷歌搜索一下, 他长得就是文章上面分析的那样, 这里我引用一下<a target="_blank" rel="noopener" href="https://www.runoob.com/design-pattern/bridge-pattern.html">菜鸟教程</a>里面的关于桥接模式的表述, 我觉得很合适.<br>　　学习了桥接模式的设计方法之后, 再看CocoaLumberjack框架的源码, 就会发现, 好像是这么回事, 很精彩. 看懂了源码之后, 下面就来自行定制一下输出格式, 这整个过程几乎不需要上网查任何资料, 自给自足即可.
+　　</p>
+<h1 id="扩展CocoaLumberjack"><a href="#扩展CocoaLumberjack" class="headerlink" title="扩展CocoaLumberjack"></a>扩展CocoaLumberjack</h1><p>　　通过上面分析可知, 只要我的类实现了<code>DDLogFormatter </code>协议, 就可以作为一个合法的Formatter对象做为DDLog的配置. 下面看看扩展的Formatter源码:
+　　</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  CCLogFormatter.h</span></span><br><span class="line"><span class="comment">//  OCSimpleView</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  自定义格式化信息, 用于CocoaLumberjack框架</span></span><br><span class="line"><span class="comment">//  Created by Cocos on 2019/7/25.</span></span><br><span class="line"><span class="comment">//  Copyright © 2019 Cocos. All rights reserved.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#import <span class="meta-string">&lt;Foundation/Foundation.h&gt;</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&lt;CocoaLumberjack/CocoaLumberjack.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="built_in">NS_ASSUME_NONNULL_BEGIN</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">CCLogFormatter</span> : <span class="title">NSObject</span> &lt;<span class="title">DDLogFormatter</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> *  Default initializer</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">- (<span class="keyword">instancetype</span>)init;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> *  Designated initializer, requires a date formatter</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">- (<span class="keyword">instancetype</span>)initWithDateFormatter:(<span class="built_in">NSDateFormatter</span> * __<span class="keyword">nullable</span>)dateFormatter <span class="built_in">NS_DESIGNATED_INITIALIZER</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">NS_ASSUME_NONNULL_END</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  CCLogFormatter.m</span></span><br><span class="line"><span class="comment">//  OCSimpleView</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  Created by Cocos on 2019/7/25.</span></span><br><span class="line"><span class="comment">//  Copyright © 2019 Cocos. All rights reserved.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#import <span class="meta-string">&quot;CCLogFormatter.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">CCLogFormatter</span> () </span>&#123;</span><br><span class="line">    <span class="built_in">NSDateFormatter</span> *_dateFormatter;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">CCLogFormatter</span></span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">- (<span class="keyword">instancetype</span>)init &#123;</span><br><span class="line">    <span class="keyword">return</span> [<span class="keyword">self</span> initWithDateFormatter:<span class="literal">nil</span>];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">instancetype</span>)initWithDateFormatter:(<span class="built_in">NSDateFormatter</span> * __<span class="keyword">nullable</span>)aDateFormatter &#123;</span><br><span class="line">    <span class="keyword">if</span> ((<span class="keyword">self</span> = [<span class="keyword">super</span> init])) &#123;</span><br><span class="line">        <span class="keyword">if</span> (aDateFormatter) &#123;</span><br><span class="line">            _dateFormatter = aDateFormatter;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            _dateFormatter = [[<span class="built_in">NSDateFormatter</span> alloc] init];</span><br><span class="line">            [_dateFormatter setFormatterBehavior:<span class="built_in">NSDateFormatterBehavior10_4</span>]; <span class="comment">// 10.4+ style</span></span><br><span class="line">            [_dateFormatter setDateFormat:<span class="string">@&quot;yyyy/MM/dd HH:mm:ss:SSS&quot;</span>];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">NSString</span> * _Nullable)formatLogMessage:(<span class="keyword">nonnull</span> DDLogMessage *)logMessage &#123;</span><br><span class="line">    <span class="built_in">NSString</span> *dateAndTime = [_dateFormatter stringFromDate:(logMessage-&gt;_timestamp)];</span><br><span class="line">    <span class="keyword">return</span> [[<span class="built_in">NSString</span> alloc] initWithFormat:<span class="string">@&quot;[%@]\n%@:\n[%@]%@&quot;</span>, logMessage.file, logMessage.function, dateAndTime, logMessage.message];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<p>其实还是挺简单的, 我实现了formatLogMessage:这个方法, 其他的代码直接从<code>DDLogFileFormatterDefault</code>类抄过来, 当然这里直接让<code>CCLogFormatter</code>继承<code>DDLogFileFormatterDefault</code>的话这里初始化代码就可以省略了. 在<code>CCLogFormatter </code>里我让这个格式从原来:</p>
+<pre><code>2019/07/25 14:33:36:239  Debug</code></pre>
+<p>换成了如下格式:</p>
+<pre><code>[~/Xcode/Study/OCSimpleView/OCSimpleView/ViewController.m]
+-[ViewController loggerFunc]:
+[2019/07/25 14:58:07:358]Debug</code></pre>
+<p>这样扩展就结束了. 其他更多复杂的功能, 百变不离其宗, 都是这个套路.</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>　　这篇文章主要是通过对热门框架CocoaLumberjack源码的分析, 找出其中的设计模式, 进而了解设计模式的重要性, 学会灵活扩展框架的实现方法之一. 还有很多设计模式, 传说一共有30多种, 实在是太多了, 学不完, 但是保持一颗年轻的心, 活到老学到老, 我觉得是最重要的 : )</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/%E6%9E%B6%E6%9E%84%E4%B8%8E%E8%AE%BE%E8%AE%A1/">架构与设计</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/可扩展/">可扩展</a><a href="/tags/iOS/">iOS</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2019/07/25/2019-07-25-talking-about-design-patterns-from-cocoaLumberjack/" data-title="从CocoaLumberjack的高效易扩展谈为什么要学习设计模式 | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2019/08/01/2019-08-01-understand-the-usage-of-the-didReceiveChallenge-protocol-method-in-NSURLSessionDelegate/" title="认真理解iOS开发中HTTPS协议的用法">
+  <strong>上一篇：</strong><br/>
+  <span>
+  认真理解iOS开发中HTTPS协议的用法</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2019/07/19/2019-07-19-modular-design-in-ios/"  title="业界流行的三种iOS组件化设计方案">
+ <strong>下一篇：</strong><br/> 
+ <span>业界流行的三种iOS组件化设计方案
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#CocoaLumberjack%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="toc-number">3.</span> <span class="toc-text">CocoaLumberjack的使用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#CocoaLumberjack%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90"><span class="toc-number">4.</span> <span class="toc-text">CocoaLumberjack源码分析</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F"><span class="toc-number">5.</span> <span class="toc-text">桥接模式</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%89%A9%E5%B1%95CocoaLumberjack"><span class="toc-number">6.</span> <span class="toc-text">扩展CocoaLumberjack</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">7.</span> <span class="toc-text">总结</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Greedy-Algorithm/" title="Greedy Algorithm">Greedy Algorithm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2020 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
