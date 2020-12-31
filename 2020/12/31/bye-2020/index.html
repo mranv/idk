@@ -1,0 +1,649 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>聊一聊桌面程序开发和2020年总结 | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="聊一聊桌面程序和移动端程序的开发思路差异和2020年总结前言2020年马上就要过去了，这个月的博文憋到现在才写，实在是有原因的，倒不是说工作太忙没空写，而是没有心思写。 和去年相比，2020年经历的事情多了，也艰难了。我的年总总结，大概要从5月开始算起。 工作上工作上，经历了5月份的裁员风波到6月份的入职新公司，再到7月份又接到多个offer，让我从心理层面上是有很多波动的，生活就是在不断经历各种">
+<meta property="og:type" content="article">
+<meta property="og:title" content="聊一聊桌面程序开发和2020年总结">
+<meta property="og:url" content="http://yoursite.com/2020/12/31/bye-2020/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="聊一聊桌面程序和移动端程序的开发思路差异和2020年总结前言2020年马上就要过去了，这个月的博文憋到现在才写，实在是有原因的，倒不是说工作太忙没空写，而是没有心思写。 和去年相比，2020年经历的事情多了，也艰难了。我的年总总结，大概要从5月开始算起。 工作上工作上，经历了5月份的裁员风波到6月份的入职新公司，再到7月份又接到多个offer，让我从心理层面上是有很多波动的，生活就是在不断经历各种">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-31T13:24:02.000Z">
+<meta property="article:modified_time" content="2020-12-31T13:31:59.715Z">
+<meta property="article:author" content="Cocos">
+<meta property="article:tag" content="Mac应用">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2020/12/31/bye-2020/" title="聊一聊桌面程序开发和2020年总结" itemprop="url">聊一聊桌面程序开发和2020年总结</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2020-12-31T13:24:02.000Z" itemprop="datePublished"> 发表于 2020-12-31</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%81%8A%E4%B8%80%E8%81%8A%E6%A1%8C%E9%9D%A2%E7%A8%8B%E5%BA%8F%E5%92%8C%E7%A7%BB%E5%8A%A8%E7%AB%AF%E7%A8%8B%E5%BA%8F%E7%9A%84%E5%BC%80%E5%8F%91%E6%80%9D%E8%B7%AF%E5%B7%AE%E5%BC%82%E5%92%8C2020%E5%B9%B4%E6%80%BB%E7%BB%93"><span class="toc-number">1.</span> <span class="toc-text">聊一聊桌面程序和移动端程序的开发思路差异和2020年总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E4%B8%8A"><span class="toc-number">3.</span> <span class="toc-text">工作上</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E4%B8%8A%E7%9A%84%E6%94%B6%E8%8E%B7"><span class="toc-number">4.</span> <span class="toc-text">工作上的收获</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%94%B6%E8%8E%B7%E4%B9%8B%EF%BC%8C%E6%8E%8C%E6%8F%A1%E5%AE%89%E5%85%A8%E5%BA%94%E7%94%A8%E7%9A%84%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80"><span class="toc-number">4.1.</span> <span class="toc-text">收获之，掌握安全应用的开发基础</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%94%9F%E6%B4%BB%E4%B8%8A%E7%9A%84%E6%94%B6%E8%8E%B7"><span class="toc-number">5.</span> <span class="toc-text">生活上的收获</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2021%E5%B9%B4%E7%9B%AE%E6%A0%87"><span class="toc-number">6.</span> <span class="toc-text">2021年目标</span></a></li></ol>
+		
+		</div>
+		
+		<h1 id="聊一聊桌面程序和移动端程序的开发思路差异和2020年总结"><a href="#聊一聊桌面程序和移动端程序的开发思路差异和2020年总结" class="headerlink" title="聊一聊桌面程序和移动端程序的开发思路差异和2020年总结"></a>聊一聊桌面程序和移动端程序的开发思路差异和2020年总结</h1><h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>2020年马上就要过去了，这个月的博文憋到现在才写，实在是有原因的，倒不是说工作太忙没空写，而是没有心思写。</p>
+<p>和去年相比，2020年经历的事情多了，也艰难了。我的年总总结，大概要从5月开始算起。</p>
+<h1 id="工作上"><a href="#工作上" class="headerlink" title="工作上"></a>工作上</h1><p>工作上，经历了5月份的裁员风波到6月份的入职新公司，再到7月份又接到多个offer，让我从心理层面上是有很多波动的，生活就是在不断经历各种选择，每个人都希望作出各种最优的选择，但是这是不太可能的，大部分情况都是基于当前最需要什么来决定选择什么。</p>
+<p>工作是生活的一部分，那就意味着需要做出选择。从6月份拿到的offer看，有纯互联网公司，有金融公司，有安全软件公司，最后选择了安全公司。</p>
+<p>当时的想法就是，我需要尽快入职，因为入职后缴纳社保公积金，能保证我的买房计划的实施。这个后面会说到。</p>
+<p>另一个想法，就是从毕业到现在，都很少经历加班，工作压力都不大，所以就想着找一家工作压力大的能加班的公司，进一步强化自己，至少以后简历好看一些，进好公司容易一些。</p>
+<p>第三个客观原因就是，5月份国内还在爆发疫情，到处弥漫着失业的气息，加上自己简历本身不是很突出，我真的慌呀～</p>
+<p>基于上面的想法，最后选择了一家工作强度比较大的安全公司，负责Mac客户端开发。说句实话，如果不是因为上面第一个想法，我应该不会选择安全公司的，理由很简单，就是给我开待遇的时候居然直接<strong>忽略</strong>了我的诉求，在加班这么厉害的情况下，给我开的待遇还没有我上家公司好！</p>
+<p>待遇，是对一个人<strong>认可</strong>的对直接表示方式，当然也和市场有关系，也和履历有关。实际上我见过很多技术一般但工资很高的开发者，也见过技术很好但待遇很低的开发者。</p>
+<h1 id="工作上的收获"><a href="#工作上的收获" class="headerlink" title="工作上的收获"></a>工作上的收获</h1><p>进入安全公司工作，有满意的地方，也有不满之处。</p>
+<p>不满之处上面说了，待遇不满。特别是当我入职之后，仅仅用了半个多月便熟悉了整个中型规模程序的设计原理和架构（在此之前我没接触过Mac开发，入职时心很虚），并能快速指导主要功能开发的时候，再接触那些技术比我差的，产出比我低的，基础也没有我好的，但是估计待遇比我还好的同事之后，我便有些后悔了，当初我的态度咋那么软那么没底气呢。</p>
+<p>但是既然来了，就不能忘记自己来的目的，不能忘记自己想要什么，所以在工作上我还是一如既往认真负责，提供可维护的代码，拒绝垃圾代码，主动弥补自己缺失的技能和短板，建立危机感，希望日后有用武之地呀。</p>
+<h2 id="收获之，掌握安全应用的开发基础"><a href="#收获之，掌握安全应用的开发基础" class="headerlink" title="收获之，掌握安全应用的开发基础"></a>收获之，掌握安全应用的开发基础</h2><p>毕业以来，我主要是做互联网APP开发，自从接触到<strong>Mac安全管控软件</strong>开发之后，我能明显感受到自己的眼界是变开阔了，技术深度加深了。这就是我这半年工作上<strong>最大的收获</strong>。</p>
+<p>以往做的互联网APP开发，无非就是做UI，然后HTTP协议请求后端拿数据，接着保存，展示到UI上，完了。这种事情，做个一两年可以，做多了，无非就变成了不断开发各种UI罢了，招一个刚毕业的人他也能很好完成，特别是他还可以采用跨平台技术比如Flutter之类的技术，开发效率可以原生iOS要高，成本更低。</p>
+<p>这也就是为啥网上那么移动端开发者因为Flutter的诞生而害怕失业的原因，因为，做这类工作实在是太简单了。</p>
+<p>而，安全应用所关注的领域则截然不同了，不再只是单独追求UI和业务逻辑，也会开始要求开发者要有较扎实的理论技术，对底层有较多了解，还要求能反汇编，能找到一些没有公开的符号，甚至能对内核进行入侵式开发，实现一些苹果没有提供的功能。</p>
+<p>Mac安全应用的开发思路，不再是iOS那样百度一下，查查文档，找找开源demo就能完成的，更多的是需要有硬核技术，毕竟Mac程序不像iOS那么多的限制，开发的思路更加丰富。</p>
+<p>举一些例子，我们做安全管控软件，就要求能管控得住用户的网络，数据的流动，磁盘读写，甚至能在用户使用App的时候，hook用户的App进行各种限制操作。</p>
+<p>这就要求开发者能熟悉内核开发技术，熟悉汇编，看得懂反编译，能知道Mac的内核提供了那些功能，以及那些隐藏的功能。而掌握进程的本质，就能入侵用户的App，实现一些我们自己的限制功能。</p>
+<p>比如限制用户只能把文件保存到指定位置，给用户的UI上新增或者隐藏一些我们的东西。再到普通功能的开发，由于Mac的开发案例极其匮乏，经常一个普通功能都要做调研，反编译其他App学习，这个也对开发者技术功底有很强的要求。</p>
+<p>而多进程开发，也是桌面程序的重头戏，多进程开发思路也非常有意思，程序会有多个进程，除了UI主程，还有管控网络的单独进程，处理业务数据的进程，负责升级任务的进程，负责启动UI的进程等等，不同的进程可能完全用不同语言实现。这些开发思路都和iOS移动端开发有很大不同，算是技术面的加深和拓宽吧。</p>
+<p>例子还有很多，空谈意义不大，这部分可以参考我过去写的博文，以及以后还要写的。<strong>总之一句话，今年下半年的开发，目光不再局限UI和业务开发，从难度上和意义上都远超过过去几年的开发，现在让我再次回到iOS移动端开发，我应该能做得更好。</strong></p>
+<h1 id="生活上的收获"><a href="#生活上的收获" class="headerlink" title="生活上的收获"></a>生活上的收获</h1><p>2020年，在生活上的收获都超过了以往。10月份结婚领证，11月份达成留在深圳的目标，其中的经历就不多说了，只有过来人，才能明白其中的艰难。目前还在苦苦审批，希望一切顺利，让我能在2021年能够全面发力。</p>
+<h1 id="2021年目标"><a href="#2021年目标" class="headerlink" title="2021年目标"></a>2021年目标</h1><p>目前初步定下的目标，工作上，能完全成为一名合格的安全工程师：熟悉汇编和反编译，熟悉常用逆向手段，掌握内核开发基础。又或者能成为一名资深iOS移动端工程师，具体走哪条路，还要看明年的机遇。</p>
+<p>生活上，希望审批一切顺利，让我能放宽心，再无顾虑勇往直前，从摆酒，蜜月旅行，到备孕，稳步进行。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Mac应用/">Mac应用</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2020/12/31/bye-2020/" data-title="聊一聊桌面程序开发和2020年总结 | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+
+<div class="next">
+<a href="/2020/11/22/Explore-the-principle-of-mac-os-x-and-ios-process-creation-from-the-kernel/"  title="从内核探究Mac OS X和iOS App 进程的创建原理">
+ <strong>下一篇：</strong><br/> 
+ <span>从内核探究Mac OS X和iOS App 进程的创建原理
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%81%8A%E4%B8%80%E8%81%8A%E6%A1%8C%E9%9D%A2%E7%A8%8B%E5%BA%8F%E5%92%8C%E7%A7%BB%E5%8A%A8%E7%AB%AF%E7%A8%8B%E5%BA%8F%E7%9A%84%E5%BC%80%E5%8F%91%E6%80%9D%E8%B7%AF%E5%B7%AE%E5%BC%82%E5%92%8C2020%E5%B9%B4%E6%80%BB%E7%BB%93"><span class="toc-number">1.</span> <span class="toc-text">聊一聊桌面程序和移动端程序的开发思路差异和2020年总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E4%B8%8A"><span class="toc-number">3.</span> <span class="toc-text">工作上</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E4%B8%8A%E7%9A%84%E6%94%B6%E8%8E%B7"><span class="toc-number">4.</span> <span class="toc-text">工作上的收获</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%94%B6%E8%8E%B7%E4%B9%8B%EF%BC%8C%E6%8E%8C%E6%8F%A1%E5%AE%89%E5%85%A8%E5%BA%94%E7%94%A8%E7%9A%84%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80"><span class="toc-number">4.1.</span> <span class="toc-text">收获之，掌握安全应用的开发基础</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%94%9F%E6%B4%BB%E4%B8%8A%E7%9A%84%E6%94%B6%E8%8E%B7"><span class="toc-number">5.</span> <span class="toc-text">生活上的收获</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2021%E5%B9%B4%E7%9B%AE%E6%A0%87"><span class="toc-number">6.</span> <span class="toc-text">2021年目标</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Greedy-Algorithm/" title="Greedy Algorithm">Greedy Algorithm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2020 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
