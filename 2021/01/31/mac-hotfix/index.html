@@ -1,0 +1,643 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>Mac程序的热修复实现思路 | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="Mac程序的热修复实现思路前言Mac的热修复，相比iOS来说，从设计上思路要开阔很多。iOS的热修复需要借助runtime，让原生逻辑从原先的oc进入js环境执行，然后热修复时下载js脚本替换原来的代码。而且还被苹果商店给禁止了。 Mac的热修复功能，可以从进程模块替换的角度考虑。一个Mac程序一般都会有多个进程构成，可能有负责网络的独立进程，负责UI的xxx.app，有严格权限控制的独立XPC进">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mac程序的热修复实现思路">
+<meta property="og:url" content="http://yoursite.com/2021/01/31/mac-hotfix/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="Mac程序的热修复实现思路前言Mac的热修复，相比iOS来说，从设计上思路要开阔很多。iOS的热修复需要借助runtime，让原生逻辑从原先的oc进入js环境执行，然后热修复时下载js脚本替换原来的代码。而且还被苹果商店给禁止了。 Mac的热修复功能，可以从进程模块替换的角度考虑。一个Mac程序一般都会有多个进程构成，可能有负责网络的独立进程，负责UI的xxx.app，有严格权限控制的独立XPC进">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/images/mac-hotfix.png">
+<meta property="article:published_time" content="2021-01-31T05:23:38.000Z">
+<meta property="article:modified_time" content="2021-02-08T05:30:35.917Z">
+<meta property="article:author" content="Cocos">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/images/mac-hotfix.png">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2021/01/31/mac-hotfix/" title="Mac程序的热修复实现思路" itemprop="url">Mac程序的热修复实现思路</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2021-01-31T05:23:38.000Z" itemprop="datePublished"> 发表于 2021-01-31</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Mac%E7%A8%8B%E5%BA%8F%E7%9A%84%E7%83%AD%E4%BF%AE%E5%A4%8D%E5%AE%9E%E7%8E%B0%E6%80%9D%E8%B7%AF"><span class="toc-number">1.</span> <span class="toc-text">Mac程序的热修复实现思路</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E8%BF%9B%E7%A8%8B%E7%9A%84%E6%8F%90%E6%9D%83"><span class="toc-number">3.</span> <span class="toc-text">安装进程的提权</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%90%E6%9D%83%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%80%9D%E8%B7%AF"><span class="toc-number">3.1.</span> <span class="toc-text">提权的实现思路</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%9A%E7%94%A8%E7%83%AD%E4%BF%AE%E5%A4%8D%E4%BB%BB%E5%8A%A1%E4%B8%8B%E8%BD%BD%E4%BB%A5%E5%8F%8A%E6%89%A7%E8%A1%8C%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%80%9D%E8%B7%AF"><span class="toc-number">3.2.</span> <span class="toc-text">通用热修复任务下载以及执行的实现思路</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E5%8C%85%E7%9A%84%E5%86%85%E5%AE%B9%E8%AE%BE%E8%AE%A1"><span class="toc-number">3.3.</span> <span class="toc-text">安装包的内容设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E5%8C%85%E7%9A%84%E4%B8%8B%E8%BD%BD"><span class="toc-number">3.4.</span> <span class="toc-text">安装包的下载</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<h1 id="Mac程序的热修复实现思路"><a href="#Mac程序的热修复实现思路" class="headerlink" title="Mac程序的热修复实现思路"></a>Mac程序的热修复实现思路</h1><h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>Mac的热修复，相比iOS来说，从设计上思路要开阔很多。iOS的热修复需要借助runtime，让原生逻辑从原先的oc进入js环境执行，然后热修复时下载js脚本替换原来的代码。而且还被苹果商店给禁止了。</p>
+<p>Mac的热修复功能，可以从进程模块替换的角度考虑。一个Mac程序一般都会有多个进程构成，可能有负责网络的独立进程，负责UI的xxx.app，有严格权限控制的独立XPC进程，负责保活的辅助进程等。</p>
+<p>所以热修复的思路和iOS不同，Mac一般是替换模块的可执行程序，其中会包括安装进程的提权操作，通用热修复数据下载和执行等。本文主要会介绍这两个方面的设计思路。</p>
+<h1 id="安装进程的提权"><a href="#安装进程的提权" class="headerlink" title="安装进程的提权"></a>安装进程的提权</h1><p>这里详细解释一下什么是提权。一般我们的热修复任务下载到本地之后，需要有人去执行它，执行它的角色就是安装进程了，安装进程是我们自己设计的，主要是配合热修复安装包的逻辑来工作，把安装包中的更新模块安装到事先指定的位置。</p>
+<p>提权的意思，就是让安装进程从普通用户权限提升到root权限，因为一些模块需要放到系统预先设定的目录，比如内核模块，这些目录都是需要root权限的，而且让系统加载内核扩展也需要root权限，所以我们需要提权操作。</p>
+<h2 id="提权的实现思路"><a href="#提权的实现思路" class="headerlink" title="提权的实现思路"></a>提权的实现思路</h2><p>进程提权在桌面程序是一个比较常见的需求，苹果也有一套官方推荐的方案。这里介绍的就是苹果推荐的方案。</p>
+<p>思路不复杂，简单说，要实现用户无需输入密码即可让程序运行在root权限下的方法，就是借助launchd，首次安装软件的时候在launchd的<code>/Library/LaunchDaemons </code>目录下写入开机自启动的plist文件，plist文件中指定的程序就会以root权限启动了。具体可以看我之前写的一篇文章<a target="_blank" rel="noopener" href="http://blog.cocosdever.com/2020/11/22/Explore-the-principle-of-mac-os-x-and-ios-process-creation-from-the-kernel/">从内核探究Mac OS X和iOS App 进程的创建原理</a></p>
+<ol>
+<li>我们需要在plist文件里面指定一个我们自己写的提权进程，比如叫<code>Helper</code>，随后用户开机的时候launchd就会以root权限运行<code>Helper</code>了。</li>
+<li>接着Helper可以监听自定义端口或者注册xpc服务，这样一来我们的其他进程就能通过<code>Helper</code>进程进行提权了。</li>
+<li>具体<code>Helper</code>代码怎么写，就看自己的业务需求了，简单点，就是注册xpc服务，然后我们的热修复安装进程，需要提权时就通过xpc告知<code>Helper</code>进程。</li>
+<li><code>Helper</code>进程把原来的热修复安装进程杀了再重新以子进程的形式启动热修复安装进程，这样热修复安装进程就是root权限了，这样热修复进程就用原来的用户权限提升到root权限。</li>
+</ol>
+<p>上面就是Mac开发中提权标准做法。</p>
+<h2 id="通用热修复任务下载以及执行的实现思路"><a href="#通用热修复任务下载以及执行的实现思路" class="headerlink" title="通用热修复任务下载以及执行的实现思路"></a>通用热修复任务下载以及执行的实现思路</h2><h2 id="安装包的内容设计"><a href="#安装包的内容设计" class="headerlink" title="安装包的内容设计"></a>安装包的内容设计</h2><p>热修复安装包一般是一个压缩包，压缩包中有相关的shell脚本以及对应需要升级的进程可执行文件，实际热修复安装进程的工作，只是直接执行解压并执行压缩包中的shell脚本。</p>
+<h2 id="安装包的下载"><a href="#安装包的下载" class="headerlink" title="安装包的下载"></a>安装包的下载</h2><p>考虑到后台可能会每次下发多个热修复安装包，其中又会包含一些需要重启电脑的升级，从代码的角度上讲，要判断出安装包是否已经被成功安装而且成功重启是比较困难的，一般都要借助文件系统，比如在本地存放一个什么标记之类。</p>
+<p>另一个问题就是，多个热修复安装包可能会修复同一个模块，比如一开始A安装包修复了网络模块v1，接着又来了一个B安装包修复网络模块v2，这个时候你可能就会想着是不是需要跳过A安装包直接安装B安装包呢？如果再混合上重启类安装，实际场景远比这个复杂，另外还有可能是热修复过后电脑还没重启，用户又自己手动安装了程序，这样会导致版本号错乱的问题，所以如果把全部场景都考虑上去的话，代码逻辑就会变得非常复杂。</p>
+<p>下图就是我一开始把<strong>重启类</strong>任务限制成最多1个的流程图，逻辑较多。</p>
+<p><img src="/images/mac-hotfix.png"></p>
+<p>上面的设计有一个问题，程序会每安装一个重启类任务后就重启电脑一次，如果同时有多个重启类任务时就要重启多次，体验不是很好。而且总体看逻辑是比较复杂的。</p>
+<p>后来觉得，直接有多少任务就安装多少任务，无需再区分是否重启，所这样实现逻辑也会简单明了很多，而功能体验上也会更好。以上面的<strong>是否存在重启类任务</strong>的分支就始终返回否了。</p>
+<p>优化后的流程图我就不画了，就是把上面<strong>是否存在重启类任务</strong>的<code>是</code>分支去掉即可。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>以上就是Mac热修复的设计思路了，主要是在进程的角度处理问题，讲述了提权，任务下载和执行的具体设计思路。可以看出来，Mac开发的思路和iOS还是有很大区别的，不过本质也是一样的。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2021/01/31/mac-hotfix/" data-title="Mac程序的热修复实现思路 | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+
+<div class="next">
+<a href="/2020/12/31/bye-2020/"  title="聊一聊桌面程序开发和2020年总结">
+ <strong>下一篇：</strong><br/> 
+ <span>聊一聊桌面程序开发和2020年总结
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Mac%E7%A8%8B%E5%BA%8F%E7%9A%84%E7%83%AD%E4%BF%AE%E5%A4%8D%E5%AE%9E%E7%8E%B0%E6%80%9D%E8%B7%AF"><span class="toc-number">1.</span> <span class="toc-text">Mac程序的热修复实现思路</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E8%BF%9B%E7%A8%8B%E7%9A%84%E6%8F%90%E6%9D%83"><span class="toc-number">3.</span> <span class="toc-text">安装进程的提权</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%90%E6%9D%83%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%80%9D%E8%B7%AF"><span class="toc-number">3.1.</span> <span class="toc-text">提权的实现思路</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%9A%E7%94%A8%E7%83%AD%E4%BF%AE%E5%A4%8D%E4%BB%BB%E5%8A%A1%E4%B8%8B%E8%BD%BD%E4%BB%A5%E5%8F%8A%E6%89%A7%E8%A1%8C%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%80%9D%E8%B7%AF"><span class="toc-number">3.2.</span> <span class="toc-text">通用热修复任务下载以及执行的实现思路</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E5%8C%85%E7%9A%84%E5%86%85%E5%AE%B9%E8%AE%BE%E8%AE%A1"><span class="toc-number">3.3.</span> <span class="toc-text">安装包的内容设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E5%8C%85%E7%9A%84%E4%B8%8B%E8%BD%BD"><span class="toc-number">3.4.</span> <span class="toc-text">安装包的下载</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Greedy-Algorithm/" title="Greedy Algorithm">Greedy Algorithm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2021 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
