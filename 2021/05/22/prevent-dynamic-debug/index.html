@@ -1,0 +1,675 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>低成本防静态分析和防动态调试的解决方案 | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="前言提高程序的逆向成本，是很多保密性高的代码所必备操作。其中高成本的方案，有加壳，虚拟机保护等，这些方案对项目的改动较大。低成本的方案一般是代码混淆之类，可以最大程度减少代码改动。 最近项目刚好需要增强代码安全性，提高逆向难度，经过几天的摸索已经找到了一个低成本高收益的方案。下面会从防静态分析，防止动态调试两个方面入手。 本文针对C语言做处理，其他语言思路一样，可能还有更便利的方法。只不过一般安全">
+<meta property="og:type" content="article">
+<meta property="og:title" content="低成本防静态分析和防动态调试的解决方案">
+<meta property="og:url" content="http://yoursite.com/2021/05/22/prevent-dynamic-debug/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="前言提高程序的逆向成本，是很多保密性高的代码所必备操作。其中高成本的方案，有加壳，虚拟机保护等，这些方案对项目的改动较大。低成本的方案一般是代码混淆之类，可以最大程度减少代码改动。 最近项目刚好需要增强代码安全性，提高逆向难度，经过几天的摸索已经找到了一个低成本高收益的方案。下面会从防静态分析，防止动态调试两个方面入手。 本文针对C语言做处理，其他语言思路一样，可能还有更便利的方法。只不过一般安全">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/images/48c897e0-e8bc-4093-93c9-c99442abbeee.png">
+<meta property="og:image" content="http://yoursite.com/images/6aa7668a-14a7-4b8a-89df-803f733b8828.png">
+<meta property="og:image" content="http://yoursite.com/images/59762328-9bf2-4695-aa89-850671c6473f.png">
+<meta property="og:image" content="http://yoursite.com/images/583f1669-6f58-4ebf-8fe6-6343360b7ed5.png">
+<meta property="og:image" content="http://yoursite.com/images/9798d868-740f-4c02-b798-d40ecdfd80bc.png">
+<meta property="og:image" content="http://yoursite.com/images/2904c4f8-aa04-404f-9e09-8ad30ca5d102.png">
+<meta property="og:image" content="http://yoursite.com/images/c146bdf9-03b6-4d1b-bbb6-b6382c70a83c.png">
+<meta property="article:published_time" content="2021-05-22T11:39:02.000Z">
+<meta property="article:modified_time" content="2021-05-22T11:43:56.813Z">
+<meta property="article:author" content="Cocos">
+<meta property="article:tag" content="Mac应用">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/images/48c897e0-e8bc-4093-93c9-c99442abbeee.png">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2021/05/22/prevent-dynamic-debug/" title="低成本防静态分析和防动态调试的解决方案" itemprop="url">低成本防静态分析和防动态调试的解决方案</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2021-05-22T11:39:02.000Z" itemprop="datePublished"> 发表于 2021-05-22</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%98%B2%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90"><span class="toc-number">2.</span> <span class="toc-text">防静态分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A7%BB%E9%99%A4%E7%AC%A6%E5%8F%B7"><span class="toc-number">2.1.</span> <span class="toc-text">移除符号</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86"><span class="toc-number">2.2.</span> <span class="toc-text">代码混淆</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%98%B2%E5%8A%A8%E6%80%81%E8%B0%83%E8%AF%95"><span class="toc-number">2.3.</span> <span class="toc-text">防动态调试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%98%B2%E6%B3%A8%E5%85%A5"><span class="toc-number">2.4.</span> <span class="toc-text">防注入</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8E%A8%E8%8D%90%E9%98%85%E8%AF%BB"><span class="toc-number">4.</span> <span class="toc-text">推荐阅读</span></a></li></ol>
+		
+		</div>
+		
+		<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>提高程序的逆向成本，是很多保密性高的代码所必备操作。其中高成本的方案，有加壳，虚拟机保护等，这些方案对项目的改动较大。低成本的方案一般是代码混淆之类，可以最大程度减少代码改动。</p>
+<p>最近项目刚好需要增强代码安全性，提高逆向难度，经过几天的摸索已经找到了一个<strong>低成本高收益</strong>的方案。下面会从防静态分析，防止动态调试两个方面入手。</p>
+<p>本文针对<strong>C语言</strong>做处理，其他语言思路一样，可能还有更便利的方法。只不过一般安全性要求高的代码都是比较底层C代码，上层应用级别的代码基本没有值得防护的，当然越高级的语言本身越复杂，静态分析也越难。</p>
+<h1 id="防静态分析"><a href="#防静态分析" class="headerlink" title="防静态分析"></a>防静态分析</h1><p>我们知道，Mac上的可执行程序一般是macho格式的二进制文件，现有的很多静态分析工具，比如<strong>MachOView</strong>，<strong>Hopper</strong>，<strong>nm</strong>等，都能轻松获取二进制文件中的符号表还有程序段的指令集。比如下面：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  main.c</span></span><br><span class="line"><span class="comment">//  TestSymbol</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  Created by Cocos on 2021/4/17.</span></span><br><span class="line"><span class="comment">//  Copyright © 2020 Cocos. All rights reserved.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="comment">//#include &lt;unistd.h&gt;</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">__attribute__ ((visibility(<span class="string">&quot;hidden&quot;</span>)))</span><br><span class="line"><span class="keyword">int</span> (*localPrintf)(<span class="keyword">const</span> <span class="keyword">char</span> * __restrict, ...);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">char</span>* str1 = <span class="string">&quot;Hello, World\n&quot;</span>;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">char</span>* str2 = <span class="string">&quot;Hello, Boy\n&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> ggIntVal = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">static_say</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;static hello\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">say</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;hello\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">const</span> <span class="keyword">char</span> * argv[], <span class="keyword">char</span> **envp, <span class="keyword">char</span> **apple)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// insert code here...</span></span><br><span class="line">    localPrintf = <span class="built_in">printf</span>;</span><br><span class="line">    localPrintf(<span class="string">&quot;%s&quot;</span>, str1);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">char</span> *tiny = <span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(<span class="keyword">int</span>));</span><br><span class="line">    <span class="built_in">free</span>(tiny);</span><br><span class="line"></span><br><span class="line">    say();</span><br><span class="line">    static_say();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; <span class="number">10</span> ; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (i % <span class="number">2</span>) &#123;</span><br><span class="line">            ggIntVal *= i;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;\n%d\n&quot;</span>, ggIntVal);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/48c897e0-e8bc-4093-93c9-c99442abbeee.png"></p>
+<p><img src="/images/6aa7668a-14a7-4b8a-89df-803f733b8828.png"></p>
+<p><img src="/images/59762328-9bf2-4695-aa89-850671c6473f.png"></p>
+<p>上面两个图可以看出用工具能够轻松防汇编出指令集，Hopper还能强大能直接把指令集解释成伪代码，基本和源码一致。</p>
+<p><strong>所以对于保密性比较高的代码，需要尽力提高逆向难度，保护公司的代码财产。</strong></p>
+<h2 id="移除符号"><a href="#移除符号" class="headerlink" title="移除符号"></a>移除符号</h2><p>防止静态分析，首先要做的就是移除内部符号。内部符号，包括数据段符号（全局变量），代码段符号（内部函数名）。</p>
+<p>移除符号可以使用strip命令</p>
+<pre><code>strip -x TestSymbol -o TestSymbol_nosymbol</code></pre>
+<p>Xcode支持配置strip，只需要配置成下面这样即可</p>
+<p><img src="/images/583f1669-6f58-4ebf-8fe6-6343360b7ed5.png"></p>
+<p>运行一下代码，用nm看一下符号，可以发现内部符号全部消失了（类型小写的是内部符号）</p>
+<p><img src="/images/9798d868-740f-4c02-b798-d40ecdfd80bc.png"></p>
+<p><strong>敲重点了</strong>，可以看到两个全局变量的符号还可以看到（str1，str2），还有一个函数符号（say）。可以在代码中加上attribute告诉编译器把符号隐藏掉，这样符号会变成内部符号然后被剔除。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">__attribute__ ((visibility(<span class="string">&quot;hidden&quot;</span>)))</span><br></pre></td></tr></table></figure>
+
+<p>编译后，再一次执行nm，可以看到str1， str2两个符号已经消失了。</p>
+<p><img src="/images/2904c4f8-aa04-404f-9e09-8ad30ca5d102.png"></p>
+<h2 id="代码混淆"><a href="#代码混淆" class="headerlink" title="代码混淆"></a>代码混淆</h2><p>代码混淆可以有两部分，一个是加密代码中的常量字符串，另一个是在逻辑代码中增加垃圾代码，这样编译出来的指令里面就多了很多垃圾指令，别人逆向的时候看得头昏眼花的，增加逆向难度。</p>
+<p>先说一下加密字符串的，我在知乎上看到一个手工加密并且用宏的方式实现，最大程度较少代码的改动，感觉不错，具体细节可以看这篇文章：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/39020918"># 纯手工混淆C/C++代码（下）</a> ，思路就是写一个小工具，把事先写好的字符串宏，给自动生成另一个同名的宏（成为加密宏），代码中如果要加密字符串的话，就用加密宏即可。具体细节可以看上面文章，很简单的不多说了。</p>
+<p>这样编译出来的二进制文件，也看不到明文字符串了，而且代码的改动也非常少，只需要把原来的字符串写成对于宏就可以，连工程配置都不需要修改。</p>
+<p>此外还可以通过工具对生成一些垃圾代码，并用宏的形式附加到需要保护的函数中，这些都能提高静态分析的成本。</p>
+<h2 id="防动态调试"><a href="#防动态调试" class="headerlink" title="防动态调试"></a>防动态调试</h2><p>防止动态调试，主要是防止应用程序被Xcode中的attach功能附加上，这样即便没有源码，也可以对进程进行调试。要防止，那么需要先知道attach的原理。</p>
+<p>attach大概原理其实我还没怎么研究，可以试一下，在Xcode上对还没有运行的程序执行attach操作后，运行程序时，程序的父进程是<code>debugserver</code> ，<code>debugserver</code> 会利用ptrace系统调用对子进程进行调试。</p>
+<p><img src="/images/c146bdf9-03b6-4d1b-bbb6-b6382c70a83c.png"></p>
+<p>如果attach正在运行的进程，其父进程不变依然是<code>launchd</code> ，这种情况下具体如何调试我还没弄清楚，不过最终也会使用到ptrace。</p>
+<p>实际上，Mac还是提供了标准的接口供程序阻止其他进程对自己进行动态调试的，具体方法可以参考这篇文章，实现起来就是一个系统调用即可。</p>
+<p>下面代码演示了两种防动态调试的方法，一种是直接调用指定标号的系统调用，另一种是调用ptrace函数</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  main.m</span></span><br><span class="line"><span class="comment">//  singleWindow</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  Created by Cocos on 2020/7/13.</span></span><br><span class="line"><span class="comment">//  Copyright © 2020 Cocos. All rights reserved.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#import <span class="meta-string">&lt;Cocoa/Cocoa.h&gt;</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&lt;dlfcn.h&gt;</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">//定义一个函数指针用来接收动态加载出来的函数ptrace</span></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">int</span> <span class="params">(*<span class="keyword">ptrace_ptr_t</span>)</span><span class="params">(<span class="keyword">int</span> _request, <span class="keyword">pid_t</span> _pid, <span class="keyword">caddr_t</span> _addr, <span class="keyword">int</span> _data)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> !defined(PT_DENY_ATTACH)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PT_DENY_ATTACH 31</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">DenyAppAttach</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//动态加载并链接指定的库</span></span><br><span class="line">    <span class="comment">//第一个参数path为0时, 它会自动查找 $LD_LIBRARY_PATH,$DYLD_LIBRARY_PATH, $DYLD_FALLBACK_LIBRARY_PATH 和 当前工作目录中的动态链接库.</span></span><br><span class="line">    <span class="keyword">void</span> *handle = dlopen(<span class="number">0</span>, RTLD_GLOBAL | RTLD_NOW);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//动态加载ptrace函数，ptrace函数的参数个数和类型，及返回类型跟ptrace_ptr_t函数指针定义的是一样的</span></span><br><span class="line">    <span class="keyword">ptrace_ptr_t</span> ptrace_ptr = dlsym(handle, <span class="string">&quot;ptrace&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//执行ptrace_ptr相当于执行ptrace函数</span></span><br><span class="line">    ptrace_ptr(PT_DENY_ATTACH, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//关闭动态库，并且卸载</span></span><br><span class="line">    dlclose(handle);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">const</span> <span class="keyword">char</span> *argv[])</span> </span>&#123;</span><br><span class="line">    DenyAppAttach();</span><br><span class="line">    @autoreleasepool &#123;</span><br><span class="line">        <span class="comment">// Setup code that might create autoreleased objects goes here.</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> NSApplicationMain(argc, argv);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>也可以直接调用指定编号的系统调用</p>
+<pre><code>syscall(26, 31, 0,0,0);</code></pre>
+<p>注意，上面代码可以另外加debug宏，不然程序也没法正常debug了。</p>
+<h2 id="防注入"><a href="#防注入" class="headerlink" title="防注入"></a>防注入</h2><p>注入这个之前的文章说过很多次了，我们的程序在运行的时候会调用依赖的动态库，这种属于dyld对程序的合法注入，当然还有一类是入侵形式的注入，以到达对源程序进行hook的效果，进而改变源程序的功能，防注入也可以在编译时带上参数实现，在 Other Linker Flags 配置上添加下面内容即可：</p>
+<pre><code>-Wl,-sectcreate,__RESTRICT,__restrict,/dev/null</code></pre>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>本文从代码混淆，移除符号，配置工程三个方面提升程序的逆向成本，增加一些良好的安全防护功能，仅对项目工程做了轻微改动，可以说是低成本高收益的解决方案。</p>
+<h1 id="推荐阅读"><a href="#推荐阅读" class="headerlink" title="推荐阅读"></a>推荐阅读</h1><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/39020918">纯手工混淆C/C++代码（下）</a> </p>
+<p><a target="_blank" rel="noopener" href="http://darren90.github.io/2019/02/28/iOS%E5%AE%89%E5%85%A8%E4%B9%8B%E9%98%B2%E6%AD%A2%E8%B0%83%E8%AF%95%E4%B8%8E%E9%98%B2%E6%AD%A2%E6%B3%A8%E5%85%A5/">iOS安全之防止调试与防止注入 | 小镇青年</a></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Mac应用/">Mac应用</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2021/05/22/prevent-dynamic-debug/" data-title="低成本防静态分析和防动态调试的解决方案 | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+
+<div class="next">
+<a href="/2021/04/03/xpc-communication/"  title="Mac上XPC多进程通讯的完整解决方案">
+ <strong>下一篇：</strong><br/> 
+ <span>Mac上XPC多进程通讯的完整解决方案
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%98%B2%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90"><span class="toc-number">2.</span> <span class="toc-text">防静态分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A7%BB%E9%99%A4%E7%AC%A6%E5%8F%B7"><span class="toc-number">2.1.</span> <span class="toc-text">移除符号</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86"><span class="toc-number">2.2.</span> <span class="toc-text">代码混淆</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%98%B2%E5%8A%A8%E6%80%81%E8%B0%83%E8%AF%95"><span class="toc-number">2.3.</span> <span class="toc-text">防动态调试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%98%B2%E6%B3%A8%E5%85%A5"><span class="toc-number">2.4.</span> <span class="toc-text">防注入</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8E%A8%E8%8D%90%E9%98%85%E8%AF%BB"><span class="toc-number">4.</span> <span class="toc-text">推荐阅读</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mac/" title="Mac">Mac<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mac应用/" title="Mac应用">Mac应用<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2021 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
