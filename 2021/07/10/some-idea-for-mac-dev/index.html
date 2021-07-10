@@ -4,27 +4,25 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>集成QQ互联SDK或者友盟社会化分享SDK出现Undefined symbols for architecture i386的分析 | C的博客</title>
+    <title>分享近期Mac应用开发的一些想法 | C的博客</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="Cocos">
     
 
     
-    <meta name="description" content="文档更新说明 最后更新 2016年07月12日 首次更新 2016年07月12日  正文　　集成友盟社交化分享组件并且在模拟器(iphone5)上编译时报错了,提示: Undefined symbols for architecture i386: &quot;_OBJC_CLASS_$_QQApiAudioObject&quot;, referenced from:   objc-class-r">
+    <meta name="description" content="前言这段时间做的几个Mac需求，都属于非常规需求，网上找不到标准答案，只能自己调研，自己设计思路，然后结合产品设计最后实现功能。其中有一些思路值得记录分享一下。本文不会公开全部细节，只记录思路。 拦截全局URL跳转需求背景：通常在App内点击某个URL，系统会帮我们打开默认的浏览器并且跳转到对应网站上。现在有个需求，要实现拦截URL跳转逻辑, 根据后台配置的网址策略，选择不同浏览器打开。因为我们的">
 <meta property="og:type" content="article">
-<meta property="og:title" content="集成QQ互联SDK或者友盟社会化分享SDK出现Undefined symbols for architecture i386的分析">
-<meta property="og:url" content="http://yoursite.com/2016/07/12/2016-07-12-the-error-about-QQ-SDK-i386/index.html">
+<meta property="og:title" content="分享近期Mac应用开发的一些想法">
+<meta property="og:url" content="http://yoursite.com/2021/07/10/some-idea-for-mac-dev/index.html">
 <meta property="og:site_name" content="C的博客">
-<meta property="og:description" content="文档更新说明 最后更新 2016年07月12日 首次更新 2016年07月12日  正文　　集成友盟社交化分享组件并且在模拟器(iphone5)上编译时报错了,提示: Undefined symbols for architecture i386: &quot;_OBJC_CLASS_$_QQApiAudioObject&quot;, referenced from:   objc-class-r">
+<meta property="og:description" content="前言这段时间做的几个Mac需求，都属于非常规需求，网上找不到标准答案，只能自己调研，自己设计思路，然后结合产品设计最后实现功能。其中有一些思路值得记录分享一下。本文不会公开全部细节，只记录思路。 拦截全局URL跳转需求背景：通常在App内点击某个URL，系统会帮我们打开默认的浏览器并且跳转到对应网站上。现在有个需求，要实现拦截URL跳转逻辑, 根据后台配置的网址策略，选择不同浏览器打开。因为我们的">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://yoursite.com/images/qq-sdk-without-i386.jpg">
-<meta property="article:published_time" content="2016-07-12T13:45:34.000Z">
-<meta property="article:modified_time" content="2016-07-12T14:15:04.000Z">
+<meta property="article:published_time" content="2021-07-10T01:46:07.000Z">
+<meta property="article:modified_time" content="2021-07-10T01:53:07.052Z">
 <meta property="article:author" content="Cocos">
-<meta property="article:tag" content="异常">
+<meta property="article:tag" content="Mac">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://yoursite.com/images/qq-sdk-without-i386.jpg">
 
     
     <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
@@ -86,14 +84,14 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2016/07/12/2016-07-12-the-error-about-QQ-SDK-i386/" title="集成QQ互联SDK或者友盟社会化分享SDK出现Undefined symbols for architecture i386的分析" itemprop="url">集成QQ互联SDK或者友盟社会化分享SDK出现Undefined symbols for architecture i386的分析</a>
+      <a href="/2021/07/10/some-idea-for-mac-dev/" title="分享近期Mac应用开发的一些想法" itemprop="url">分享近期Mac应用开发的一些想法</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
 		
   <p class="article-time">
-    <time datetime="2016-07-12T13:45:34.000Z" itemprop="datePublished"> 发表于 2016-07-12</time>
+    <time datetime="2021-07-10T01:46:07.000Z" itemprop="datePublished"> 发表于 2021-07-10</time>
     
   </p>
 </header>
@@ -102,50 +100,41 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AD%A3%E6%96%87"><span class="toc-number">2.</span> <span class="toc-text">正文</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8B%A6%E6%88%AA%E5%85%A8%E5%B1%80URL%E8%B7%B3%E8%BD%AC"><span class="toc-number">2.</span> <span class="toc-text">拦截全局URL跳转</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#App%E5%85%8D%E5%A4%8D%E5%88%B6%E6%8A%80%E6%9C%AF"><span class="toc-number">3.</span> <span class="toc-text">App免复制技术</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
 		
 		</div>
 		
-		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
-<li>最后更新 2016年07月12日</li>
-<li>首次更新 2016年07月12日</li>
-</ul>
-<h1 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h1><p>　　集成友盟社交化分享组件并且在模拟器(iphone5)上编译时报错了,提示:</p>
-<pre><code>Undefined symbols for architecture i386:
-&quot;_OBJC_CLASS_$_QQApiAudioObject&quot;, referenced from:
-  objc-class-ref in libSocialQQ.a(UMSocialQQHandler.o)
-&quot;_OBJC_CLASS_$_QQApiImageObject&quot;, referenced from:
-  objc-class-ref in libSocialQQ.a(UMSocialQQHandler.o)
-&quot;_OBJC_CLASS_$_QQApiInterface&quot;, referenced from:
-  objc-class-ref in libSocialQQ.a(UMSocialQQHandler.o)
-&quot;_OBJC_CLASS_$_QQApiNewsObject&quot;, referenced from:
-  objc-class-ref in libSocialQQ.a(UMSocialQQHandler.o)
-&quot;_OBJC_CLASS_$_QQApiTextObject&quot;, referenced from:
-  objc-class-ref in libSocialQQ.a(UMSocialQQHandler.o)
-&quot;_OBJC_CLASS_$_QQApiVideoObject&quot;, referenced from:
-  objc-class-ref in libSocialQQ.a(UMSocialQQHandler.o)
-&quot;_OBJC_CLASS_$_SendMessageToQQReq&quot;, referenced from:
-  objc-class-ref in libSocialQQ.a(UMSocialQQHandler.o)
-&quot;_OBJC_CLASS_$_TencentOAuth&quot;, referenced from:
-  objc-class-ref in libSocialQQ.a(UMSocialQQHandler.o)
-ld: symbol(s) not found for architecture i386
-clang: error: linker command failed with exit code 1 (use -v to see invocation)</code></pre>
-<p>关于这个问题其实还是很好理解的,原因就是QQ互联的SDK在目前的最新版里已经没有再支持i386指令集了,不过呢还是支持x86_64指令集,所以简单一句话就是,这个SDK不能在iphone5及以下的模拟器跑了,但是支持64位模拟器比如iphone5s及以上.看到友盟论坛好多同学不清楚,索性写下这篇短文分析一下了.</p>
-<p>顺便附带一个QQ官方的SDK更新说明吧.</p>
-<img src="/images/qq-sdk-without-i386.jpg" class="" title="qq-sdk-without-i386">  
+		<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这段时间做的几个Mac需求，都属于非常规需求，网上找不到标准答案，只能自己调研，自己设计思路，然后结合产品设计最后实现功能。其中有一些思路值得记录分享一下。本文不会公开全部细节，只记录思路。</p>
+<h1 id="拦截全局URL跳转"><a href="#拦截全局URL跳转" class="headerlink" title="拦截全局URL跳转"></a>拦截全局URL跳转</h1><p><strong>需求背景：</strong>通常在App内点击某个URL，系统会帮我们打开默认的浏览器并且跳转到对应网站上。现在有个需求，要实现拦截URL跳转逻辑, 根据后台配置的网址策略，选择不同浏览器打开。因为我们的软件是一款安全管控软件，不同浏览器能打开不同的域名，所以做这样一个需求可以极大提高用户使用体验。</p>
+<p>这个需求有两大要点，第一是针对那些被我们的软件注入了动态库的App，在这类App里拦截点击URL的动作，并重新根据策略使用指定浏览器打开，是一件比较常规的事，大概就是找到相关的函数然后Hook，修改逻辑即可。</p>
+<p>有难度的是如何拦截用户电脑上那些不被管控的App的跳转事件呢？经过一番调研之后，我给出了三个方案。</p>
+<p>第一个是给普通App注入一个轻量级的动态库，用来拦截跳转，这个会造成全局稳定性问题，不是最优选。</p>
+<p>第二个是在内核里面事件拦截，这个方案有太多的未知性，安全风险更大，不是最优选。</p>
+<p>第三个是，最后经过一番讨论，转变了一下思路，想出了一个看似不可行实际上确很靠谱的方案。安装我们的软件时，内部再额外附带一个App（<code>网址分配服务</code>），允许接受http等相关web服务的事件，类似普通浏览器，然后再通过产品体验优化引导，最后让用户很自然的把我们的网址分配进程设置成默认浏览器，这样就实现了对全局Web跳转事件的拦截了，用了一个简单的方案实现了复杂的问题，很巧妙。</p>
+<p><code>网址分配服务</code>的主要工作，就是接收网址跳转事件，根据获取的网址策略，分配到真实浏览器去打开，当然这其中会设计很多业务逻辑，这里就不多说了，其中有一个业务层面的思路值得提一下。</p>
+<p>按照业务需求，<code>网址分配服务</code>只有当主程序处于登录状态时才会把URL转发到被管控的浏览器上，否则只能把URL转发到普通的浏览器。针对这个需求点，一开始我想到的是如何把主程序的登录状态通过跨进程通讯传给网址分配服务进程，这个就涉及到进程通讯了，用套接字，文件，还是共享内存，XPC，然后又涉及到进程突然中断时状态不准确等常见的进程间通讯的问题，很麻烦，想了好多方案。</p>
+<p>最后和同事讨论的时候，经同事提醒想到了一个非常简单可靠的方案，当主程序正在运行时，则把所有需要由被管控的浏览器打开的请求，都直接转发给主程序，主程序再内部判断登录状态再决定最终打开哪个浏览器，这样直接绕过进程间的状态同步了，到达需求的效果。</p>
+<p><strong>由此可见，解决问题的思路很重要，如果能把复杂的问题简单化，最终BUG少程序运行稳健，比起高大上的解决方案往往获利更多。</strong></p>
+<h1 id="App免复制技术"><a href="#App免复制技术" class="headerlink" title="App免复制技术"></a>App免复制技术</h1><p><strong>需求背景：</strong>我们的管控软件在运行的时候，需要让用户导入App到不同的管控空间中，不同空间的App拥有不同的权限。早期采用普通复制，占用了大量磁盘空间。Mac系统的磁盘空间一般都比较少，普通的MacBook大部分只有256GB，甚至还有很多128GB的，所以这个问题是比较严重的，必须解决空间占用问题。</p>
+<p>比较容易想到的方法就是软链接，导入空间内的不是完整的App，而是一个软链接，这样就不占用空间了，但是软链接运行时实际上是和原文件是同一个，这样会有一个问题，当用户已经运行了空间中的App，再运行普通App时，launchd会直接把空间中的App激活，导致不符合用户习惯，让用户无法多开普通App。</p>
+<p>解决思路，一开始也是想到注入Finder.app， 注入launchd进程，但是这些都增加了系统的不稳定性，而且还存在很多技术障碍。后来灵机一动，把复杂问题简单化，减少磁盘占用还有另一个方法，采用硬链接也可以解决空间占用问题。</p>
+<p>不过问题也来了，Mac上的App本质是一个文件夹，名字以.app结尾，软链接可以直接基于文件夹创建，但是硬链接不行啊，硬链接只能基于文件创建。另外硬链接也无法在不同挂在盘之间创建，总体限制还是比较多的。</p>
+<p><strong>但是，有思路才是最重要的，问题始终都是可以解决的。最后成功解决各个难题，配合优秀的产品设计，获得了比较好的用户体验。</strong></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>以上就是近段时间完成的主要难题，考虑到项目的保密性，没有公开全部细节。但是也不难看出，解决问题的思路很重要，<strong>开阔的思维和丰富的横向知识</strong>，再配合团队头脑风暴，配合产品体验设计，最终也能解决问题。</p>
+  
 	</div>
 		<footer class="article-footer clearfix">
 <div class="article-catetags">
 
 <div class="article-categories">
   <span></span>
-  <a class="article-category-link" href="/categories/iOS/">iOS</a>
+  <a class="article-category-link" href="/categories/Mac%E5%BA%94%E7%94%A8/">Mac应用</a>
 </div>
 
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/异常/">异常</a>
+  <span></span> <a href="/tags/Mac/">Mac</a>
   </div>
 
 </div>
@@ -154,7 +143,7 @@ clang: error: linker command failed with exit code 1 (use -v to see invocation)<
 
 	<div class="article-share" id="share">
 	
-	  <div data-url="http://yoursite.com/2016/07/12/2016-07-12-the-error-about-QQ-SDK-i386/" data-title="集成QQ互联SDK或者友盟社会化分享SDK出现Undefined symbols for architecture i386的分析 | C的博客" data-tsina="" class="share clearfix">
+	  <div data-url="http://yoursite.com/2021/07/10/some-idea-for-mac-dev/" data-title="分享近期Mac应用开发的一些想法 | C的博客" data-tsina="" class="share clearfix">
 	  </div>
 	
 	</div>
@@ -167,19 +156,11 @@ clang: error: linker command failed with exit code 1 (use -v to see invocation)<
 	
 <nav class="article-nav clearfix">
  
- <div class="prev" >
- <a href="/2016/08/19/2016-08-19-In-the-iOS-Programming-road-tips2/" title="在iOS编程路上走过的坑 - Tips2">
-  <strong>上一篇：</strong><br/>
-  <span>
-  在iOS编程路上走过的坑 - Tips2</span>
-</a>
-</div>
-
 
 <div class="next">
-<a href="/2016/06/16/2016-06-16-the-declaration-of-my-blog-about-2016-6/"  title="近期忙于开发一个公益项目,博客更新得有点慢.">
+<a href="/2021/05/22/prevent-dynamic-debug/"  title="低成本防静态分析和防动态调试的解决方案">
  <strong>下一篇：</strong><br/> 
- <span>近期忙于开发一个公益项目,博客更新得有点慢.
+ <span>低成本防静态分析和防动态调试的解决方案
 </span>
 </a>
 </div>
@@ -203,7 +184,7 @@ clang: error: linker command failed with exit code 1 (use -v to see invocation)<
   <div id="toc" class="toc-aside">
   <strong class="toc-title">文章目录</strong>
  
- <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AD%A3%E6%96%87"><span class="toc-number">2.</span> <span class="toc-text">正文</span></a></li></ol>
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8B%A6%E6%88%AA%E5%85%A8%E5%B1%80URL%E8%B7%B3%E8%BD%AC"><span class="toc-number">2.</span> <span class="toc-text">拦截全局URL跳转</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#App%E5%85%8D%E5%A4%8D%E5%88%B6%E6%8A%80%E6%9C%AF"><span class="toc-number">3.</span> <span class="toc-text">App免复制技术</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
  
   </div>
 
