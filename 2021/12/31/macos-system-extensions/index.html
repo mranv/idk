@@ -1,0 +1,696 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>MacOS系统扩展SystemExtensions深入实践 | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="前言从iOS转入Mac安全类产品的开发已经有一年半时间了，我也从一开始负责网络和UI模块慢慢追加负责内核模块的开发和维护，总体看，Mac开发的各种功能的实现思路和方法，要比iOS广阔很多，能接触到的计算机知识体系也更加完整，收获很多。 言归正传，今年苹果发布了M1芯片，在M1芯片的机器上又对内核开发做了很多限制，移除大量内核符号，导致我们软件无法采用原来的内核方案运作，被迫切换到系统扩展上来。由于">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MacOS系统扩展SystemExtensions深入实践">
+<meta property="og:url" content="http://yoursite.com/2021/12/31/macos-system-extensions/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="前言从iOS转入Mac安全类产品的开发已经有一年半时间了，我也从一开始负责网络和UI模块慢慢追加负责内核模块的开发和维护，总体看，Mac开发的各种功能的实现思路和方法，要比iOS广阔很多，能接触到的计算机知识体系也更加完整，收获很多。 言归正传，今年苹果发布了M1芯片，在M1芯片的机器上又对内核开发做了很多限制，移除大量内核符号，导致我们软件无法采用原来的内核方案运作，被迫切换到系统扩展上来。由于">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-12-31T13:21:33.000Z">
+<meta property="article:modified_time" content="2021-12-31T13:22:02.986Z">
+<meta property="article:author" content="Cocos">
+<meta property="article:tag" content="MacOS">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2021/12/31/macos-system-extensions/" title="MacOS系统扩展SystemExtensions深入实践" itemprop="url">MacOS系统扩展SystemExtensions深入实践</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2021-12-31T13:21:33.000Z" itemprop="datePublished"> 发表于 2021-12-31</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E6%89%A9%E5%B1%95%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">2.</span> <span class="toc-text">系统扩展是什么</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%83%BD%E5%AE%9E%E7%8E%B0%E4%BB%80%E4%B9%88%E5%8A%9F%E8%83%BD"><span class="toc-number">3.</span> <span class="toc-text">能实现什么功能</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Network-Extension"><span class="toc-number">4.</span> <span class="toc-text">Network Extension</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Endpoint-Security"><span class="toc-number">5.</span> <span class="toc-text">Endpoint Security</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="toc-number">6.</span> <span class="toc-text">准备工作</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98"><span class="toc-number">7.</span> <span class="toc-text">常见问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%AE%89%E8%A3%85"><span class="toc-number">7.0.1.</span> <span class="toc-text">如何安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86"><span class="toc-number">7.0.2.</span> <span class="toc-text">如何管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%85%AC%E8%AF%81"><span class="toc-number">7.0.3.</span> <span class="toc-text">如何公证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E8%B0%83%E8%AF%95"><span class="toc-number">7.0.4.</span> <span class="toc-text">如何调试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BBApp%E5%AE%89%E8%A3%85%E7%B3%BB%E7%BB%9F%E6%89%A9%E5%B1%95%E6%97%B6%E6%8A%A5%E9%94%99%E6%8E%92%E6%9F%A5"><span class="toc-number">7.0.5.</span> <span class="toc-text">主App安装系统扩展时报错排查</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E4%B8%8E%E7%B3%BB%E7%BB%9F%E6%89%A9%E5%B1%95%E9%80%9A%E8%AE%AF"><span class="toc-number">7.0.6.</span> <span class="toc-text">如何与系统扩展通讯</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E9%94%99%E8%AF%AF"><span class="toc-number">7.0.7.</span> <span class="toc-text">其他错误</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8E%A8%E8%8D%90%E9%98%85%E8%AF%BB"><span class="toc-number">8.</span> <span class="toc-text">推荐阅读</span></a></li></ol>
+		
+		</div>
+		
+		<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>从iOS转入Mac安全类产品的开发已经有一年半时间了，我也从一开始负责网络和UI模块慢慢追加负责内核模块的开发和维护，总体看，Mac开发的各种功能的实现思路和方法，要比iOS广阔很多，能接触到的计算机知识体系也更加完整，收获很多。</p>
+<p>言归正传，今年苹果发布了M1芯片，在M1芯片的机器上又对内核开发做了很多限制，移除大量内核符号，导致我们软件无法采用原来的内核方案运作，被迫切换到系统扩展上来。由于领导的信任，对整个程序架构的调整和全新技术方案的落地就由我来主导了，经过几个月封闭式调研开发，目前基本已经能支持大部分原来内核扩展的功能了。本文就是我对系统扩展开发的记录和总结，现在，来聊一聊系统扩展的能力。</p>
+<h1 id="系统扩展是什么"><a href="#系统扩展是什么" class="headerlink" title="系统扩展是什么"></a>系统扩展是什么</h1><p>在说系统扩展之前，先了解一下内核扩展。桌面程序的开发，一般分为应用层开发和内核开发(驱动开发)，相比之下，iOS和安卓等移动端就只有应用层开发。关于内核的概念可以自行学习这不多说。</p>
+<p>我们知道，操作系统一般是指运行在硬件之上，为各类应用层软件系统硬件管理方案的软件系统，而内核扩展作为操作系统的一个扩展功能，和操作系统运行在同个层级。这就意味着，如果内核扩展出现BUG导致Crash，也就意味着操作系统会崩溃死机。而一般的应用层软件，出问题顶多就是软件自己Crash。</p>
+<p>所以开发内核扩展就必须小心翼翼，而且因为内核扩展是运行在内核层，可供使用的API也很少，还得用C语言来写，开发效率极低，调试效率极低。为了解决内核扩展这一系列问题，苹果在Mac 10.15开始推出系统扩展，用来取代内核扩展，并开始在后续新系统裁剪内核扩展符号，引导开发者切换到系统扩展。</p>
+<p>当然要求开发者使用系统扩展取代内核扩展的原因，还有一点是系统封闭性的增强，因为内核扩展我们能做的功能也非常多，比如Hook内核中的系统调用等，而系统扩展只是运行在应用层的一个普通程序，对系统的威胁性就降低很多了。</p>
+<h1 id="能实现什么功能"><a href="#能实现什么功能" class="headerlink" title="能实现什么功能"></a>能实现什么功能</h1><p>说了一大堆内核扩展和系统扩展的背景知识，这里大家应该有清晰的理解，那系统扩展到底能支持什么？</p>
+<p>目前看，系统扩展能支持的功能，基本能和内核扩展KPI对齐，细节上还是比内核扩展提供的KPI要弱一些。另外由于无法像内核扩展一样Hack操作系统的关键流程，Hook系统调用表，系统扩展总体能带来的功能要少一个数量级。</p>
+<p>目前苹果为系统扩展提供两个功能模块：Network Extensions(下文简称NE扩展)，Endpoints Security。此外还为驱动软件比如USB接口提供一个类似的应用层扩展模块：DriverKit。</p>
+<h1 id="Network-Extension"><a href="#Network-Extension" class="headerlink" title="Network Extension"></a>Network Extension</h1><p>网络扩展这个功能在iOS8和Mac10.10的时候就已经有了。在Mac10.15之前，网络扩展必须通过商店下载的App才能支持，而且只有一个<code>Provider</code>类，在Mac10.15之后，网络扩展除了以原来的模式存在，还允许以系统扩展的模式运行。</p>
+<p>系统扩展模式下的网络扩展，除了具有Provider类，还具备main函数，它被以完整程序的形式运行起来。main函数代码如下：</p>
+<figure class="highlight plain"><figcaption><span>text</span></figcaption><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">autoreleasepool &#123;</span><br><span class="line"></span><br><span class="line">    NEProvider.startSystemExtensionMode()</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">dispatchMain()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>官网对系统扩展之网络扩展的文档还停留在好几年前的模式，<a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/networkextension">官网网络扩展文档</a>，这份文档里面的大部分描述都和内核KPI无关，这是一个坑，导致我调研网络扩展功能的时候走了很多弯路。旧的网络扩展API，网上有非常多的基于iOS的描述，这部分和Mac没有什么区别，这里就不多说了。</p>
+<p>简单讲，网络扩展主要提供两套不同层级的API。一个是Packet Tunnel， 对应的类是<code>NEPacketTunnelProvider</code>，提供IP层协议的流量，基于IP Packet实现的网络扩展，可以读取到整个电脑的IP报文，具体到编程，就是从苹果提供的<code>NEPacketTunnelFlow</code>里面读取到NSData数组和协议编号，其中协议编号主要是用来表示协议是IPv4还是IPv6，方法原型如下：</p>
+<figure class="highlight plain"><figcaption><span>text</span></figcaption><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">open func readPackets(completionHandler: @escaping ([Data], [NSNumber]) -&gt; Void)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>通过这套API，就可以读取到整个电脑的所有网络流量了，市面上有部分VPN协议就是基于Packet实现的，比如著名的WireGuard。读取到流量之后，一般就是通过自己定义的VPN协议，把数据转发到后台服务器，后台服务器解析协议之后，提取Packet内容，写入UTUN等虚拟网卡，就能把流量从后台服务器发出去了，再读取网卡，把回包弄回到客户端，这样就实现了一套完整的VPN功能。</p>
+<p>苹果官方提供了网络扩展Demo，不过太久没维护只能支持到Swift3.0，我推荐一个仓库，已经支持到Swift5.0了：<a target="_blank" rel="noopener" href="https://github.com/networkextension/SimpleTunnel">SimpleTunnel_Swift5.0</a></p>
+<p>第二套API，基于App层面的App Proxy Provider，对应的类有<code>NEAppProxyProvider</code>，以及子类<code>NETransparentProxyProvider</code>。 这套API主要是处理TCP/UDP流量，也就是基于IP层协议的两个传输层协议，苹果也提供了类似的Flow类已经读取数据的方法，读取出来的数据就是TCP或者UDP协议传输的数据NSData，不包括三次握手，不包括协议头部等数据。相比IP层协议，这方便开发者直接对内容进行处理。下面重点说一下这两个Provider类的区别。</p>
+<p><code>NEAppProxyProvider</code>早在iOS 9就已经出现了，它的限制比较多，需要使用MDN进行配置，也就是描述文件，而且无法代理系统APP，想要代理什么APP的流量也需要逐个配置，另外如果流量来了，然后扩展拒绝代理的话，被代理的程序会直接得到网络中断的错误。</p>
+<p>如果了解内核Socket KPI的人应该能看明白，这些功能是无法取代内核Socket相关的KPI。苹果自己当然也明白，所以在推出系统扩展的时候，为了让系统扩展能取代内核Socket鉴权那套KPI，苹果在MacOS11系统发布的时候，也推出了子类<code>NETransparentProxyProvider</code>。</p>
+<p><code>NETransparentProxyProvider</code>类主要是提供了类似内核Socket KPI的功能，除了拥有AppProxy全部功能外，还拥有了更加强大的功能，不需要MDN配置，可以直接通过几行代码创建是VPN配置；允许设置子网和端口来代理所有OutBound流量，也就是往外发的流量，而且也代表了它能处理系统App的流量；允许选择性地跳过代理，跳过代理时，系统会让流量走原来的流程，被代理的程序无感知，这就意味着它拥有类似内核KPI的鉴权功能，即跳过流量则流量走原路，接管流量然后转发流量则实现了VPN功能，接管流量但是不转发流量则实现了拒绝网络请求的功能。</p>
+<p>相关API如下：</p>
+<figure class="highlight plain"><figcaption><span>text</span></figcaption><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">- (BOOL)handleNewFlow:(NEAppProxyFlow *)flow;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">- (BOOL)handleNewUDPFlow:(NEAppProxyUDPFlow *)flow initialRemoteEndpoint:(NWEndpoint *)remoteEndpoint;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>上面两个可被重写的方法，一个用来处理UDP流，另一个可以处理TCP和UDP，具体用法自行参考文档。</p>
+<p>相比内核KPI，<code>NETransparentProxyProvider</code>类少了处理InBound的功能，以及Inject Socket data，以及其他Socket KPI大大小小的Socket操作的功能，这里就不多说了。</p>
+<h1 id="Endpoint-Security"><a href="#Endpoint-Security" class="headerlink" title="Endpoint Security"></a>Endpoint Security</h1><p>Endpoint Security系统扩展(以下简称ES)，是苹果全新推出的用来取代内核KAUTH的系统扩展，功能可对齐KAUTH，可能还更为强大。</p>
+<p>ES相比网络扩展要简单很多，支持监听事件，鉴权事件，这也就意味着可以通过系统扩展来限制用户启动某些程序，访问某些文件，或者执行某些权限。具体支持的事件可以看下面：</p>
+<figure class="highlight plain"><figcaption><span>text</span></figcaption><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">typedef enum &#123;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; The following events are available beginning in macOS 10.15</span><br><span class="line"></span><br><span class="line">    ES_EVENT_TYPE_AUTH_EXEC</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_OPEN</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_KEXTLOAD</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_MMAP</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_MPROTECT</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_MOUNT</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_RENAME</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_SIGNAL</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_UNLINK</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_EXEC</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_OPEN</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_FORK</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_CLOSE</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_CREATE</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_EXCHANGEDATA</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_EXIT</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_GET_TASK</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_KEXTLOAD</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_KEXTUNLOAD</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_LINK</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_MMAP</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_MPROTECT</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_MOUNT</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_UNMOUNT</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_IOKIT_OPEN</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_RENAME</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_SETATTRLIST</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_SETEXTATTR</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_SETFLAGS</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_SETMODE</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_SETOWNER</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_SIGNAL</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_UNLINK</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_WRITE</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_FILE_PROVIDER_MATERIALIZE</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_FILE_PROVIDER_MATERIALIZE</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_FILE_PROVIDER_UPDATE</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_FILE_PROVIDER_UPDATE</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_READLINK</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_READLINK</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_TRUNCATE</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_TRUNCATE</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_LINK</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_LOOKUP</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_CREATE</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_SETATTRLIST</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_SETEXTATTR</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_SETFLAGS</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_SETMODE</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_SETOWNER</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; The following events are available beginning in macOS 10.15.1</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_CHDIR</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_CHDIR</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_GETATTRLIST</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_GETATTRLIST</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_STAT</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_ACCESS</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_CHROOT</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_CHROOT</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_UTIMES</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_UTIMES</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_CLONE</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_CLONE</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_FCNTL</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_GETEXTATTR</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_GETEXTATTR</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_LISTEXTATTR</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_LISTEXTATTR</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_READDIR</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_READDIR</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_DELETEEXTATTR</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_DELETEEXTATTR</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_FSGETPATH</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_FSGETPATH</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_DUP</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_SETTIME</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_SETTIME</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_UIPC_BIND</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_UIPC_BIND</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_UIPC_CONNECT</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_UIPC_CONNECT</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_EXCHANGEDATA</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_SETACL</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_SETACL</span><br><span class="line"></span><br><span class="line"> &#x2F;&#x2F; The following events are available beginning in macOS 10.15.4</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_PTY_GRANT</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_PTY_CLOSE</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_PROC_CHECK</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_PROC_CHECK</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_GET_TASK</span><br><span class="line"></span><br><span class="line"> &#x2F;&#x2F; The following events are available beginning in macOS 11.0</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_SEARCHFS</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_SEARCHFS</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_FCNTL</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_IOKIT_OPEN</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_PROC_SUSPEND_RESUME</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_PROC_SUSPEND_RESUME</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_CS_INVALIDATED</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_GET_TASK_NAME</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_TRACE</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_REMOTE_THREAD_CREATE</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_REMOUNT</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_REMOUNT</span><br><span class="line"></span><br><span class="line"> &#x2F;&#x2F; The following events are available beginning in macOS 11.3</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_GET_TASK_READ</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_GET_TASK_READ</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_GET_TASK_INSPECT</span><br><span class="line"></span><br><span class="line"> &#x2F;&#x2F; The following events are available beginning in macOS 12.0</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_SETUID</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_SETGID</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_SETEUID</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_SETEGID</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_SETREUID</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_SETREGID</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_AUTH_COPYFILE</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_NOTIFY_COPYFILE</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; ES_EVENT_TYPE_LAST is not a valid event type but a convenience</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; value for operating on the range of defined event types.</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; This value may change between releases and was available</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; beginning in macOS 10.15</span><br><span class="line"></span><br><span class="line">  , ES_EVENT_TYPE_LAST</span><br><span class="line"></span><br><span class="line">&#125; es_event_type_t;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>可以看到能支持的事件还是挺丰富的，甚至连MPROTECT这种高端系统调用都有。</p>
+<p>针对AUTH事件，鉴权形式可分成两种，一种是Allow/Deny模式，另一种是Flag模式。应该都很好理解，后者就是允许把事件的访问权限修改成只读操作，或者读写都拒绝。具体代码如下：</p>
+<figure class="highlight plain"><figcaption><span>text</span></figcaption><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">respt &#x3D; es_respond_auth_result(client, message, ES_AUTH_RESULT_DENY, is_cache);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">respt &#x3D; es_respond_flags_result(client, message, 0xffffffff, is_cache);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>需要注意的是，如果全部放行，填入0xffffffff。其他相关实例可以参考苹果官方Demo：</p>
+<p><a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/endpointsecurity/monitoring_system_events_with_endpoint_security">ES系统扩展官方DEMO</a></p>
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><p><strong>NE系统扩展</strong>，无需任何准备工作，照平常开发App的流程即可。不过需要注意一个问题，直接从Xcode里面勾选的NE Entitlement是错误的，需要手动添加-systemextension，举个例子，如果想开发<code>NETransparentProxyProvider</code>，使用Xcode勾选App proxy的时候，生成的Entitlement是app-proxy-provider，需要手动修改成app-proxy-provider-systemextension，而且由于Xcode13.1还不支持这个手动改过的Entitlements，无法支持自动管理证书和Provisioning Profile，需要手动下载具备app-proxy-provider-systemextension权限的Profile文件。具体操作如下：</p>
+<p>登录苹果开发账号管理界面(Certificates, Identifiers &amp; Profiles)，选择Developer ID Application类型的证书，在Identifiers里勾选NetworkExtension，无需勾选System Extension，因为这个是主App才需要的安装权限。这样下载下来的Profile文件中的NE Entitlements就是以systemextension结尾了。</p>
+<p><strong>ES系统扩展</strong>则比较麻烦，首先需要申请Entitlements：com.apple.developer.endpoint-security.client</p>
+<p>和其他的Entitlements不同，ES的权限需要额外向苹果申请，申请入口可以从上面DEMO页面里找到。</p>
+<p>在申请权限还未被审批之前，可以通过关闭SIP的方式运行没有签名的ES扩展，另外还可以使用systemextensionsctl工具，设置DEBUG模式，方便调试ES扩展。至于NE扩展，调试方式和普通程序无太大区别。</p>
+<h1 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h1><h3 id="如何安装"><a href="#如何安装" class="headerlink" title="如何安装"></a>如何安装</h3><p>安装系统扩展，需要先将系统扩展放入主App中，可以先创建主App，然后在同一个工程里面创建系统扩并选择主App的Target，或者手动选择系统扩展包，在Build Phases配置里加上Embed System Extensions步骤，把系统扩展放到System Extensions目录，最终编译之后，系统扩展的App会被放在.app/Contents/Library/SystemExtensions目录下。并且已<code>包名.systemextension</code>命名。</p>
+<p>需要注意的是，主App必须具备com.apple.developer.system-extension.install的Entitlement，才能安装ES扩展。如果要安装NE扩展，还需要具备对应的NE Entitlement，例如app-proxy-provider-systemextension，否则在添加VPN配置的时候会报错。</p>
+<p>除此之外，还需要确保主App和扩展有相同的Team编号。</p>
+<h3 id="如何管理"><a href="#如何管理" class="headerlink" title="如何管理"></a>如何管理</h3><p>借助苹果提供的systemextensionsctl工具，可以查询扩展的状态，卸载扩展。</p>
+<h3 id="如何公证"><a href="#如何公证" class="headerlink" title="如何公证"></a>如何公证</h3><p>系统扩展需要经过公证，才能安装到普通电脑上。具体公证方法参考苹果官方文档：</p>
+<p><a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution">系统扩展App公证</a></p>
+<h3 id="如何调试"><a href="#如何调试" class="headerlink" title="如何调试"></a>如何调试</h3><p>正常调试即可，参考官方文档：</p>
+<p><a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/driverkit/debugging_and_testing_system_extensions">系统扩展调试</a></p>
+<h3 id="主App安装系统扩展时报错排查"><a href="#主App安装系统扩展时报错排查" class="headerlink" title="主App安装系统扩展时报错排查"></a>主App安装系统扩展时报错排查</h3><p>主App安装ES系统扩展报错较少，基本上配置好Entitlements就可以了。</p>
+<p>NE则有较多要求。首先需要保证Entitlements中的App-Groups和主App保持一致。其次确保NE的Info.plist文件中MachServiceName必须是主App的Groups的子集或者保持一致。</p>
+<figure class="highlight plain"><figcaption><span>text</span></figcaption><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;UTF-8&quot;?&gt;</span><br><span class="line"></span><br><span class="line">&lt;!DOCTYPE plist PUBLIC &quot;-&#x2F;&#x2F;Apple&#x2F;&#x2F;DTD PLIST 1.0&#x2F;&#x2F;EN&quot; &quot;http:&#x2F;&#x2F;www.apple.com&#x2F;DTDs&#x2F;PropertyList-1.0.dtd&quot;&gt;</span><br><span class="line"></span><br><span class="line">&lt;plist version&#x3D;&quot;1.0&quot;&gt;</span><br><span class="line"></span><br><span class="line">&lt;dict&gt;</span><br><span class="line"></span><br><span class="line"> &lt;key&gt;NetworkExtension&lt;&#x2F;key&gt;</span><br><span class="line"></span><br><span class="line"> &lt;dict&gt;</span><br><span class="line"></span><br><span class="line">  &lt;key&gt;NEMachServiceName&lt;&#x2F;key&gt;</span><br><span class="line"></span><br><span class="line">  &lt;string&gt;0000CSH000.com.xxx.app-group.ne&lt;&#x2F;string&gt;</span><br><span class="line"></span><br><span class="line">  &lt;key&gt;NEProviderClasses&lt;&#x2F;key&gt;</span><br><span class="line"></span><br><span class="line">  &lt;dict&gt;</span><br><span class="line"></span><br><span class="line">   &lt;key&gt;com.apple.networkextension.app-proxy&lt;&#x2F;key&gt;</span><br><span class="line"></span><br><span class="line">   &lt;string&gt;$(PRODUCT_MODULE_NAME).AppProxyProvider&lt;&#x2F;string&gt;</span><br><span class="line"></span><br><span class="line">  &lt;&#x2F;dict&gt;</span><br><span class="line"></span><br><span class="line"> &lt;&#x2F;dict&gt;</span><br><span class="line"></span><br><span class="line">&lt;&#x2F;dict&gt;</span><br><span class="line"></span><br><span class="line">&lt;&#x2F;plist&gt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="如何与系统扩展通讯"><a href="#如何与系统扩展通讯" class="headerlink" title="如何与系统扩展通讯"></a>如何与系统扩展通讯</h3><p>苹果官方推荐使用XPC技术，系统扩展也自带了全局XPC Mach服务，只需要在plist文件中设置好服务名字即可：</p>
+<figure class="highlight plain"><figcaption><span>text</span></figcaption><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">NetworkExtension，在info.plist设置NEMachServiceName字段</span><br><span class="line"></span><br><span class="line">EndpointSecurity， 在info.plist设置 NSEndpointSecurityMachServiceName</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>随后其他程序只要把系统扩展当作全局XPC使用即可：</p>
+<figure class="highlight plain"><figcaption><span>text</span></figcaption><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">[[NSXPCConnection alloc] initWithMachServiceName:@&quot;NSEndpointSecurityMachServiceName字段的值&quot; options:0];</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="其他错误"><a href="#其他错误" class="headerlink" title="其他错误"></a>其他错误</h3><p>做好上面说的，基本就能正常运行跑起来了，如果还有问题，目前相关资料很少，只能从苹果论坛得到信息了。地址：<a target="_blank" rel="noopener" href="https://developer.apple.com/forums/tags/systemextensions">SystemExtensions论坛</a> 其中活跃用户：<a target="_blank" rel="noopener" href="https://developer.apple.com/forums/profile/eskimo">eskimo</a>，是苹果系统扩展相关开发工程师，他的回答基本就是标准答案了。</p>
+<h1 id="推荐阅读"><a href="#推荐阅读" class="headerlink" title="推荐阅读"></a>推荐阅读</h1><p><a target="_blank" rel="noopener" href="https://developer.apple.com/system-extensions/">系统扩展官方介绍</a></p>
+<p><a target="_blank" rel="noopener" href="https://developer.apple.com/videos/play/wwdc2019/714">系统扩展之网络扩展特性WWDC官方资料</a></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/MacOS/">MacOS</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2021/12/31/macos-system-extensions/" data-title="MacOS系统扩展SystemExtensions深入实践 | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+
+<div class="next">
+<a href="/2021/07/10/some-idea-for-mac-dev/"  title="分享近期Mac应用开发的一些想法">
+ <strong>下一篇：</strong><br/> 
+ <span>分享近期Mac应用开发的一些想法
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E6%89%A9%E5%B1%95%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">2.</span> <span class="toc-text">系统扩展是什么</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%83%BD%E5%AE%9E%E7%8E%B0%E4%BB%80%E4%B9%88%E5%8A%9F%E8%83%BD"><span class="toc-number">3.</span> <span class="toc-text">能实现什么功能</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Network-Extension"><span class="toc-number">4.</span> <span class="toc-text">Network Extension</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Endpoint-Security"><span class="toc-number">5.</span> <span class="toc-text">Endpoint Security</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="toc-number">6.</span> <span class="toc-text">准备工作</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98"><span class="toc-number">7.</span> <span class="toc-text">常见问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%AE%89%E8%A3%85"><span class="toc-number">7.0.1.</span> <span class="toc-text">如何安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86"><span class="toc-number">7.0.2.</span> <span class="toc-text">如何管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%85%AC%E8%AF%81"><span class="toc-number">7.0.3.</span> <span class="toc-text">如何公证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E8%B0%83%E8%AF%95"><span class="toc-number">7.0.4.</span> <span class="toc-text">如何调试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BBApp%E5%AE%89%E8%A3%85%E7%B3%BB%E7%BB%9F%E6%89%A9%E5%B1%95%E6%97%B6%E6%8A%A5%E9%94%99%E6%8E%92%E6%9F%A5"><span class="toc-number">7.0.5.</span> <span class="toc-text">主App安装系统扩展时报错排查</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E4%B8%8E%E7%B3%BB%E7%BB%9F%E6%89%A9%E5%B1%95%E9%80%9A%E8%AE%AF"><span class="toc-number">7.0.6.</span> <span class="toc-text">如何与系统扩展通讯</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E9%94%99%E8%AF%AF"><span class="toc-number">7.0.7.</span> <span class="toc-text">其他错误</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8E%A8%E8%8D%90%E9%98%85%E8%AF%BB"><span class="toc-number">8.</span> <span class="toc-text">推荐阅读</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mac/" title="Mac">Mac<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mac应用/" title="Mac应用">Mac应用<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2021 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
