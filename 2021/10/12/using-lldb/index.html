@@ -1,0 +1,699 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>利用LLDB动态调试定位Crash原因 | C的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Cocos">
+    
+
+    
+    <meta name="description" content="前言LLDB是LLVM项目里面一个使用非常广泛的调试器，配合debugserver，对本地调试或者远程调试都有很好的支持。 网上也有很多关于这两个程序的介绍，这里就不多说了，本文主要记录了我在实际工作中遇到的两个例子，利用LLDB的调试功能，在没有代码的情况下，定位Crash的具体符号。通过这两个例子，可以对这一类问题提供通用的思路：找到某个功能调用的具体符号，方便排查问题，或者开发对相关符号的钩">
+<meta property="og:type" content="article">
+<meta property="og:title" content="利用LLDB动态调试定位Crash原因">
+<meta property="og:url" content="http://yoursite.com/2021/10/12/using-lldb/index.html">
+<meta property="og:site_name" content="C的博客">
+<meta property="og:description" content="前言LLDB是LLVM项目里面一个使用非常广泛的调试器，配合debugserver，对本地调试或者远程调试都有很好的支持。 网上也有很多关于这两个程序的介绍，这里就不多说了，本文主要记录了我在实际工作中遇到的两个例子，利用LLDB的调试功能，在没有代码的情况下，定位Crash的具体符号。通过这两个例子，可以对这一类问题提供通用的思路：找到某个功能调用的具体符号，方便排查问题，或者开发对相关符号的钩">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-10-12T01:44:05.000Z">
+<meta property="article:modified_time" content="2021-10-12T01:51:51.000Z">
+<meta property="article:author" content="Cocos">
+<meta property="article:tag" content="iOS">
+<meta property="article:tag" content="Mac">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
+				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">主页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/tags">标签</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2021/10/12/using-lldb/" title="利用LLDB动态调试定位Crash原因" itemprop="url">利用LLDB动态调试定位Crash原因</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
+		
+  <p class="article-time">
+    <time datetime="2021-10-12T01:44:05.000Z" itemprop="datePublished"> 发表于 2021-10-12</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A1%88%E4%BE%8B%E4%B8%80"><span class="toc-number">2.</span> <span class="toc-text">案例一</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A1%88%E4%BE%8B%E4%BA%8C"><span class="toc-number">3.</span> <span class="toc-text">案例二</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%9D%E8%80%83"><span class="toc-number">4.</span> <span class="toc-text">思考</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E9%98%85%E8%AF%BB"><span class="toc-number">5.</span> <span class="toc-text">参考阅读</span></a></li></ol>
+		
+		</div>
+		
+		<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>LLDB是LLVM项目里面一个使用非常广泛的调试器，配合debugserver，对本地调试或者远程调试都有很好的支持。</p>
+<p>网上也有很多关于这两个程序的介绍，这里就不多说了，本文主要记录了我在实际工作中遇到的两个例子，利用LLDB的调试功能，在<strong>没有代码</strong>的情况下，定位Crash的具体符号。通过这两个例子，可以对这一类问题提供通用的思路：<strong>找到某个功能调用的具体符号，方便排查问题，或者开发对相关符号的钩子(Hook)功能</strong>。</p>
+<h1 id="案例一"><a href="#案例一" class="headerlink" title="案例一"></a>案例一</h1><p>某些特殊情况下，App运行后主动退出，在没有代码的情况下，我们不清楚App主动退出的原因，这个时候可以借助LLDB，通过attach命令，调试程序，并打上一些猜测的断点，进一步观察情况。 下面以进程名字<code>DACS_ARM_Tool</code>为例</p>
+<p>通过attach进程名的方式，等待进程启动。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">attach -n DACS_ARM_Tool --waitfor</span><br></pre></td></tr></table></figure>
+
+<p>运行程序，可以看到lldb如下输入：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">(lldb) attach -n DACS_ARM_Tool --waitfor</span><br><span class="line">Process 30772 stopped</span><br><span class="line">* thread <span class="comment">#1, stop reason = signal SIGSTOP</span></span><br><span class="line">    frame <span class="comment">#0: 0x000000010f6b062a dyld`stat64 + 10</span></span><br><span class="line">dyld`stat64:</span><br><span class="line">-&gt;  0x10f6b062a &lt;+10&gt;: jae    0x10f6b0634               ; &lt;+20&gt;</span><br><span class="line">    0x10f6b062c &lt;+12&gt;: movq   %rax, %rdi</span><br><span class="line">    0x10f6b062f &lt;+15&gt;: jmp    0x10f6ae408               ; cerror_nocancel</span><br><span class="line">    0x10f6b0634 &lt;+20&gt;: retq</span><br><span class="line">Target 0: (DACS_ARM_Tool) stopped.</span><br></pre></td></tr></table></figure>
+
+<p>上面显示进程中断运行，目前执行到1号线程，中断原因是signal SIGSTOP。</p>
+<p>在这里我们可以思考一下，App如果是主动退出，一般会调用哪些符号，常见的有<code>-[NSApplication terminate:]</code> ，<code>exit</code>等，所以先对这两个符号打上断点。</p>
+<p>lldb打断点的命令是breakpoint set，缩写是br s，后面跟上符号的类型以及符号名字，-n表示符号名，-r表示正则匹配，具体用法参考文末官方文档。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">(lldb) br s -n <span class="built_in">exit</span></span><br><span class="line">Breakpoint 1: <span class="built_in">where</span> = Foundation`+[NSThread <span class="built_in">exit</span>], address = 0x00007fff360a8a10</span><br><span class="line">(lldb) br s -n <span class="string">&quot;-[NSApplication terminate:]&quot;</span></span><br><span class="line">Breakpoint 2: <span class="built_in">where</span> = AppKit`-[NSApplication terminate:], address = 0x00007fff30ec2a7f</span><br></pre></td></tr></table></figure>
+
+<p>接着输入命令c，让程序恢复运行，此时可以输入br list命令，可以看到当前识别到的断点位置：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">(lldb) br list</span><br><span class="line">Current breakpoints:</span><br><span class="line">1: name = <span class="string">&#x27;exit&#x27;</span>, locations = 3, resolved = 3, hit count = 1</span><br><span class="line">  1.1: <span class="built_in">where</span> = Foundation`+[NSThread <span class="built_in">exit</span>], address = 0x00007fff360a8a10, resolved, hit count = 1</span><br><span class="line">  1.2: <span class="built_in">where</span> = libsystem_c.dylib`<span class="built_in">exit</span>, address = 0x00007fff6db323db, resolved, hit count = 0</span><br><span class="line">  1.3: <span class="built_in">where</span> = Security`Security::CountingMutex::<span class="built_in">exit</span>(), address = 0x00007fff4028afe8, resolved, hit count = 0</span><br><span class="line"></span><br><span class="line">2: name = <span class="string">&#x27;-[NSApplication terminate:]&#x27;</span>, locations = 1, resolved = 1, hit count = 0</span><br><span class="line">  2.1: <span class="built_in">where</span> = AppKit`-[NSApplication terminate:], address = 0x00007fff30ec2a7f, resolved, hit count = 0</span><br></pre></td></tr></table></figure>
+
+<p>可以看到一共断点到4个位置，继续运行程序，出发程序退出逻辑，这样就可以看到程序在退出之前被中断了。接着使用bt命令查看调用栈，一般就可以看到一些原因了。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Process 35564 stopped</span><br><span class="line">* thread <span class="comment">#1, queue = &#x27;com.apple.main-thread&#x27;, stop reason = breakpoint 4.1</span></span><br><span class="line">    frame <span class="comment">#0: 0x00007fff30ec2a7f AppKit`-[NSApplication terminate:]</span></span><br><span class="line">AppKit`-[NSApplication terminate:]:</span><br><span class="line">-&gt;  0x7fff30ec2a7f &lt;+0&gt;: pushq  %rbp</span><br><span class="line">    0x7fff30ec2a80 &lt;+1&gt;: movq   %rsp, %rbp</span><br><span class="line">    0x7fff30ec2a83 &lt;+4&gt;: pushq  %r15</span><br><span class="line">    0x7fff30ec2a85 &lt;+6&gt;: pushq  %r14</span><br><span class="line">Target 0: (DACS_ARM_Tool) stopped.</span><br><span class="line">(lldb) bt</span><br><span class="line">* thread <span class="comment">#1, queue = &#x27;com.apple.main-thread&#x27;, stop reason = breakpoint 4.1</span></span><br><span class="line">  * frame <span class="comment">#0: 0x00007fff30ec2a7f AppKit`-[NSApplication terminate:]</span></span><br><span class="line">    frame <span class="comment">#1: 0x000000010bf5add2 DACS_ARM_Tool`-[ViewController testCrash:](self=0x00007fa73d81e320, _cmd=&quot;testCrash:&quot;, sender=0x00007fa73c5b3450) at ViewController.mm:406:5</span></span><br><span class="line">    frame <span class="comment">#2: 0x00007fff30e377a7 AppKit`-[NSApplication(NSResponder) sendAction:to:from:] + 299</span></span><br><span class="line">    frame <span class="comment">#3: 0x00007fff30e37642 AppKit`-[NSControl sendAction:to:] + 86</span></span><br><span class="line">    frame <span class="comment">#4: 0x00007fff30e37574 AppKit`__26-[NSCell _sendActionFrom:]_block_invoke + 136</span></span><br><span class="line">    frame <span class="comment">#5: 0x00007fff30e37476 AppKit`-[NSCell _sendActionFrom:] + 171</span></span><br><span class="line">    frame <span class="comment">#6: 0x00007fff30e373bd AppKit`-[NSButtonCell _sendActionFrom:] + 96</span></span><br><span class="line">    frame <span class="comment">#7: 0x00007fff30e3369b AppKit`NSControlTrackMouse + 1745</span></span><br><span class="line">    frame <span class="comment">#8: 0x00007fff30e32fa2 AppKit`-[NSCell trackMouse:inRect:ofView:untilMouseUp:] + 130</span></span><br><span class="line">    frame <span class="comment">#9: 0x00007fff30e32e61 AppKit`-[NSButtonCell trackMouse:inRect:ofView:untilMouseUp:] + 691</span></span><br><span class="line">    frame <span class="comment">#10: 0x00007fff30e321dd AppKit`-[NSControl mouseDown:] + 748</span></span><br><span class="line">    frame <span class="comment">#11: 0x00007fff30e305f0 AppKit`-[NSWindow(NSEventRouting) _handleMouseDownEvent:isDelayedEvent:] + 4914</span></span><br><span class="line">    frame <span class="comment">#12: 0x00007fff30d9ae21 AppKit`-[NSWindow(NSEventRouting) _reallySendEvent:isDelayedEvent:] + 2612</span></span><br><span class="line">    frame <span class="comment">#13: 0x00007fff30d9a1c9 AppKit`-[NSWindow(NSEventRouting) sendEvent:] + 349</span></span><br><span class="line">    frame <span class="comment">#14: 0x00007fff30d98554 AppKit`-[NSApplication(NSEvent) sendEvent:] + 352</span></span><br><span class="line">    frame <span class="comment">#15: 0x00007fff30be55bf AppKit`-[NSApplication run] + 707</span></span><br><span class="line">    frame <span class="comment">#16: 0x00007fff30bb7396 AppKit`NSApplicationMain + 777</span></span><br><span class="line">    frame <span class="comment">#17: 0x000000010bf67a6f DACS_ARM_Tool`main(argc=1, argv=0x00007ffee3caf538) at main.m:14:12</span></span><br><span class="line">    frame <span class="comment">#18: 0x00007fff6da88cc9 libdyld.dylib`start + 1</span></span><br><span class="line">    frame <span class="comment">#19: 0x00007fff6da88cc9 libdyld.dylib`start + 1</span></span><br></pre></td></tr></table></figure>
+
+<p>上面lldb的输出可以看到，程序进入testCrash方法，调用了terminate:导致的退出。</p>
+<p>上面就是一个完整的分析例子，例子比较简单，所以很快就可以看到原因。实际开发中一般会遇到更加复杂的情况，比如除了上面打断的两个退出符号之外，还有其他符号，又或者程序退出中途又会调用多个名为exit的函数，这样使用bt是看不到正确的调用栈的，需要慢慢分析。</p>
+<h1 id="案例二"><a href="#案例二" class="headerlink" title="案例二"></a>案例二</h1><p>某次对login进程注入了一个动态库之后，发现login无法启动，控制台出现了一句话之后Crash。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">2021-10-09 16:07:52.355 login[63473:8543240] The application with bundle ID (null) is running setugid(), <span class="built_in">which</span> is not allowed. Exiting.</span><br></pre></td></tr></table></figure>
+
+<p>从字面看，意思就是程序没有bundle id导致无法调用setugid，这个可能是我注入的动态库中运行了某些hook类的代码导致的，但是因为代码很多，一行一行注释排查需要花费很长时间，如果能借助LLDB，通过在某些符号上打断点，能确定出问题的地方，那效率肯定能提高一些。</p>
+<p>开始排查。还是和上面一样进入LLDB，通过attach进程名字：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">attach -n login --waitfor</span><br></pre></td></tr></table></figure>
+
+<p>在终端里单独运行login程序，发现lldb能attach成功并且中断了程序：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">(lldb) attach -n login --waitfor</span><br><span class="line">Process 68174 stopped</span><br><span class="line">* thread <span class="comment">#1, stop reason = signal SIGSTOP</span></span><br><span class="line">    frame <span class="comment">#0: 0x000000011b9de000 dyld`_dyld_start</span></span><br><span class="line">dyld`_dyld_start:</span><br><span class="line">-&gt;  0x11b9de000 &lt;+0&gt;: popq   %rdi</span><br><span class="line">    0x11b9de001 &lt;+1&gt;: pushq  <span class="variable">$0x0</span></span><br><span class="line">    0x11b9de003 &lt;+3&gt;: movq   %rsp, %rbp</span><br><span class="line">    0x11b9de006 &lt;+6&gt;: andq   $-0x10, %rsp</span><br><span class="line">Target 0: (login) stopped.</span><br></pre></td></tr></table></figure>
+
+<p>因为这次我不清楚具体触发Crash的符号名，所以这里使用正则匹配的形式，模糊匹配符号：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">(lldb) br s -r <span class="string">&quot;bundle&quot;</span></span><br><span class="line">Breakpoint 5: no locations (pending).</span><br></pre></td></tr></table></figure>
+
+<p>还没显示断点信息，恢复程序，就可以看到程序运行一会马上中断了，这一次可以看到断点信息了，一共有300多个断点：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">(lldb) c</span><br><span class="line">Process 68174 resuming</span><br><span class="line">339 locations added to breakpoint 5</span><br><span class="line">Process 68174 stopped</span><br><span class="line">* thread <span class="comment">#1, queue = &#x27;com.apple.main-thread&#x27;, stop reason = breakpoint 5.19</span></span><br><span class="line">    frame <span class="comment">#0: 0x00007fff6dcc1e44 libxpc.dylib`+[OS_xpc_bundle load]</span></span><br><span class="line">libxpc.dylib`+[OS_xpc_bundle load]:</span><br><span class="line">-&gt;  0x7fff6dcc1e44 &lt;+0&gt;: retq</span><br><span class="line"></span><br><span class="line">libxpc.dylib`+[OS_xpc_service_instance load]:</span><br><span class="line">    0x7fff6dcc1e45 &lt;+0&gt;: retq</span><br><span class="line"></span><br><span class="line">libxpc.dylib`+[OS_xpc_activity load]:</span><br><span class="line">    0x7fff6dcc1e46 &lt;+0&gt;: retq</span><br><span class="line"></span><br><span class="line">libxpc.dylib`+[OS_xpc_file_transfer load]:</span><br><span class="line">    0x7fff6dcc1e47 &lt;+0&gt;: retq</span><br><span class="line">Target 0: (login) stopped.</span><br></pre></td></tr></table></figure>
+
+<p>可以看到程序断点在符号<code>+[OS_xpc_bundle load]</code> 里面。通过br list命令，可以看到所有的断点信息（数量太多了，摘取其中一部分放上来）</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">(lldb) br list</span><br><span class="line">Current breakpoints:</span><br><span class="line">6: regex = <span class="string">&#x27;bundle&#x27;</span>, locations = 339, resolved = 339, hit count = 0</span><br><span class="line">  6.8: <span class="built_in">where</span> = libsystem_networkextension.dylib`ne_copy_cached_synthesized_uuids_for_bundle_identifier_locked, address = 0x00007fff6dc6bf3d, resolved, hit count = 0</span><br><span class="line">  6.9: <span class="built_in">where</span> = libsystem_networkextension.dylib`__ne_copy_cached_uuids_for_bundle_identifier_block_invoke, address = 0x00007fff6dc6c058, resolved, hit count = 0</span><br><span class="line">  6.10: <span class="built_in">where</span> = libsystem_networkextension.dylib`ne_copy_cached_bundle_identifier_for_synthesized_uuid_locked, address = 0x00007fff6dc6c228, resolved, hit count = 0</span><br><span class="line">  6.11: <span class="built_in">where</span> = libsystem_networkextension.dylib`__ne_copy_cached_bundle_identifier_for_uuid_block_invoke, address = 0x00007fff6dc6c307, resolved, hit count = 0</span><br><span class="line">  6.12: <span class="built_in">where</span> = libsystem_networkextension.dylib`__ne_copy_cached_bundle_identifier_for_uuid_block_invoke_2, address = 0x00007fff6dc6c39f, resolved, hit count = 0</span><br><span class="line">  6.13: <span class="built_in">where</span> = libsystem_networkextension.dylib`__ne_copy_cached_bundle_identifier_for_synthesized_uuid_locked_block_invoke, address = 0x00007fff6dc6d7f7, resolved, hit count = 0</span><br><span class="line">  6.14: <span class="built_in">where</span> = libsystem_networkextension.dylib`ne_copy_cached_bundle_identifier_for_uuid, address = 0x00007fff6dc6c0f9, resolved, hit count = 0</span><br><span class="line">  6.15: <span class="built_in">where</span> = libsystem_networkextension.dylib`ne_copy_cached_preferred_bundle_for_bundle_identifier, address = 0x00007fff6dc6c436, resolved, hit count = 0</span><br><span class="line">  6.16: <span class="built_in">where</span> = libsystem_networkextension.dylib`ne_copy_cached_uuids_for_bundle_identifier, address = 0x00007fff6dc67836, resolved, hit count = 0</span><br><span class="line">  6.17: <span class="built_in">where</span> = libsystem_sandbox.dylib`gpu_bundle_find_trusted, address = 0x00007fff6dc93d10, resolved, hit count = 0</span><br><span class="line">  6.18: <span class="built_in">where</span> = libsystem_sandbox.dylib`gpu_bundle_is_path_trusted, address = 0x00007fff6dc93ef3, resolved, hit count = 0</span><br><span class="line">  6.19: <span class="built_in">where</span> = libxpc.dylib`+[OS_xpc_bundle load], address = 0x00007fff6dcc1e44, resolved, hit count = 0</span><br><span class="line">部分省略。。。</span><br><span class="line">部分省略。。。</span><br><span class="line"> 6.73: <span class="built_in">where</span> = Foundation`-[NSBundle bundleIdentifier], address = 0x00007fff35fc955c, resolved, hit count = 0</span><br><span class="line">  6.74: <span class="built_in">where</span> = Foundation`+[NSBundle bundleWithIdentifier:], address = 0x00007fff35fc9d5d, resolved, hit count = 0</span><br><span class="line">  6.75: <span class="built_in">where</span> = Foundation`+[NSBundle bundleWithPath:], address = 0x00007fff35fc9ebc, resolved, hit count = 0</span><br><span class="line">  6.76: <span class="built_in">where</span> = Foundation`+[NSBundle bundleForClass:], address = 0x00007fff35fe7226, resolved, hit count = 0</span><br><span class="line">  6.77: <span class="built_in">where</span> = Foundation`-[__NSBundleTables bundleForClass:], address = 0x00007fff35fe742d, resolved, hit count = 0</span><br><span class="line">  6.78: <span class="built_in">where</span> = Foundation`-[NSBundle bundleURL], address = 0x00007fff36052db5, resolved, hit count = 0</span><br><span class="line">  6.79: <span class="built_in">where</span> = Foundation`+[NSBundle bundleWithURL:], address = 0x00007fff36065016, resolved, hit count = 0</span><br></pre></td></tr></table></figure>
+
+<p>可以看到正则匹配的符号实在是太多了，断点了几百个符号，很容易导致程序运行时随便就匹配到无关断点，很难排查问题。此时输入c，会看到程序又卡在另一个断点上了，所以必须先删除所有断点，重新设置一个更加详细的正则匹配的符号名。</p>
+<p>通过下面命令删除所有断点：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">br del</span><br></pre></td></tr></table></figure>
+
+<p>这里好像没有什么特别的技巧了，只能看看注入的动态库中有什么符号，或者什么符号和bundle ID有关系的，经过一系列测试，最后可以发现断点到<code>bundleIdentifier</code>这个符号上，能找到Crash的最后调用信息。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">(lldb) br s -r bundleIdentifier</span><br><span class="line">Breakpoint 7: 40 locations.</span><br></pre></td></tr></table></figure>
+
+<p>输入c继续运行，发现第二次c之后，程序crash了，所以可以判断crash的地方就是第二次触发断点的地方。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">(lldb) c</span><br><span class="line">Process 16886 resuming</span><br><span class="line">Process 16886 stopped</span><br><span class="line">* thread <span class="comment">#1, queue = &#x27;com.apple.main-thread&#x27;, stop reason = breakpoint 8.1</span></span><br><span class="line">    frame <span class="comment">#0: 0x00007fff35fc955c Foundation`-[NSBundle bundleIdentifier]</span></span><br><span class="line">Foundation`-[NSBundle bundleIdentifier]:</span><br><span class="line">-&gt;  0x7fff35fc955c &lt;+0&gt;: pushq  %rbp</span><br><span class="line">    0x7fff35fc955d &lt;+1&gt;: movq   %rsp, %rbp</span><br><span class="line">    0x7fff35fc9560 &lt;+4&gt;: pushq  %rbx</span><br><span class="line">    0x7fff35fc9561 &lt;+5&gt;: pushq  %rax</span><br></pre></td></tr></table></figure>
+
+<p>所以在第二次触发断点之后，查看调用栈：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">(lldb) bt</span><br><span class="line">* thread <span class="comment">#1, queue = &#x27;com.apple.main-thread&#x27;, stop reason = breakpoint 8.1</span></span><br><span class="line">  * frame <span class="comment">#0: 0x00007fff35fc955c Foundation`-[NSBundle bundleIdentifier]</span></span><br><span class="line">    frame <span class="comment">#1: 0x00007fff30bb7805 AppKit`_NSCheckForIllegalSetugidApp + 157</span></span><br><span class="line">    frame <span class="comment">#2: 0x00007fff30bd7251 AppKit`+[NSWindow initialize] + 60</span></span><br><span class="line">    frame <span class="comment">#3: 0x00007fff6c8e2795 libobjc.A.dylib`CALLING_SOME_+initialize_METHOD + 17</span></span><br><span class="line">    frame <span class="comment">#4: 0x00007fff6c8e30a6 libobjc.A.dylib`initializeNonMetaClass + 646</span></span><br><span class="line">    frame <span class="comment">#5: 0x00007fff6c8e4062 libobjc.A.dylib`initializeAndMaybeRelock(objc_class*, objc_object*, mutex_tt&lt;false&gt;&amp;, bool) + 214</span></span><br><span class="line">    frame <span class="comment">#6: 0x00007fff6c8d4d45 libobjc.A.dylib`lookUpImpOrForward + 1072</span></span><br><span class="line">    frame <span class="comment">#7: 0x00007fff6c8d4399 libobjc.A.dylib`_objc_msgSend_uncached + 73</span></span><br><span class="line">    frame <span class="comment">#8: 0x00000001010c7a54 libDataCube.dylib`+[NSWindow(self=NSWindow, _cmd=&quot;load&quot;) load] at NSWindow+Logo.m:18:5</span></span><br><span class="line">    frame <span class="comment">#9: 0x00007fff6c8d3393 libobjc.A.dylib`load_images + 1068</span></span><br><span class="line">    frame <span class="comment">#10: 0x000000010780d26c dyld`dyld::notifySingle(dyld_image_states, ImageLoader const*, ImageLoader::InitializerTimingList*) + 418</span></span><br><span class="line">    frame <span class="comment">#11: 0x0000000107820fe9 dyld`ImageLoader::recursiveInitialization(ImageLoader::LinkContext const&amp;, unsigned int, char const*, ImageLoader::InitializerTimingList&amp;, ImageLoader::UninitedUpwards&amp;) + 475</span></span><br><span class="line">    frame <span class="comment">#12: 0x0000000107820f66 dyld`ImageLoader::recursiveInitialization(ImageLoader::LinkContext const&amp;, unsigned int, char const*, ImageLoader::InitializerTimingList&amp;, ImageLoader::UninitedUpwards&amp;) + 344</span></span><br><span class="line">    frame <span class="comment">#13: 0x000000010781f0b4 dyld`ImageLoader::processInitializers(ImageLoader::LinkContext const&amp;, unsigned int, ImageLoader::InitializerTimingList&amp;, ImageLoader::UninitedUpwards&amp;) + 188</span></span><br><span class="line">    frame <span class="comment">#14: 0x000000010781f154 dyld`ImageLoader::runInitializers(ImageLoader::LinkContext const&amp;, ImageLoader::InitializerTimingList&amp;) + 82</span></span><br><span class="line">    frame <span class="comment">#15: 0x000000010780d6a8 dyld`dyld::initializeMainExecutable() + 199</span></span><br><span class="line">    frame <span class="comment">#16: 0x0000000107812bba dyld`dyld::_main(macho_header const*, unsigned long, int, char const**, char const**, char const**, unsigned long*) + 6667</span></span><br><span class="line">    frame <span class="comment">#17: 0x000000010780c227 dyld`dyldbootstrap::start(dyld3::MachOLoaded const*, int, char const**, dyld3::MachOLoaded const*, unsigned long*) + 453</span></span><br><span class="line">    frame <span class="comment">#18: 0x000000010780c025 dyld`_dyld_start + 37</span></span><br></pre></td></tr></table></figure>
+
+<p>真想大白了，是因为用到了NSWindow这个类，内部会调用方法<code>_NSCheckForIllegalSetugidApp</code>检查bundle id，因为login这个程序并不是一个普通的app结构，因此检查不通过，导致程序crash了。</p>
+<p>知道了crash的原因，只需要把所有NSWindow相关的代码都移除掉，就可以正常运行被注入之后的login程序了。</p>
+<h1 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h1><p>上面两个案例，都是通过LLDB来发现出现问题的具体位置，除了crash问题，其他问题，比如网络的，都可以通过类似的手法来找到程序实际调用了哪些符号，对症下药，找到最终解决问题的方案。其中LLDB还有很多功能，比如查看断点处的汇编指令d：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">(lldb) d</span><br><span class="line">Foundation`-[NSBundle bundleIdentifier]:</span><br><span class="line">    0x7fff35fc955c &lt;+0&gt;:  pushq  %rbp</span><br><span class="line">    0x7fff35fc955d &lt;+1&gt;:  movq   %rsp, %rbp</span><br><span class="line">-&gt;  0x7fff35fc9560 &lt;+4&gt;:  pushq  %rbx</span><br><span class="line">    0x7fff35fc9561 &lt;+5&gt;:  pushq  %rax</span><br><span class="line">    0x7fff35fc9562 &lt;+6&gt;:  movq   0x558bccdf(%rip), %rsi    ; <span class="string">&quot;infoDictionary&quot;</span></span><br><span class="line">    0x7fff35fc9569 &lt;+13&gt;: movq   0x557e4aa8(%rip), %rbx    ; (void *)0x00007fff6c8d3800: objc_msgSend</span><br><span class="line">    0x7fff35fc9570 &lt;+20&gt;: callq  *%rbx</span><br><span class="line">    0x7fff35fc9572 &lt;+22&gt;: movq   0x557e468f(%rip), %rcx    ; (void *)0x00007fff8b1f2ce0: kCFBundleIdentifierKey</span><br><span class="line">    0x7fff35fc9579 &lt;+29&gt;: movq   (%rcx), %rdx</span><br><span class="line">    0x7fff35fc957c &lt;+32&gt;: movq   0x558bbe8d(%rip), %rsi    ; <span class="string">&quot;objectForKey:&quot;</span></span><br><span class="line">    0x7fff35fc9583 &lt;+39&gt;: movq   %rax, %rdi</span><br><span class="line">    0x7fff35fc9586 &lt;+42&gt;: movq   %rbx, %rax</span><br><span class="line">    0x7fff35fc9589 &lt;+45&gt;: addq   <span class="variable">$0x8</span>, %rsp</span><br><span class="line">    0x7fff35fc958d &lt;+49&gt;: popq   %rbx</span><br><span class="line">    0x7fff35fc958e &lt;+50&gt;: popq   %rbp</span><br><span class="line">    0x7fff35fc958f &lt;+51&gt;: jmpq   *%rax</span><br><span class="line">    0x7fff35fc9591 &lt;+53&gt;: nop</span><br><span class="line">    0x7fff35fc9592 &lt;+54&gt;: nop</span><br><span class="line">    0x7fff35fc9593 &lt;+55&gt;: nop</span><br><span class="line">    0x7fff35fc9594 &lt;+56&gt;: nop</span><br><span class="line">    0x7fff35fc9595 &lt;+57&gt;: nop</span><br><span class="line">    0x7fff35fc9596 &lt;+58&gt;: nop</span><br><span class="line">    0x7fff35fc9597 &lt;+59&gt;: nop</span><br><span class="line">    0x7fff35fc9598 &lt;+60&gt;: nop</span><br><span class="line">    0x7fff35fc9599 &lt;+61&gt;: nop</span><br></pre></td></tr></table></figure>
+
+<p>我对LLDB的其他功能也不是很熟悉，这里就不多说了。</p>
+<h1 id="参考阅读"><a href="#参考阅读" class="headerlink" title="参考阅读"></a>参考阅读</h1><p><a target="_blank" rel="noopener" href="https://lldb.llvm.org/use/tutorial.html">LLDB官方使用教程简介</a></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/">底层原理</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/iOS/">iOS</a><a href="/tags/Mac/">Mac</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2021/10/12/using-lldb/" data-title="利用LLDB动态调试定位Crash原因 | C的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2021/12/31/macos-system-extensions/" title="MacOS系统扩展SystemExtensions深入实践">
+  <strong>上一篇：</strong><br/>
+  <span>
+  MacOS系统扩展SystemExtensions深入实践</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2021/07/10/some-idea-for-mac-dev/"  title="分享近期Mac应用开发的一些想法">
+ <strong>下一篇：</strong><br/> 
+ <span>分享近期Mac应用开发的一些想法
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A1%88%E4%BE%8B%E4%B8%80"><span class="toc-number">2.</span> <span class="toc-text">案例一</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A1%88%E4%BE%8B%E4%BA%8C"><span class="toc-number">3.</span> <span class="toc-text">案例二</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%9D%E8%80%83"><span class="toc-number">4.</span> <span class="toc-text">思考</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E9%98%85%E8%AF%BB"><span class="toc-number">5.</span> <span class="toc-text">参考阅读</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>4</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mac/" title="Mac">Mac<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mac应用/" title="Mac应用">Mac应用<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graph/" title="Graph">Graph<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 无立足境，是方干净 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
+		
+		<a href="/about" target="_blank" title="Cocos">Cocos</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'cocosdever';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
