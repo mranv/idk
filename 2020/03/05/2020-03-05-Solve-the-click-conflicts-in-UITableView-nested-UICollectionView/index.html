@@ -3,14 +3,14 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  
+
     <title>解决UITableView嵌套UICollectionView出现的点击冲突问题(实现点击穿透)的另一种思路 | C的博客</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
-    
-    <meta name="author" content="Cocos">
-    
 
-    
+    <meta name="author" content="Anubhav Gain">
+
+
+
     <meta name="description" content="文档更新说明 最后更新 2020年03月05日 首次更新 2020年03月06日  前言　　昨天有个同事发烧了, 然后整层楼的人都不能去上班了, 只能待在家里, 所以我寻思着最近做的东西就写了这篇文章了. 这个星期刚写的一个类似Excel的SheetView, 其中涉及到点击冲突问题, 当时查了一下网上的解决方案, 大概就是分成两种做法: 一种是重写TableViewCell的HitTest方法,">
 <meta property="og:type" content="article">
 <meta property="og:title" content="解决UITableView嵌套UICollectionView出现的点击冲突问题(实现点击穿透)的另一种思路">
@@ -20,21 +20,21 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2020-03-05T04:33:18.000Z">
 <meta property="article:modified_time" content="2020-03-06T05:05:02.000Z">
-<meta property="article:author" content="Cocos">
+<meta property="article:author" content="Anubhav Gain">
 <meta property="article:tag" content="UI">
 <meta name="twitter:card" content="summary">
 
-    
+
     <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
-    
-    
+
+
     <link rel="icon" href="/img/favicon.ico">
-    
-    
+
+
     <link rel="apple-touch-icon" href="/img/jacman.jpg">
     <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
-    
-    
+
+
 <link rel="stylesheet" href="/css/style.css">
 <link rel="stylesheet" href="/%02.css">
 <link rel="stylesheet" href="/.css">
@@ -43,9 +43,9 @@
 
   <body>
     <header>
-      
+
 <div>
-		
+
 			<div id="textlogo">
 				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
 				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
@@ -55,55 +55,55 @@
 			<nav class="animated">
 				<ul>
 					<ul>
-					 
+
 						<li><a href="/">主页</a></li>
-					
+
 						<li><a href="/archives">归档</a></li>
-					
+
 						<li><a href="/tags">标签</a></li>
-					
+
 						<li><a href="/about">关于</a></li>
-					
+
 					<li>
- 					
+
 					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
 						<label>Search</label>
 						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
 						<input type="hidden" name="q" value="site:yoursite.com">
 					</form>
-					
+
 					</li>
 				</ul>
-			</nav>			
+			</nav>
 </div>
     </header>
     <div id="container">
       <div id="main" class="post" itemscope itemprop="blogPost">
-  
-	<article itemprop="articleBody"> 
+
+	<article itemprop="articleBody">
 		<header class="article-info clearfix">
   <h1 itemprop="name">
-    
+
       <a href="/2020/03/05/2020-03-05-Solve-the-click-conflicts-in-UITableView-nested-UICollectionView/" title="解决UITableView嵌套UICollectionView出现的点击冲突问题(实现点击穿透)的另一种思路" itemprop="url">解决UITableView嵌套UICollectionView出现的点击冲突问题(实现点击穿透)的另一种思路</a>
   </h1>
   <p class="article-author">By
-       
-		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
-		
+
+		<a href="/about" title="Anubhav Gain" target="_blank" itemprop="author">Anubhav Gain</a>
+
   <p class="article-time">
     <time datetime="2020-03-05T04:33:18.000Z" itemprop="datePublished"> 发表于 2020-03-05</time>
-    
+
   </p>
 </header>
 	<div class="article-content">
-		
+
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
-		
+
 			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BB%93%E8%AE%BA"><span class="toc-number">3.</span> <span class="toc-text">结论</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%88%86%E6%9E%90"><span class="toc-number">4.</span> <span class="toc-text">分析</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E5%87%BA%E7%8E%B0%E7%9A%84UI%E5%B0%8F%E9%97%AE%E9%A2%98"><span class="toc-number">5.</span> <span class="toc-text">解决出现的UI小问题</span></a></li></ol>
-		
+
 		</div>
-		
+
 		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
 <li>最后更新 2020年03月05日</li>
 <li>首次更新 2020年03月06日</li>
@@ -134,7 +134,7 @@
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// 重写TableView子类</span></span><br><span class="line">- (<span class="keyword">void</span>)touchesMoved:(<span class="built_in">NSSet</span>&lt;<span class="built_in">UITouch</span> *&gt; *)touches withEvent:(<span class="built_in">UIEvent</span> *)event &#123;</span><br><span class="line">    [<span class="keyword">super</span> touchesMoved:touches withEvent:event];</span><br><span class="line">    [<span class="keyword">self</span> setHighlighted:<span class="literal">NO</span> animated:<span class="literal">YES</span>];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)touchesCancelled:(<span class="built_in">NSSet</span>&lt;<span class="built_in">UITouch</span> *&gt; *)touches withEvent:(<span class="built_in">UIEvent</span> *)event &#123;</span><br><span class="line">    [<span class="keyword">super</span> touchesCancelled:touches withEvent:event];</span><br><span class="line">    [<span class="keyword">self</span> setHighlighted:<span class="literal">NO</span> animated:<span class="literal">YES</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>第二个遇到的问题, 如果长按某一行, 之后松开点击其他行, 这个时候会触发被长按的那行的点击事件, 这个就是苹果不推荐你直接调用nextResponder的touches方法的原因的😂, 开发者不知道内部实现, 不能随便乱用, 否则会出现这样的意料之外的事. 这个问题暂时找不到怎么解决, 算是一种遗憾.</p>
-  
+
 	</div>
 		<footer class="article-footer clearfix">
 <div class="article-catetags">
@@ -146,7 +146,7 @@
 
 
   <div class="article-tags">
-  
+
   <span></span> <a href="/tags/UI/">UI</a>
   </div>
 
@@ -155,20 +155,20 @@
 
 
 	<div class="article-share" id="share">
-	
+
 	  <div data-url="http://yoursite.com/2020/03/05/2020-03-05-Solve-the-click-conflicts-in-UITableView-nested-UICollectionView/" data-title="解决UITableView嵌套UICollectionView出现的点击冲突问题(实现点击穿透)的另一种思路 | C的博客" data-tsina="" class="share clearfix">
 	  </div>
-	
+
 	</div>
 
 
 </footer>
 
-   	       
+
 	</article>
-	
+
 <nav class="article-nav clearfix">
- 
+
  <div class="prev" >
  <a href="/2020/03/08/2020-03-08-sheet-view-ui-libary/" title="CCSheetView -- 提供横竖滚动的行列视图组件">
   <strong>上一篇：</strong><br/>
@@ -180,7 +180,7 @@
 
 <div class="next">
 <a href="/2020/02/26/2020-02-26-add-cocoapods-support-to-your-own-libraries/"  title="给CCTrendCharts类库加上CocoaPods支持的有趣经历">
- <strong>下一篇：</strong><br/> 
+ <strong>下一篇：</strong><br/>
  <span>给CCTrendCharts类库加上CocoaPods支持的有趣经历
 </span>
 </a>
@@ -188,7 +188,7 @@
 
 </nav>
 
-	
+
 
 <section id="comments" class="comment">
   <div id="disqus_thread">
@@ -199,174 +199,174 @@
 
 
 
-</div>  
+</div>
       <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
 
   <div id="toc" class="toc-aside">
   <strong class="toc-title">文章目录</strong>
- 
+
  <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BB%93%E8%AE%BA"><span class="toc-number">3.</span> <span class="toc-text">结论</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%88%86%E6%9E%90"><span class="toc-number">4.</span> <span class="toc-text">分析</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E5%87%BA%E7%8E%B0%E7%9A%84UI%E5%B0%8F%E9%97%AE%E9%A2%98"><span class="toc-number">5.</span> <span class="toc-text">解决出现的UI小问题</span></a></li></ol>
- 
+
   </div>
 
 <div id="asidepart">
 <div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
 <aside class="clearfix">
 
-  
+
 <div class="categorieslist">
 	<p class="asidetitle">分类</p>
 		<ul>
-		
-		  
+
+
 			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>4</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>2</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/生活/" title="生活">生活<sup>3</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
-		  
-		
+
+
 		</ul>
 </div>
 
 
-  
+
 <div class="tagslist">
 	<p class="asidetitle">标签</p>
 		<ul class="clearfix">
-		
-			
+
+
 				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/iOS/" title="iOS">iOS<sup>7</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Mac/" title="Mac">Mac<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/感想/" title="感想">感想<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Mac应用/" title="Mac应用">Mac应用<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
-			
-		
+
+
 		</ul>
 </div>
 
@@ -374,29 +374,29 @@
   <div class="linkslist">
   <p class="asidetitle">友情链接</p>
     <ul>
-        
+
           <li>
-            
+
             	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
-            
+
           </li>
-        
+
           <li>
-            
+
             	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
-            
+
           </li>
-        
+
           <li>
-            
+
             	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
-            
+
           </li>
-        
+
     </ul>
 </div>
 
-  
+
 
 
   <div class="rsspart">
@@ -407,41 +407,41 @@
 </div>
     </div>
     <footer><div id="footer" >
-	
+
 	<div class="line">
 		<span></span>
 		<div class="author"></div>
 	</div>
-	
-	
+
+
 	<section class="info">
 		<p> 无立足境，是方干净 <br/>
 			</p>
 	</section>
-	 
+
 	<div class="social-font" class="clearfix">
-		
-		
-		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
-		
-		
-		
-		
-		
-		
-		
-		
-		
+
+
+		<a href="https://github.com/Anubhav Gain543" target="_blank" class="icon-github" title="github"></a>
+
+
+
+
+
+
+
+
+
 	</div>
-			
-		
+
+
 
 		<p class="copyright">
-		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
-		
-		<a href="/about" target="_blank" title="Cocos">Cocos</a>
-		
-		
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024
+
+		<a href="/about" target="_blank" title="Anubhav Gain">Anubhav Gain</a>
+
+
 		</p>
 </div>
 </footer>
@@ -451,7 +451,7 @@
 <script src="/js/jquery.qrcode-0.12.0.min.js"></script>
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   $('.navbar').click(function(){
     $('header nav').toggleClass('shownav');
   });
@@ -474,31 +474,31 @@ $(document).ready(function(){
   });
   o.click(function(){
     o.css('display', 'none').removeClass('beforeFadeIn');
-    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');
     m.removeClass('moveMain');
   });
   $(window).scroll(function(){
     o.css("top",Math.max(80,260-$(this).scrollTop()));
   });
-  
+
   $(window).resize(function(){
-    getSize(); 
+    getSize();
     if (myWidth >= 1024) {
       $('header nav').removeClass('shownav');
     }else{
       m.removeClass('moveMain');
       a.css('display', 'block').removeClass('fadeOut');
       o.css('display', 'none');
-      
+
       $('#toc.toc-aside').css('display', 'none');
-        
+
     }
   });
 });
 </script>
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   var ai = $('.article-content>iframe'),
       ae = $('.article-content>embed'),
       t  = $('#toc'),
@@ -525,7 +525,7 @@ $(document).ready(function(){
 
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   var $this = $('.share'),
       url = $this.attr('data-url'),
       encodedUrl = encodeURIComponent(url),
@@ -570,7 +570,7 @@ $(document).ready(function(){
   $('.article-share-qrcode').hover(function(){}, function(){
       $('.hoverqrcode').hide();
   });
-});   
+});
 </script>
 
 
@@ -578,7 +578,7 @@ $(document).ready(function(){
 
 <script type="text/javascript">
 
-var disqus_shortname = 'cocosdever';
+var disqus_shortname = 'Anubhav Gaindever';
 
 (function(){
   var dsq = document.createElement('script');
@@ -606,7 +606,7 @@ var disqus_shortname = 'cocosdever';
 <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
 <script src="/fancybox/jquery.fancybox.pack.js"></script>
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   $('.article-content').each(function(i){
     $(this).find('img').each(function(){
       if ($(this).parent().hasClass('fancybox')) return;
@@ -621,7 +621,7 @@ $(document).ready(function(){
   if($.fancybox){
     $('.fancybox').fancybox();
   }
-}); 
+});
 </script>
 
 
@@ -635,7 +635,7 @@ var _hmt = _hmt || [];
 (function() {
   var hm = document.createElement("script");
   hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
-  var s = document.getElementsByTagName("script")[0]; 
+  var s = document.getElementsByTagName("script")[0];
   s.parentNode.insertBefore(hm, s);
 })();
 </script>

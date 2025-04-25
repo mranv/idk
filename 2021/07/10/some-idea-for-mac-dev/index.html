@@ -3,14 +3,14 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  
+
     <title>分享近期Mac应用开发的一些想法 | C的博客</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
-    
-    <meta name="author" content="Cocos">
-    
 
-    
+    <meta name="author" content="Anubhav Gain">
+
+
+
     <meta name="description" content="前言这段时间做的几个Mac需求，都属于非常规需求，网上找不到标准答案，只能自己调研，自己设计思路，然后结合产品设计最后实现功能。其中有一些思路值得记录分享一下。本文不会公开全部细节，只记录思路。 拦截全局URL跳转需求背景：通常在App内点击某个URL，系统会帮我们打开默认的浏览器并且跳转到对应网站上。现在有个需求，要实现拦截URL跳转逻辑, 根据后台配置的网址策略，选择不同浏览器打开。因为我们的">
 <meta property="og:type" content="article">
 <meta property="og:title" content="分享近期Mac应用开发的一些想法">
@@ -20,21 +20,21 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-07-10T01:46:07.000Z">
 <meta property="article:modified_time" content="2021-07-10T01:53:07.052Z">
-<meta property="article:author" content="Cocos">
+<meta property="article:author" content="Anubhav Gain">
 <meta property="article:tag" content="Mac">
 <meta name="twitter:card" content="summary">
 
-    
+
     <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
-    
-    
+
+
     <link rel="icon" href="/img/favicon.ico">
-    
-    
+
+
     <link rel="apple-touch-icon" href="/img/jacman.jpg">
     <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
-    
-    
+
+
 <link rel="stylesheet" href="/css/style.css">
 <link rel="stylesheet" href="/%02.css">
 <link rel="stylesheet" href="/.css">
@@ -43,9 +43,9 @@
 
   <body>
     <header>
-      
+
 <div>
-		
+
 			<div id="textlogo">
 				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
 				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
@@ -55,55 +55,55 @@
 			<nav class="animated">
 				<ul>
 					<ul>
-					 
+
 						<li><a href="/">主页</a></li>
-					
+
 						<li><a href="/archives">归档</a></li>
-					
+
 						<li><a href="/tags">标签</a></li>
-					
+
 						<li><a href="/about">关于</a></li>
-					
+
 					<li>
- 					
+
 					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
 						<label>Search</label>
 						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
 						<input type="hidden" name="q" value="site:yoursite.com">
 					</form>
-					
+
 					</li>
 				</ul>
-			</nav>			
+			</nav>
 </div>
     </header>
     <div id="container">
       <div id="main" class="post" itemscope itemprop="blogPost">
-  
-	<article itemprop="articleBody"> 
+
+	<article itemprop="articleBody">
 		<header class="article-info clearfix">
   <h1 itemprop="name">
-    
+
       <a href="/2021/07/10/some-idea-for-mac-dev/" title="分享近期Mac应用开发的一些想法" itemprop="url">分享近期Mac应用开发的一些想法</a>
   </h1>
   <p class="article-author">By
-       
-		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
-		
+
+		<a href="/about" title="Anubhav Gain" target="_blank" itemprop="author">Anubhav Gain</a>
+
   <p class="article-time">
     <time datetime="2021-07-10T01:46:07.000Z" itemprop="datePublished"> 发表于 2021-07-10</time>
-    
+
   </p>
 </header>
 	<div class="article-content">
-		
+
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
-		
+
 			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8B%A6%E6%88%AA%E5%85%A8%E5%B1%80URL%E8%B7%B3%E8%BD%AC"><span class="toc-number">2.</span> <span class="toc-text">拦截全局URL跳转</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#App%E5%85%8D%E5%A4%8D%E5%88%B6%E6%8A%80%E6%9C%AF"><span class="toc-number">3.</span> <span class="toc-text">App免复制技术</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
-		
+
 		</div>
-		
+
 		<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这段时间做的几个Mac需求，都属于非常规需求，网上找不到标准答案，只能自己调研，自己设计思路，然后结合产品设计最后实现功能。其中有一些思路值得记录分享一下。本文不会公开全部细节，只记录思路。</p>
 <h1 id="拦截全局URL跳转"><a href="#拦截全局URL跳转" class="headerlink" title="拦截全局URL跳转"></a>拦截全局URL跳转</h1><p><strong>需求背景：</strong>通常在App内点击某个URL，系统会帮我们打开默认的浏览器并且跳转到对应网站上。现在有个需求，要实现拦截URL跳转逻辑, 根据后台配置的网址策略，选择不同浏览器打开。因为我们的软件是一款安全管控软件，不同浏览器能打开不同的域名，所以做这样一个需求可以极大提高用户使用体验。</p>
 <p>这个需求有两大要点，第一是针对那些被我们的软件注入了动态库的App，在这类App里拦截点击URL的动作，并重新根据策略使用指定浏览器打开，是一件比较常规的事，大概就是找到相关的函数然后Hook，修改逻辑即可。</p>
@@ -121,7 +121,7 @@
 <p>不过问题也来了，Mac上的App本质是一个文件夹，名字以.app结尾，软链接可以直接基于文件夹创建，但是硬链接不行啊，硬链接只能基于文件创建。另外硬链接也无法在不同挂在盘之间创建，总体限制还是比较多的。</p>
 <p><strong>但是，有思路才是最重要的，问题始终都是可以解决的。最后成功解决各个难题，配合优秀的产品设计，获得了比较好的用户体验。</strong></p>
 <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>以上就是近段时间完成的主要难题，考虑到项目的保密性，没有公开全部细节。但是也不难看出，解决问题的思路很重要，<strong>开阔的思维和丰富的横向知识</strong>，再配合团队头脑风暴，配合产品体验设计，最终也能解决问题。</p>
-  
+
 	</div>
 		<footer class="article-footer clearfix">
 <div class="article-catetags">
@@ -133,7 +133,7 @@
 
 
   <div class="article-tags">
-  
+
   <span></span> <a href="/tags/Mac/">Mac</a>
   </div>
 
@@ -142,20 +142,20 @@
 
 
 	<div class="article-share" id="share">
-	
+
 	  <div data-url="http://yoursite.com/2021/07/10/some-idea-for-mac-dev/" data-title="分享近期Mac应用开发的一些想法 | C的博客" data-tsina="" class="share clearfix">
 	  </div>
-	
+
 	</div>
 
 
 </footer>
 
-   	       
+
 	</article>
-	
+
 <nav class="article-nav clearfix">
- 
+
  <div class="prev" >
  <a href="/2021/10/12/using-lldb/" title="利用LLDB动态调试定位Crash原因">
   <strong>上一篇：</strong><br/>
@@ -167,7 +167,7 @@
 
 <div class="next">
 <a href="/2021/05/22/prevent-dynamic-debug/"  title="低成本防静态分析和防动态调试的解决方案">
- <strong>下一篇：</strong><br/> 
+ <strong>下一篇：</strong><br/>
  <span>低成本防静态分析和防动态调试的解决方案
 </span>
 </a>
@@ -175,7 +175,7 @@
 
 </nav>
 
-	
+
 
 <section id="comments" class="comment">
   <div id="disqus_thread">
@@ -186,174 +186,174 @@
 
 
 
-</div>  
+</div>
       <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
 
   <div id="toc" class="toc-aside">
   <strong class="toc-title">文章目录</strong>
- 
+
  <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8B%A6%E6%88%AA%E5%85%A8%E5%B1%80URL%E8%B7%B3%E8%BD%AC"><span class="toc-number">2.</span> <span class="toc-text">拦截全局URL跳转</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#App%E5%85%8D%E5%A4%8D%E5%88%B6%E6%8A%80%E6%9C%AF"><span class="toc-number">3.</span> <span class="toc-text">App免复制技术</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
- 
+
   </div>
 
 <div id="asidepart">
 <div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
 <aside class="clearfix">
 
-  
+
 <div class="categorieslist">
 	<p class="asidetitle">分类</p>
 		<ul>
-		
-		  
+
+
 			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>4</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>2</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/生活/" title="生活">生活<sup>3</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
-		  
-		
+
+
 		</ul>
 </div>
 
 
-  
+
 <div class="tagslist">
 	<p class="asidetitle">标签</p>
 		<ul class="clearfix">
-		
-			
+
+
 				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/iOS/" title="iOS">iOS<sup>7</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Mac/" title="Mac">Mac<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/感想/" title="感想">感想<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Mac应用/" title="Mac应用">Mac应用<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
-			
-		
+
+
 		</ul>
 </div>
 
@@ -361,29 +361,29 @@
   <div class="linkslist">
   <p class="asidetitle">友情链接</p>
     <ul>
-        
+
           <li>
-            
+
             	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
-            
+
           </li>
-        
+
           <li>
-            
+
             	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
-            
+
           </li>
-        
+
           <li>
-            
+
             	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
-            
+
           </li>
-        
+
     </ul>
 </div>
 
-  
+
 
 
   <div class="rsspart">
@@ -394,41 +394,41 @@
 </div>
     </div>
     <footer><div id="footer" >
-	
+
 	<div class="line">
 		<span></span>
 		<div class="author"></div>
 	</div>
-	
-	
+
+
 	<section class="info">
 		<p> 无立足境，是方干净 <br/>
 			</p>
 	</section>
-	 
+
 	<div class="social-font" class="clearfix">
-		
-		
-		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
-		
-		
-		
-		
-		
-		
-		
-		
-		
+
+
+		<a href="https://github.com/Anubhav Gain543" target="_blank" class="icon-github" title="github"></a>
+
+
+
+
+
+
+
+
+
 	</div>
-			
-		
+
+
 
 		<p class="copyright">
-		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
-		
-		<a href="/about" target="_blank" title="Cocos">Cocos</a>
-		
-		
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024
+
+		<a href="/about" target="_blank" title="Anubhav Gain">Anubhav Gain</a>
+
+
 		</p>
 </div>
 </footer>
@@ -438,7 +438,7 @@
 <script src="/js/jquery.qrcode-0.12.0.min.js"></script>
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   $('.navbar').click(function(){
     $('header nav').toggleClass('shownav');
   });
@@ -461,31 +461,31 @@ $(document).ready(function(){
   });
   o.click(function(){
     o.css('display', 'none').removeClass('beforeFadeIn');
-    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');
     m.removeClass('moveMain');
   });
   $(window).scroll(function(){
     o.css("top",Math.max(80,260-$(this).scrollTop()));
   });
-  
+
   $(window).resize(function(){
-    getSize(); 
+    getSize();
     if (myWidth >= 1024) {
       $('header nav').removeClass('shownav');
     }else{
       m.removeClass('moveMain');
       a.css('display', 'block').removeClass('fadeOut');
       o.css('display', 'none');
-      
+
       $('#toc.toc-aside').css('display', 'none');
-        
+
     }
   });
 });
 </script>
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   var ai = $('.article-content>iframe'),
       ae = $('.article-content>embed'),
       t  = $('#toc'),
@@ -512,7 +512,7 @@ $(document).ready(function(){
 
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   var $this = $('.share'),
       url = $this.attr('data-url'),
       encodedUrl = encodeURIComponent(url),
@@ -557,7 +557,7 @@ $(document).ready(function(){
   $('.article-share-qrcode').hover(function(){}, function(){
       $('.hoverqrcode').hide();
   });
-});   
+});
 </script>
 
 
@@ -565,7 +565,7 @@ $(document).ready(function(){
 
 <script type="text/javascript">
 
-var disqus_shortname = 'cocosdever';
+var disqus_shortname = 'Anubhav Gaindever';
 
 (function(){
   var dsq = document.createElement('script');
@@ -593,7 +593,7 @@ var disqus_shortname = 'cocosdever';
 <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
 <script src="/fancybox/jquery.fancybox.pack.js"></script>
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   $('.article-content').each(function(i){
     $(this).find('img').each(function(){
       if ($(this).parent().hasClass('fancybox')) return;
@@ -608,7 +608,7 @@ $(document).ready(function(){
   if($.fancybox){
     $('.fancybox').fancybox();
   }
-}); 
+});
 </script>
 
 
@@ -622,7 +622,7 @@ var _hmt = _hmt || [];
 (function() {
   var hm = document.createElement("script");
   hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
-  var s = document.getElementsByTagName("script")[0]; 
+  var s = document.getElementsByTagName("script")[0];
   s.parentNode.insertBefore(hm, s);
 })();
 </script>

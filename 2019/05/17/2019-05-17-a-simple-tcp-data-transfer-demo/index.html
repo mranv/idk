@@ -3,14 +3,14 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  
+
     <title>TCP数据协议设计和数据传输处理 | C的博客</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
-    
-    <meta name="author" content="Cocos">
-    
 
-    
+    <meta name="author" content="Anubhav Gain">
+
+
+
     <meta name="description" content="文档更新说明 最后更新 2019年05月17日 首次更新 2019年05月17日  前言　　最近在复习网络相关知识, 复习到了TCP协议, 所以写了个demo熟悉一下. 为了方便我用了golang实现的, 其实用什么语言都一样, 最重要的是理解核心知识.　　在这个例子中, 我会设计一个简单的tcp数据协议, 然后客户端根据数据协议发送数据, 服务端根据协议接收数据并打印出来, 整个过程我会模拟tc">
 <meta property="og:type" content="article">
 <meta property="og:title" content="TCP数据协议设计和数据传输处理">
@@ -20,21 +20,21 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2019-05-17T08:43:21.000Z">
 <meta property="article:modified_time" content="2019-05-17T09:50:42.000Z">
-<meta property="article:author" content="Cocos">
+<meta property="article:author" content="Anubhav Gain">
 <meta property="article:tag" content="tcp">
 <meta name="twitter:card" content="summary">
 
-    
+
     <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
-    
-    
+
+
     <link rel="icon" href="/img/favicon.ico">
-    
-    
+
+
     <link rel="apple-touch-icon" href="/img/jacman.jpg">
     <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
-    
-    
+
+
 <link rel="stylesheet" href="/css/style.css">
 <link rel="stylesheet" href="/%02.css">
 <link rel="stylesheet" href="/.css">
@@ -43,9 +43,9 @@
 
   <body>
     <header>
-      
+
 <div>
-		
+
 			<div id="textlogo">
 				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
 				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
@@ -55,55 +55,55 @@
 			<nav class="animated">
 				<ul>
 					<ul>
-					 
+
 						<li><a href="/">主页</a></li>
-					
+
 						<li><a href="/archives">归档</a></li>
-					
+
 						<li><a href="/tags">标签</a></li>
-					
+
 						<li><a href="/about">关于</a></li>
-					
+
 					<li>
- 					
+
 					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
 						<label>Search</label>
 						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
 						<input type="hidden" name="q" value="site:yoursite.com">
 					</form>
-					
+
 					</li>
 				</ul>
-			</nav>			
+			</nav>
 </div>
     </header>
     <div id="container">
       <div id="main" class="post" itemscope itemprop="blogPost">
-  
-	<article itemprop="articleBody"> 
+
+	<article itemprop="articleBody">
 		<header class="article-info clearfix">
   <h1 itemprop="name">
-    
+
       <a href="/2019/05/17/2019-05-17-a-simple-tcp-data-transfer-demo/" title="TCP数据协议设计和数据传输处理" itemprop="url">TCP数据协议设计和数据传输处理</a>
   </h1>
   <p class="article-author">By
-       
-		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
-		
+
+		<a href="/about" title="Anubhav Gain" target="_blank" itemprop="author">Anubhav Gain</a>
+
   <p class="article-time">
     <time datetime="2019-05-17T08:43:21.000Z" itemprop="datePublished"> 发表于 2019-05-17</time>
-    
+
   </p>
 </header>
 	<div class="article-content">
-		
+
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
-		
+
 			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%8D%8F%E8%AE%AE"><span class="toc-number">3.</span> <span class="toc-text">数据协议</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E6%95%B0%E6%8D%AE%E5%8D%8F%E8%AE%AE"><span class="toc-number">4.</span> <span class="toc-text">为什么需要数据协议</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%BB%A3%E7%A0%81"><span class="toc-number">5.</span> <span class="toc-text">服务端代码</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BB%A3%E7%A0%81"><span class="toc-number">6.</span> <span class="toc-text">客户端代码</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E7%BB%93%E6%9E%9C%E5%88%86%E6%9E%90"><span class="toc-number">7.</span> <span class="toc-text">执行结果分析</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">8.</span> <span class="toc-text">总结</span></a></li></ol>
-		
+
 		</div>
-		
+
 		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
 <li>最后更新 2019年05月17日</li>
 <li>首次更新 2019年05月17日</li>
@@ -126,7 +126,7 @@
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">server start...</span><br><span class="line">Read <span class="number">8</span> bit <span class="comment">// 第一次读取到8个字节</span></span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">0</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">1</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">2</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">2</span> add into maxBuf[<span class="number">3</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">1</span> add into maxBuf[<span class="number">4</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">2</span> add into maxBuf[<span class="number">5</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">6</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">7</span>]</span><br><span class="line">msg body <span class="built_in">len</span> is:<span class="number">2</span></span><br><span class="line">msg head = <span class="number">00000002.</span> body = <span class="number">0102</span></span><br><span class="line"><span class="number">1</span> <span class="number">2</span>  <span class="comment">//这里读取到第一条消息, 内容是1,2, 正确</span></span><br><span class="line"><span class="built_in">print</span> content done</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">0</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">1</span>]</span><br><span class="line">newOffser =  <span class="number">2</span> <span class="comment">// 读取了8个字节解析了第一条消息, 一共用去了6个字节, 剩下2个字节放回缓冲数组</span></span><br><span class="line"></span><br><span class="line">Read <span class="number">3</span> bit <span class="comment">// 第二次读取到3个字节, 加上上面剩余的2个一共就有5个字节</span></span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">2</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">5</span> add into maxBuf[<span class="number">3</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">101</span> add into maxBuf[<span class="number">4</span>]</span><br><span class="line">msg body <span class="built_in">len</span> is:<span class="number">5</span></span><br><span class="line">bufOffset &lt; msgHeadLen+<span class="keyword">int</span>(bodyLen) <span class="comment">// 程序解析得到第二条消息的body长度是5, 完整的数据就是4+5=9个字节, 而我们才5个字节明显不够, 继续等待新数据的到来</span></span><br><span class="line"></span><br><span class="line">Read <span class="number">6</span> bit <span class="comment">// 第三次读取, 读取到6个字节</span></span><br><span class="line"><span class="keyword">byte</span>:<span class="number">102</span> add into maxBuf[<span class="number">5</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">103</span> add into maxBuf[<span class="number">6</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">104</span> add into maxBuf[<span class="number">7</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">105</span> add into maxBuf[<span class="number">8</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">9</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">10</span>]</span><br><span class="line">msg body <span class="built_in">len</span> is:<span class="number">5</span></span><br><span class="line">msg head = <span class="number">00000005.</span> body = <span class="number">6566676869</span></span><br><span class="line"><span class="number">101</span> <span class="number">102</span> <span class="number">103</span> <span class="number">104</span> <span class="number">105</span> <span class="comment">// 解析得到第二条消息的内容101,102,103,104,105, 正确</span></span><br><span class="line"><span class="built_in">print</span> content done</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">0</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">1</span>]</span><br><span class="line">newOffser =  <span class="number">2</span> <span class="comment">//将剩余的2个字节放回缓冲数组</span></span><br><span class="line"></span><br><span class="line">Read <span class="number">1</span> bit <span class="comment">// 第4次读取到1个字节, 加上上面剩余的2个一共3个</span></span><br><span class="line"><span class="keyword">byte</span>:<span class="number">0</span> add into maxBuf[<span class="number">2</span>]</span><br><span class="line">totalCount &lt; msgHeadLen <span class="comment">// 3个字节很明显不够一条消息的头部长度, 继续等待读取</span></span><br><span class="line"></span><br><span class="line">Read <span class="number">2</span> bit <span class="comment">// 第5次读取到2个字节, 加上上面剩余的3个, 一共5个字节</span></span><br><span class="line"><span class="keyword">byte</span>:<span class="number">1</span> add into maxBuf[<span class="number">3</span>]</span><br><span class="line"><span class="keyword">byte</span>:<span class="number">108</span> add into maxBuf[<span class="number">4</span>]</span><br><span class="line">msg body <span class="built_in">len</span> is:<span class="number">1</span></span><br><span class="line">msg head = <span class="number">00000001.</span> body = <span class="number">6</span>c</span><br><span class="line"><span class="number">108</span>  <span class="comment">// 解析得到第三条消息内容是108, 正确</span></span><br><span class="line"><span class="built_in">print</span> content done</span><br><span class="line">newOffser =  <span class="number">0</span> <span class="comment">// 刚好5个字节都用完了, 剩余0个字节.</span></span><br></pre></td></tr></table></figure>
 
 <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>　　上面服务端已经正确处理了客户端发送的3条消息了, 只不过我们可以看出, 服务端实际上一共读取了5次数据, 而客户端是分4次发出的.<br>　　我们模拟出了出现粘包的情况, 也就是接收到超过一条消息的长度, 我们的处理方法是读取第一条, 剩余的放回缓冲数组继续等待新数据的到来. 还有接收到的数据还不够数据部那么长时的处理方法, 我们的处理方法是继续等待新数据的到来.</p>
-  
+
 	</div>
 		<footer class="article-footer clearfix">
 <div class="article-catetags">
@@ -138,7 +138,7 @@
 
 
   <div class="article-tags">
-  
+
   <span></span> <a href="/tags/tcp/">tcp</a>
   </div>
 
@@ -147,20 +147,20 @@
 
 
 	<div class="article-share" id="share">
-	
+
 	  <div data-url="http://yoursite.com/2019/05/17/2019-05-17-a-simple-tcp-data-transfer-demo/" data-title="TCP数据协议设计和数据传输处理 | C的博客" data-tsina="" class="share clearfix">
 	  </div>
-	
+
 	</div>
 
 
 </footer>
 
-   	       
+
 	</article>
-	
+
 <nav class="article-nav clearfix">
- 
+
  <div class="prev" >
  <a href="/2019/06/19/2019-06-19-NSString-in-OC-and-String-in-Swift-2/" title="认真理解OC和Swift中的字符串">
   <strong>上一篇：</strong><br/>
@@ -172,7 +172,7 @@
 
 <div class="next">
 <a href="/2019/04/01/2019-04-01-understanding-of-delegate-extensions-in-reactive-flatcocoa/"  title="深入理解RxSwift中的代理扩展原理--FlatCocoa">
- <strong>下一篇：</strong><br/> 
+ <strong>下一篇：</strong><br/>
  <span>深入理解RxSwift中的代理扩展原理--FlatCocoa
 </span>
 </a>
@@ -180,7 +180,7 @@
 
 </nav>
 
-	
+
 
 <section id="comments" class="comment">
   <div id="disqus_thread">
@@ -191,174 +191,174 @@
 
 
 
-</div>  
+</div>
       <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
 
   <div id="toc" class="toc-aside">
   <strong class="toc-title">文章目录</strong>
- 
+
  <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%8D%8F%E8%AE%AE"><span class="toc-number">3.</span> <span class="toc-text">数据协议</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E6%95%B0%E6%8D%AE%E5%8D%8F%E8%AE%AE"><span class="toc-number">4.</span> <span class="toc-text">为什么需要数据协议</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%BB%A3%E7%A0%81"><span class="toc-number">5.</span> <span class="toc-text">服务端代码</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BB%A3%E7%A0%81"><span class="toc-number">6.</span> <span class="toc-text">客户端代码</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E7%BB%93%E6%9E%9C%E5%88%86%E6%9E%90"><span class="toc-number">7.</span> <span class="toc-text">执行结果分析</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">8.</span> <span class="toc-text">总结</span></a></li></ol>
- 
+
   </div>
 
 <div id="asidepart">
 <div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
 <aside class="clearfix">
 
-  
+
 <div class="categorieslist">
 	<p class="asidetitle">分类</p>
 		<ul>
-		
-		  
+
+
 			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>4</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>2</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/生活/" title="生活">生活<sup>3</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
-		  
-		
+
+
 		</ul>
 </div>
 
 
-  
+
 <div class="tagslist">
 	<p class="asidetitle">标签</p>
 		<ul class="clearfix">
-		
-			
+
+
 				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/iOS/" title="iOS">iOS<sup>7</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Mac/" title="Mac">Mac<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/感想/" title="感想">感想<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Mac应用/" title="Mac应用">Mac应用<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
-			
-		
+
+
 		</ul>
 </div>
 
@@ -366,29 +366,29 @@
   <div class="linkslist">
   <p class="asidetitle">友情链接</p>
     <ul>
-        
+
           <li>
-            
+
             	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
-            
+
           </li>
-        
+
           <li>
-            
+
             	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
-            
+
           </li>
-        
+
           <li>
-            
+
             	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
-            
+
           </li>
-        
+
     </ul>
 </div>
 
-  
+
 
 
   <div class="rsspart">
@@ -399,41 +399,41 @@
 </div>
     </div>
     <footer><div id="footer" >
-	
+
 	<div class="line">
 		<span></span>
 		<div class="author"></div>
 	</div>
-	
-	
+
+
 	<section class="info">
 		<p> 无立足境，是方干净 <br/>
 			</p>
 	</section>
-	 
+
 	<div class="social-font" class="clearfix">
-		
-		
-		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
-		
-		
-		
-		
-		
-		
-		
-		
-		
+
+
+		<a href="https://github.com/Anubhav Gain543" target="_blank" class="icon-github" title="github"></a>
+
+
+
+
+
+
+
+
+
 	</div>
-			
-		
+
+
 
 		<p class="copyright">
-		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
-		
-		<a href="/about" target="_blank" title="Cocos">Cocos</a>
-		
-		
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024
+
+		<a href="/about" target="_blank" title="Anubhav Gain">Anubhav Gain</a>
+
+
 		</p>
 </div>
 </footer>
@@ -443,7 +443,7 @@
 <script src="/js/jquery.qrcode-0.12.0.min.js"></script>
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   $('.navbar').click(function(){
     $('header nav').toggleClass('shownav');
   });
@@ -466,31 +466,31 @@ $(document).ready(function(){
   });
   o.click(function(){
     o.css('display', 'none').removeClass('beforeFadeIn');
-    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');
     m.removeClass('moveMain');
   });
   $(window).scroll(function(){
     o.css("top",Math.max(80,260-$(this).scrollTop()));
   });
-  
+
   $(window).resize(function(){
-    getSize(); 
+    getSize();
     if (myWidth >= 1024) {
       $('header nav').removeClass('shownav');
     }else{
       m.removeClass('moveMain');
       a.css('display', 'block').removeClass('fadeOut');
       o.css('display', 'none');
-      
+
       $('#toc.toc-aside').css('display', 'none');
-        
+
     }
   });
 });
 </script>
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   var ai = $('.article-content>iframe'),
       ae = $('.article-content>embed'),
       t  = $('#toc'),
@@ -517,7 +517,7 @@ $(document).ready(function(){
 
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   var $this = $('.share'),
       url = $this.attr('data-url'),
       encodedUrl = encodeURIComponent(url),
@@ -562,7 +562,7 @@ $(document).ready(function(){
   $('.article-share-qrcode').hover(function(){}, function(){
       $('.hoverqrcode').hide();
   });
-});   
+});
 </script>
 
 
@@ -570,7 +570,7 @@ $(document).ready(function(){
 
 <script type="text/javascript">
 
-var disqus_shortname = 'cocosdever';
+var disqus_shortname = 'Anubhav Gaindever';
 
 (function(){
   var dsq = document.createElement('script');
@@ -598,7 +598,7 @@ var disqus_shortname = 'cocosdever';
 <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
 <script src="/fancybox/jquery.fancybox.pack.js"></script>
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   $('.article-content').each(function(i){
     $(this).find('img').each(function(){
       if ($(this).parent().hasClass('fancybox')) return;
@@ -613,7 +613,7 @@ $(document).ready(function(){
   if($.fancybox){
     $('.fancybox').fancybox();
   }
-}); 
+});
 </script>
 
 
@@ -627,7 +627,7 @@ var _hmt = _hmt || [];
 (function() {
   var hm = document.createElement("script");
   hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
-  var s = document.getElementsByTagName("script")[0]; 
+  var s = document.getElementsByTagName("script")[0];
   s.parentNode.insertBefore(hm, s);
 })();
 </script>

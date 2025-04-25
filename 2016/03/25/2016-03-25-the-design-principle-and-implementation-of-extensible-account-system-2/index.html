@@ -3,14 +3,14 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  
+
     <title>可绑定可扩展的帐号系统设计原理及其实现(二) | C的博客</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
-    
-    <meta name="author" content="Cocos">
-    
 
-    
+    <meta name="author" content="Anubhav Gain">
+
+
+
     <meta name="description" content="文档更新说明 2016-03-26 完成 2016-03-25 初稿  前言　　在可绑定可扩展的帐号系统设计原理及其实现(一)一文中已经啰嗦讲完原理了.本文主要借用PHP代码从实现角度讲述.分成用户注册,帐号绑定,数据迁移,数据查询四个部分. 　　 用户注册手机号注册　　手机号注册的帐号,称为主帐号,实现起来相对比较简单,只需要在users表中插入一条主帐号数据即可. 12345678910111">
 <meta property="og:type" content="article">
 <meta property="og:title" content="可绑定可扩展的帐号系统设计原理及其实现(二)">
@@ -20,22 +20,22 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2016-03-25T07:31:20.000Z">
 <meta property="article:modified_time" content="2016-03-26T01:27:24.000Z">
-<meta property="article:author" content="Cocos">
+<meta property="article:author" content="Anubhav Gain">
 <meta property="article:tag" content="PHP">
 <meta property="article:tag" content="可扩展">
 <meta name="twitter:card" content="summary">
 
-    
+
     <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
-    
-    
+
+
     <link rel="icon" href="/img/favicon.ico">
-    
-    
+
+
     <link rel="apple-touch-icon" href="/img/jacman.jpg">
     <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
-    
-    
+
+
 <link rel="stylesheet" href="/css/style.css">
 <link rel="stylesheet" href="/%02.css">
 <link rel="stylesheet" href="/.css">
@@ -44,9 +44,9 @@
 
   <body>
     <header>
-      
+
 <div>
-		
+
 			<div id="textlogo">
 				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
 				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
@@ -56,55 +56,55 @@
 			<nav class="animated">
 				<ul>
 					<ul>
-					 
+
 						<li><a href="/">主页</a></li>
-					
+
 						<li><a href="/archives">归档</a></li>
-					
+
 						<li><a href="/tags">标签</a></li>
-					
+
 						<li><a href="/about">关于</a></li>
-					
+
 					<li>
- 					
+
 					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
 						<label>Search</label>
 						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
 						<input type="hidden" name="q" value="site:yoursite.com">
 					</form>
-					
+
 					</li>
 				</ul>
-			</nav>			
+			</nav>
 </div>
     </header>
     <div id="container">
       <div id="main" class="post" itemscope itemprop="blogPost">
-  
-	<article itemprop="articleBody"> 
+
+	<article itemprop="articleBody">
 		<header class="article-info clearfix">
   <h1 itemprop="name">
-    
+
       <a href="/2016/03/25/2016-03-25-the-design-principle-and-implementation-of-extensible-account-system-2/" title="可绑定可扩展的帐号系统设计原理及其实现(二)" itemprop="url">可绑定可扩展的帐号系统设计原理及其实现(二)</a>
   </h1>
   <p class="article-author">By
-       
-		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
-		
+
+		<a href="/about" title="Anubhav Gain" target="_blank" itemprop="author">Anubhav Gain</a>
+
   <p class="article-time">
     <time datetime="2016-03-25T07:31:20.000Z" itemprop="datePublished"> 发表于 2016-03-25</time>
-    
+
   </p>
 </header>
 	<div class="article-content">
-		
+
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
-		
+
 			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E6%B3%A8%E5%86%8C"><span class="toc-number">3.</span> <span class="toc-text">用户注册</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%8B%E6%9C%BA%E5%8F%B7%E6%B3%A8%E5%86%8C"><span class="toc-number">3.1.</span> <span class="toc-text">手机号注册</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%96%B9%E5%B8%90%E5%8F%B7%E6%B3%A8%E5%86%8C"><span class="toc-number">3.2.</span> <span class="toc-text">第三方帐号注册</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B8%90%E5%8F%B7%E7%BB%91%E5%AE%9A"><span class="toc-number">4.</span> <span class="toc-text">帐号绑定</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%8B%E6%9C%BA%E5%8F%B7%E6%9C%AA%E6%B3%A8%E5%86%8C"><span class="toc-number">4.1.</span> <span class="toc-text">手机号未注册</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%8B%E6%9C%BA%E5%8F%B7%E5%B7%B2%E6%B3%A8%E5%86%8C"><span class="toc-number">4.2.</span> <span class="toc-text">手机号已注册</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E8%BF%81%E7%A7%BB"><span class="toc-number">5.</span> <span class="toc-text">数据迁移</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2"><span class="toc-number">6.</span> <span class="toc-text">数据查询</span></a></li></ol>
-		
+
 		</div>
-		
+
 		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
 <li>2016-03-26 完成</li>
 <li>2016-03-25 初稿</li>
@@ -124,7 +124,7 @@
 
 <h1 id="数据迁移"><a href="#数据迁移" class="headerlink" title="数据迁移"></a>数据迁移</h1><p>　　由于表结构已经做了设计优化,数据迁移时,只需要在<strong>accounts</strong>表中,把第三方帐号中的数据转入主帐号中就可.至于其他消费记录购买记录等等一概不需要做任何改动~😋</p>
 <h1 id="数据查询"><a href="#数据查询" class="headerlink" title="数据查询"></a>数据查询</h1><p>　　最后一部分就是数据查询了.根据数据库的设计,我们只需要得到任何一个第三方uid或者主帐号uid,即可从<strong>user_aliases</strong>表中反查出所有的关联id,然后只需要在任何需要查询记录的表中使用SQL的in语法即可查询到数据.</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//伪代码</span></span><br><span class="line"><span class="variable">$sql</span> = <span class="string">&quot;select feature from `orders` where `orders`.user_id in (id1, id2, id3, ...)&quot;</span>;</span><br><span class="line"><span class="variable">$some_data</span> = <span class="keyword">$this</span>-&gt;db-&gt;executeS(<span class="variable">$sql</span>);</span><br></pre></td></tr></table></figure>  
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//伪代码</span></span><br><span class="line"><span class="variable">$sql</span> = <span class="string">&quot;select feature from `orders` where `orders`.user_id in (id1, id2, id3, ...)&quot;</span>;</span><br><span class="line"><span class="variable">$some_data</span> = <span class="keyword">$this</span>-&gt;db-&gt;executeS(<span class="variable">$sql</span>);</span><br></pre></td></tr></table></figure>
 	</div>
 		<footer class="article-footer clearfix">
 <div class="article-catetags">
@@ -136,7 +136,7 @@
 
 
   <div class="article-tags">
-  
+
   <span></span> <a href="/tags/PHP/">PHP</a><a href="/tags/可扩展/">可扩展</a>
   </div>
 
@@ -145,20 +145,20 @@
 
 
 	<div class="article-share" id="share">
-	
+
 	  <div data-url="http://yoursite.com/2016/03/25/2016-03-25-the-design-principle-and-implementation-of-extensible-account-system-2/" data-title="可绑定可扩展的帐号系统设计原理及其实现(二) | C的博客" data-tsina="" class="share clearfix">
 	  </div>
-	
+
 	</div>
 
 
 </footer>
 
-   	       
+
 	</article>
-	
+
 <nav class="article-nav clearfix">
- 
+
  <div class="prev" >
  <a href="/2016/03/27/2016-03-27-The-Design-Patterns-book-notes/" title="设计模式 - 读书笔记">
   <strong>上一篇：</strong><br/>
@@ -170,7 +170,7 @@
 
 <div class="next">
 <a href="/2016/03/21/2016-03-21-iOS-animation-design-of-the-worm-run/"  title="用代码来实现你喜欢的动画效果 — 虫儿跑">
- <strong>下一篇：</strong><br/> 
+ <strong>下一篇：</strong><br/>
  <span>用代码来实现你喜欢的动画效果 — 虫儿跑
 </span>
 </a>
@@ -178,7 +178,7 @@
 
 </nav>
 
-	
+
 
 <section id="comments" class="comment">
   <div id="disqus_thread">
@@ -189,174 +189,174 @@
 
 
 
-</div>  
+</div>
       <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
 
   <div id="toc" class="toc-aside">
   <strong class="toc-title">文章目录</strong>
- 
+
  <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E6%B3%A8%E5%86%8C"><span class="toc-number">3.</span> <span class="toc-text">用户注册</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%8B%E6%9C%BA%E5%8F%B7%E6%B3%A8%E5%86%8C"><span class="toc-number">3.1.</span> <span class="toc-text">手机号注册</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%96%B9%E5%B8%90%E5%8F%B7%E6%B3%A8%E5%86%8C"><span class="toc-number">3.2.</span> <span class="toc-text">第三方帐号注册</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B8%90%E5%8F%B7%E7%BB%91%E5%AE%9A"><span class="toc-number">4.</span> <span class="toc-text">帐号绑定</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%8B%E6%9C%BA%E5%8F%B7%E6%9C%AA%E6%B3%A8%E5%86%8C"><span class="toc-number">4.1.</span> <span class="toc-text">手机号未注册</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%8B%E6%9C%BA%E5%8F%B7%E5%B7%B2%E6%B3%A8%E5%86%8C"><span class="toc-number">4.2.</span> <span class="toc-text">手机号已注册</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E8%BF%81%E7%A7%BB"><span class="toc-number">5.</span> <span class="toc-text">数据迁移</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2"><span class="toc-number">6.</span> <span class="toc-text">数据查询</span></a></li></ol>
- 
+
   </div>
 
 <div id="asidepart">
 <div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
 <aside class="clearfix">
 
-  
+
 <div class="categorieslist">
 	<p class="asidetitle">分类</p>
 		<ul>
-		
-		  
+
+
 			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>4</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>2</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/生活/" title="生活">生活<sup>3</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
-		  
-		
+
+
 		</ul>
 </div>
 
 
-  
+
 <div class="tagslist">
 	<p class="asidetitle">标签</p>
 		<ul class="clearfix">
-		
-			
+
+
 				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/iOS/" title="iOS">iOS<sup>7</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Mac/" title="Mac">Mac<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/感想/" title="感想">感想<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Mac应用/" title="Mac应用">Mac应用<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
-			
-		
+
+
 		</ul>
 </div>
 
@@ -364,29 +364,29 @@
   <div class="linkslist">
   <p class="asidetitle">友情链接</p>
     <ul>
-        
+
           <li>
-            
+
             	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
-            
+
           </li>
-        
+
           <li>
-            
+
             	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
-            
+
           </li>
-        
+
           <li>
-            
+
             	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
-            
+
           </li>
-        
+
     </ul>
 </div>
 
-  
+
 
 
   <div class="rsspart">
@@ -397,41 +397,41 @@
 </div>
     </div>
     <footer><div id="footer" >
-	
+
 	<div class="line">
 		<span></span>
 		<div class="author"></div>
 	</div>
-	
-	
+
+
 	<section class="info">
 		<p> 无立足境，是方干净 <br/>
 			</p>
 	</section>
-	 
+
 	<div class="social-font" class="clearfix">
-		
-		
-		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
-		
-		
-		
-		
-		
-		
-		
-		
-		
+
+
+		<a href="https://github.com/Anubhav Gain543" target="_blank" class="icon-github" title="github"></a>
+
+
+
+
+
+
+
+
+
 	</div>
-			
-		
+
+
 
 		<p class="copyright">
-		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
-		
-		<a href="/about" target="_blank" title="Cocos">Cocos</a>
-		
-		
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024
+
+		<a href="/about" target="_blank" title="Anubhav Gain">Anubhav Gain</a>
+
+
 		</p>
 </div>
 </footer>
@@ -441,7 +441,7 @@
 <script src="/js/jquery.qrcode-0.12.0.min.js"></script>
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   $('.navbar').click(function(){
     $('header nav').toggleClass('shownav');
   });
@@ -464,31 +464,31 @@ $(document).ready(function(){
   });
   o.click(function(){
     o.css('display', 'none').removeClass('beforeFadeIn');
-    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');
     m.removeClass('moveMain');
   });
   $(window).scroll(function(){
     o.css("top",Math.max(80,260-$(this).scrollTop()));
   });
-  
+
   $(window).resize(function(){
-    getSize(); 
+    getSize();
     if (myWidth >= 1024) {
       $('header nav').removeClass('shownav');
     }else{
       m.removeClass('moveMain');
       a.css('display', 'block').removeClass('fadeOut');
       o.css('display', 'none');
-      
+
       $('#toc.toc-aside').css('display', 'none');
-        
+
     }
   });
 });
 </script>
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   var ai = $('.article-content>iframe'),
       ae = $('.article-content>embed'),
       t  = $('#toc'),
@@ -515,7 +515,7 @@ $(document).ready(function(){
 
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   var $this = $('.share'),
       url = $this.attr('data-url'),
       encodedUrl = encodeURIComponent(url),
@@ -560,7 +560,7 @@ $(document).ready(function(){
   $('.article-share-qrcode').hover(function(){}, function(){
       $('.hoverqrcode').hide();
   });
-});   
+});
 </script>
 
 
@@ -568,7 +568,7 @@ $(document).ready(function(){
 
 <script type="text/javascript">
 
-var disqus_shortname = 'cocosdever';
+var disqus_shortname = 'Anubhav Gaindever';
 
 (function(){
   var dsq = document.createElement('script');
@@ -596,7 +596,7 @@ var disqus_shortname = 'cocosdever';
 <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
 <script src="/fancybox/jquery.fancybox.pack.js"></script>
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   $('.article-content').each(function(i){
     $(this).find('img').each(function(){
       if ($(this).parent().hasClass('fancybox')) return;
@@ -611,7 +611,7 @@ $(document).ready(function(){
   if($.fancybox){
     $('.fancybox').fancybox();
   }
-}); 
+});
 </script>
 
 
@@ -625,7 +625,7 @@ var _hmt = _hmt || [];
 (function() {
   var hm = document.createElement("script");
   hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
-  var s = document.getElementsByTagName("script")[0]; 
+  var s = document.getElementsByTagName("script")[0];
   s.parentNode.insertBefore(hm, s);
 })();
 </script>

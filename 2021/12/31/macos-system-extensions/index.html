@@ -3,14 +3,14 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  
+
     <title>MacOS系统扩展SystemExtensions深入实践 | C的博客</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
-    
-    <meta name="author" content="Cocos">
-    
 
-    
+    <meta name="author" content="Anubhav Gain">
+
+
+
     <meta name="description" content="前言从iOS转入Mac安全类产品的开发已经有一年半时间了，我也从一开始负责网络和UI模块慢慢追加负责内核模块的开发和维护，总体看，Mac开发的各种功能的实现思路和方法，要比iOS广阔很多，能接触到的计算机知识体系也更加完整，收获很多。 言归正传，今年苹果发布了M1芯片，在M1芯片的机器上又对内核开发做了很多限制，移除大量内核符号，导致我们软件无法采用原来的内核方案运作，被迫切换到系统扩展上来。由于">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MacOS系统扩展SystemExtensions深入实践">
@@ -20,22 +20,22 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-12-31T13:21:33.000Z">
 <meta property="article:modified_time" content="2021-12-31T13:24:03.036Z">
-<meta property="article:author" content="Cocos">
+<meta property="article:author" content="Anubhav Gain">
 <meta property="article:tag" content="MacOS">
 <meta property="article:tag" content="System Extension">
 <meta name="twitter:card" content="summary">
 
-    
+
     <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
-    
-    
+
+
     <link rel="icon" href="/img/favicon.ico">
-    
-    
+
+
     <link rel="apple-touch-icon" href="/img/jacman.jpg">
     <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
-    
-    
+
+
 <link rel="stylesheet" href="/css/style.css">
 <link rel="stylesheet" href="/%02.css">
 <link rel="stylesheet" href="/.css">
@@ -44,9 +44,9 @@
 
   <body>
     <header>
-      
+
 <div>
-		
+
 			<div id="textlogo">
 				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
 				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
@@ -56,55 +56,55 @@
 			<nav class="animated">
 				<ul>
 					<ul>
-					 
+
 						<li><a href="/">主页</a></li>
-					
+
 						<li><a href="/archives">归档</a></li>
-					
+
 						<li><a href="/tags">标签</a></li>
-					
+
 						<li><a href="/about">关于</a></li>
-					
+
 					<li>
- 					
+
 					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
 						<label>Search</label>
 						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
 						<input type="hidden" name="q" value="site:yoursite.com">
 					</form>
-					
+
 					</li>
 				</ul>
-			</nav>			
+			</nav>
 </div>
     </header>
     <div id="container">
       <div id="main" class="post" itemscope itemprop="blogPost">
-  
-	<article itemprop="articleBody"> 
+
+	<article itemprop="articleBody">
 		<header class="article-info clearfix">
   <h1 itemprop="name">
-    
+
       <a href="/2021/12/31/macos-system-extensions/" title="MacOS系统扩展SystemExtensions深入实践" itemprop="url">MacOS系统扩展SystemExtensions深入实践</a>
   </h1>
   <p class="article-author">By
-       
-		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
-		
+
+		<a href="/about" title="Anubhav Gain" target="_blank" itemprop="author">Anubhav Gain</a>
+
   <p class="article-time">
     <time datetime="2021-12-31T13:21:33.000Z" itemprop="datePublished"> 发表于 2021-12-31</time>
-    
+
   </p>
 </header>
 	<div class="article-content">
-		
+
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
-		
+
 			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E6%89%A9%E5%B1%95%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">2.</span> <span class="toc-text">系统扩展是什么</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%83%BD%E5%AE%9E%E7%8E%B0%E4%BB%80%E4%B9%88%E5%8A%9F%E8%83%BD"><span class="toc-number">3.</span> <span class="toc-text">能实现什么功能</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Network-Extension"><span class="toc-number">4.</span> <span class="toc-text">Network Extension</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Endpoint-Security"><span class="toc-number">5.</span> <span class="toc-text">Endpoint Security</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="toc-number">6.</span> <span class="toc-text">准备工作</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98"><span class="toc-number">7.</span> <span class="toc-text">常见问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%AE%89%E8%A3%85"><span class="toc-number">7.0.1.</span> <span class="toc-text">如何安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86"><span class="toc-number">7.0.2.</span> <span class="toc-text">如何管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%85%AC%E8%AF%81"><span class="toc-number">7.0.3.</span> <span class="toc-text">如何公证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E8%B0%83%E8%AF%95"><span class="toc-number">7.0.4.</span> <span class="toc-text">如何调试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BBApp%E5%AE%89%E8%A3%85%E7%B3%BB%E7%BB%9F%E6%89%A9%E5%B1%95%E6%97%B6%E6%8A%A5%E9%94%99%E6%8E%92%E6%9F%A5"><span class="toc-number">7.0.5.</span> <span class="toc-text">主App安装系统扩展时报错排查</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E4%B8%8E%E7%B3%BB%E7%BB%9F%E6%89%A9%E5%B1%95%E9%80%9A%E8%AE%AF"><span class="toc-number">7.0.6.</span> <span class="toc-text">如何与系统扩展通讯</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E9%94%99%E8%AF%AF"><span class="toc-number">7.0.7.</span> <span class="toc-text">其他错误</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8E%A8%E8%8D%90%E9%98%85%E8%AF%BB"><span class="toc-number">8.</span> <span class="toc-text">推荐阅读</span></a></li></ol>
-		
+
 		</div>
-		
+
 		<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>从iOS转入Mac安全类产品的开发已经有一年半时间了，我也从一开始负责网络和UI模块慢慢追加负责内核模块的开发和维护，总体看，Mac开发的各种功能的实现思路和方法，要比iOS广阔很多，能接触到的计算机知识体系也更加完整，收获很多。</p>
 <p>言归正传，今年苹果发布了M1芯片，在M1芯片的机器上又对内核开发做了很多限制，移除大量内核符号，导致我们软件无法采用原来的内核方案运作，被迫切换到系统扩展上来。由于领导的信任，对整个程序架构的调整和全新技术方案的落地就由我来主导了，经过几个月封闭式调研开发，目前基本已经能支持大部分原来内核扩展的功能了。本文就是我对系统扩展开发的记录和总结，现在，来聊一聊系统扩展的能力。</p>
 <h1 id="系统扩展是什么"><a href="#系统扩展是什么" class="headerlink" title="系统扩展是什么"></a>系统扩展是什么</h1><p>在说系统扩展之前，先了解一下内核扩展。桌面程序的开发，一般分为应用层开发和内核开发(驱动开发)，相比之下，iOS和安卓等移动端就只有应用层开发。关于内核的概念可以自行学习这不多说。</p>
@@ -177,7 +177,7 @@
 <h3 id="其他错误"><a href="#其他错误" class="headerlink" title="其他错误"></a>其他错误</h3><p>做好上面说的，基本就能正常运行跑起来了，如果还有问题，目前相关资料很少，只能从苹果论坛得到信息了。地址：<a target="_blank" rel="noopener" href="https://developer.apple.com/forums/tags/systemextensions">SystemExtensions论坛</a> 其中活跃用户：<a target="_blank" rel="noopener" href="https://developer.apple.com/forums/profile/eskimo">eskimo</a>，是苹果系统扩展相关开发工程师，他的回答基本就是标准答案了。</p>
 <h1 id="推荐阅读"><a href="#推荐阅读" class="headerlink" title="推荐阅读"></a>推荐阅读</h1><p><a target="_blank" rel="noopener" href="https://developer.apple.com/system-extensions/">系统扩展官方介绍</a></p>
 <p><a target="_blank" rel="noopener" href="https://developer.apple.com/videos/play/wwdc2019/714">系统扩展之网络扩展特性WWDC官方资料</a></p>
-  
+
 	</div>
 		<footer class="article-footer clearfix">
 <div class="article-catetags">
@@ -189,7 +189,7 @@
 
 
   <div class="article-tags">
-  
+
   <span></span> <a href="/tags/MacOS/">MacOS</a><a href="/tags/System-Extension/">System Extension</a>
   </div>
 
@@ -198,20 +198,20 @@
 
 
 	<div class="article-share" id="share">
-	
+
 	  <div data-url="http://yoursite.com/2021/12/31/macos-system-extensions/" data-title="MacOS系统扩展SystemExtensions深入实践 | C的博客" data-tsina="" class="share clearfix">
 	  </div>
-	
+
 	</div>
 
 
 </footer>
 
-   	       
+
 	</article>
-	
+
 <nav class="article-nav clearfix">
- 
+
  <div class="prev" >
  <a href="/2024/06/26/I-m-back/" title="我又回来了，博客好久没更新了">
   <strong>上一篇：</strong><br/>
@@ -223,7 +223,7 @@
 
 <div class="next">
 <a href="/2021/10/12/using-lldb/"  title="利用LLDB动态调试定位Crash原因">
- <strong>下一篇：</strong><br/> 
+ <strong>下一篇：</strong><br/>
  <span>利用LLDB动态调试定位Crash原因
 </span>
 </a>
@@ -231,7 +231,7 @@
 
 </nav>
 
-	
+
 
 <section id="comments" class="comment">
   <div id="disqus_thread">
@@ -242,174 +242,174 @@
 
 
 
-</div>  
+</div>
       <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
 
   <div id="toc" class="toc-aside">
   <strong class="toc-title">文章目录</strong>
- 
+
  <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E6%89%A9%E5%B1%95%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">2.</span> <span class="toc-text">系统扩展是什么</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%83%BD%E5%AE%9E%E7%8E%B0%E4%BB%80%E4%B9%88%E5%8A%9F%E8%83%BD"><span class="toc-number">3.</span> <span class="toc-text">能实现什么功能</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Network-Extension"><span class="toc-number">4.</span> <span class="toc-text">Network Extension</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Endpoint-Security"><span class="toc-number">5.</span> <span class="toc-text">Endpoint Security</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="toc-number">6.</span> <span class="toc-text">准备工作</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98"><span class="toc-number">7.</span> <span class="toc-text">常见问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%AE%89%E8%A3%85"><span class="toc-number">7.0.1.</span> <span class="toc-text">如何安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86"><span class="toc-number">7.0.2.</span> <span class="toc-text">如何管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%85%AC%E8%AF%81"><span class="toc-number">7.0.3.</span> <span class="toc-text">如何公证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E8%B0%83%E8%AF%95"><span class="toc-number">7.0.4.</span> <span class="toc-text">如何调试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BBApp%E5%AE%89%E8%A3%85%E7%B3%BB%E7%BB%9F%E6%89%A9%E5%B1%95%E6%97%B6%E6%8A%A5%E9%94%99%E6%8E%92%E6%9F%A5"><span class="toc-number">7.0.5.</span> <span class="toc-text">主App安装系统扩展时报错排查</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E4%B8%8E%E7%B3%BB%E7%BB%9F%E6%89%A9%E5%B1%95%E9%80%9A%E8%AE%AF"><span class="toc-number">7.0.6.</span> <span class="toc-text">如何与系统扩展通讯</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E9%94%99%E8%AF%AF"><span class="toc-number">7.0.7.</span> <span class="toc-text">其他错误</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8E%A8%E8%8D%90%E9%98%85%E8%AF%BB"><span class="toc-number">8.</span> <span class="toc-text">推荐阅读</span></a></li></ol>
- 
+
   </div>
 
 <div id="asidepart">
 <div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
 <aside class="clearfix">
 
-  
+
 <div class="categorieslist">
 	<p class="asidetitle">分类</p>
 		<ul>
-		
-		  
+
+
 			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>4</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>2</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/生活/" title="生活">生活<sup>3</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
-		  
-		
+
+
 		</ul>
 </div>
 
 
-  
+
 <div class="tagslist">
 	<p class="asidetitle">标签</p>
 		<ul class="clearfix">
-		
-			
+
+
 				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/iOS/" title="iOS">iOS<sup>7</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Mac/" title="Mac">Mac<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/感想/" title="感想">感想<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Mac应用/" title="Mac应用">Mac应用<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
-			
-		
+
+
 		</ul>
 </div>
 
@@ -417,29 +417,29 @@
   <div class="linkslist">
   <p class="asidetitle">友情链接</p>
     <ul>
-        
+
           <li>
-            
+
             	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
-            
+
           </li>
-        
+
           <li>
-            
+
             	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
-            
+
           </li>
-        
+
           <li>
-            
+
             	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
-            
+
           </li>
-        
+
     </ul>
 </div>
 
-  
+
 
 
   <div class="rsspart">
@@ -450,41 +450,41 @@
 </div>
     </div>
     <footer><div id="footer" >
-	
+
 	<div class="line">
 		<span></span>
 		<div class="author"></div>
 	</div>
-	
-	
+
+
 	<section class="info">
 		<p> 无立足境，是方干净 <br/>
 			</p>
 	</section>
-	 
+
 	<div class="social-font" class="clearfix">
-		
-		
-		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
-		
-		
-		
-		
-		
-		
-		
-		
-		
+
+
+		<a href="https://github.com/Anubhav Gain543" target="_blank" class="icon-github" title="github"></a>
+
+
+
+
+
+
+
+
+
 	</div>
-			
-		
+
+
 
 		<p class="copyright">
-		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
-		
-		<a href="/about" target="_blank" title="Cocos">Cocos</a>
-		
-		
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024
+
+		<a href="/about" target="_blank" title="Anubhav Gain">Anubhav Gain</a>
+
+
 		</p>
 </div>
 </footer>
@@ -494,7 +494,7 @@
 <script src="/js/jquery.qrcode-0.12.0.min.js"></script>
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   $('.navbar').click(function(){
     $('header nav').toggleClass('shownav');
   });
@@ -517,31 +517,31 @@ $(document).ready(function(){
   });
   o.click(function(){
     o.css('display', 'none').removeClass('beforeFadeIn');
-    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');
     m.removeClass('moveMain');
   });
   $(window).scroll(function(){
     o.css("top",Math.max(80,260-$(this).scrollTop()));
   });
-  
+
   $(window).resize(function(){
-    getSize(); 
+    getSize();
     if (myWidth >= 1024) {
       $('header nav').removeClass('shownav');
     }else{
       m.removeClass('moveMain');
       a.css('display', 'block').removeClass('fadeOut');
       o.css('display', 'none');
-      
+
       $('#toc.toc-aside').css('display', 'none');
-        
+
     }
   });
 });
 </script>
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   var ai = $('.article-content>iframe'),
       ae = $('.article-content>embed'),
       t  = $('#toc'),
@@ -568,7 +568,7 @@ $(document).ready(function(){
 
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   var $this = $('.share'),
       url = $this.attr('data-url'),
       encodedUrl = encodeURIComponent(url),
@@ -613,7 +613,7 @@ $(document).ready(function(){
   $('.article-share-qrcode').hover(function(){}, function(){
       $('.hoverqrcode').hide();
   });
-});   
+});
 </script>
 
 
@@ -621,7 +621,7 @@ $(document).ready(function(){
 
 <script type="text/javascript">
 
-var disqus_shortname = 'cocosdever';
+var disqus_shortname = 'Anubhav Gaindever';
 
 (function(){
   var dsq = document.createElement('script');
@@ -649,7 +649,7 @@ var disqus_shortname = 'cocosdever';
 <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
 <script src="/fancybox/jquery.fancybox.pack.js"></script>
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   $('.article-content').each(function(i){
     $(this).find('img').each(function(){
       if ($(this).parent().hasClass('fancybox')) return;
@@ -664,7 +664,7 @@ $(document).ready(function(){
   if($.fancybox){
     $('.fancybox').fancybox();
   }
-}); 
+});
 </script>
 
 
@@ -678,7 +678,7 @@ var _hmt = _hmt || [];
 (function() {
   var hm = document.createElement("script");
   hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
-  var s = document.getElementsByTagName("script")[0]; 
+  var s = document.getElementsByTagName("script")[0];
   s.parentNode.insertBefore(hm, s);
 })();
 </script>

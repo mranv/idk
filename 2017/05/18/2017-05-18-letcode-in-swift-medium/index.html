@@ -3,14 +3,14 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  
+
     <title>LetCode in Swift (Medium) | C的博客</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
-    
-    <meta name="author" content="Cocos">
-    
 
-    
+    <meta name="author" content="Anubhav Gain">
+
+
+
     <meta name="description" content="文档更新说明 最后更新 2018年03月23日 首次更新 2017年05月18日  前言　　使用Swift语言完成LetCode题目,难度Medium,就不多介绍了. 535. Encode and Decode TinyURLTinyURL is a URL shortening service where you enter a URL such as https:&#x2F;&#x2F;leetcode.com">
 <meta property="og:type" content="article">
 <meta property="og:title" content="LetCode in Swift (Medium)">
@@ -20,21 +20,21 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2017-05-18T10:48:58.000Z">
 <meta property="article:modified_time" content="2018-03-23T08:44:46.000Z">
-<meta property="article:author" content="Cocos">
+<meta property="article:author" content="Anubhav Gain">
 <meta property="article:tag" content="LetCode-Medium">
 <meta name="twitter:card" content="summary">
 
-    
+
     <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
-    
-    
+
+
     <link rel="icon" href="/img/favicon.ico">
-    
-    
+
+
     <link rel="apple-touch-icon" href="/img/jacman.jpg">
     <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
-    
-    
+
+
 <link rel="stylesheet" href="/css/style.css">
 <link rel="stylesheet" href="/%02.css">
 <link rel="stylesheet" href="/.css">
@@ -43,9 +43,9 @@
 
   <body>
     <header>
-      
+
 <div>
-		
+
 			<div id="textlogo">
 				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
 				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
@@ -55,55 +55,55 @@
 			<nav class="animated">
 				<ul>
 					<ul>
-					 
+
 						<li><a href="/">主页</a></li>
-					
+
 						<li><a href="/archives">归档</a></li>
-					
+
 						<li><a href="/tags">标签</a></li>
-					
+
 						<li><a href="/about">关于</a></li>
-					
+
 					<li>
- 					
+
 					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
 						<label>Search</label>
 						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
 						<input type="hidden" name="q" value="site:yoursite.com">
 					</form>
-					
+
 					</li>
 				</ul>
-			</nav>			
+			</nav>
 </div>
     </header>
     <div id="container">
       <div id="main" class="post" itemscope itemprop="blogPost">
-  
-	<article itemprop="articleBody"> 
+
+	<article itemprop="articleBody">
 		<header class="article-info clearfix">
   <h1 itemprop="name">
-    
+
       <a href="/2017/05/18/2017-05-18-letcode-in-swift-medium/" title="LetCode in Swift (Medium)" itemprop="url">LetCode in Swift (Medium)</a>
   </h1>
   <p class="article-author">By
-       
-		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
-		
+
+		<a href="/about" title="Anubhav Gain" target="_blank" itemprop="author">Anubhav Gain</a>
+
   <p class="article-time">
     <time datetime="2017-05-18T10:48:58.000Z" itemprop="datePublished"> 发表于 2017-05-18</time>
-    
+
   </p>
 </header>
 	<div class="article-content">
-		
+
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
-		
+
 			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#535-Encode-and-Decode-TinyURL"><span class="toc-number">3.</span> <span class="toc-text">535. Encode and Decode TinyURL</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Example1"><span class="toc-number">3.1.</span> <span class="toc-text">Example1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Note"><span class="toc-number">3.2.</span> <span class="toc-text">Note</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Infer"><span class="toc-number">3.3.</span> <span class="toc-text">Infer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Solution"><span class="toc-number">3.4.</span> <span class="toc-text">Solution</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#537-Complex-Number-Multiplication"><span class="toc-number">4.</span> <span class="toc-text">537. Complex Number Multiplication</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Example1-1"><span class="toc-number">4.1.</span> <span class="toc-text">Example1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Example1-2"><span class="toc-number">4.2.</span> <span class="toc-text">Example1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Note-1"><span class="toc-number">4.3.</span> <span class="toc-text">Note</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Solution-1"><span class="toc-number">4.4.</span> <span class="toc-text">Solution</span></a></li></ol></li></ol>
-		
+
 		</div>
-		
+
 		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
 <li>最后更新 2018年03月23日</li>
 <li>首次更新 2017年05月18日</li>
@@ -112,7 +112,7 @@
 <h1 id="535-Encode-and-Decode-TinyURL"><a href="#535-Encode-and-Decode-TinyURL" class="headerlink" title="535. Encode and Decode TinyURL"></a>535. Encode and Decode TinyURL</h1><p>TinyURL is a URL shortening service where you enter a URL such as <a target="_blank" rel="noopener" href="https://leetcode.com/problems/design-tinyurl">https://leetcode.com/problems/design-tinyurl</a> and it returns a short URL such as <a target="_blank" rel="noopener" href="http://tinyurl.com/4e9iAk">http://tinyurl.com/4e9iAk</a>.</p>
 <p>Design the encode and decode methods for the TinyURL service. There is no restriction on how your encode/decode algorithm should work. You just need to ensure that a URL can be encoded to a tiny URL and the tiny URL can be decoded to the original URL.</p>
 <p>Subscribe to see which companies asked this question.</p>
-<h2 id="Example1"><a href="#Example1" class="headerlink" title="Example1"></a>Example1</h2><h2 id="Note"><a href="#Note" class="headerlink" title="Note"></a>Note</h2><h2 id="Infer"><a href="#Infer" class="headerlink" title="Infer"></a>Infer</h2><h2 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h2><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">////</span></span><br><span class="line"><span class="comment">////  main.swift</span></span><br><span class="line"><span class="comment">////  TestSwiftCommandLine</span></span><br><span class="line"><span class="comment">////</span></span><br><span class="line"><span class="comment">////  Created by Cocos on 2016/10/27.</span></span><br><span class="line"><span class="comment">////  Copyright © 2016年 Cocos. All rights reserved.</span></span><br><span class="line"><span class="comment">////</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> dictStr = <span class="string">&quot;0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ&quot;</span></span><br><span class="line">    <span class="keyword">var</span> seq     = <span class="number">0</span></span><br><span class="line">    <span class="keyword">var</span> urlMapL2S: [<span class="type">String</span>: <span class="type">String</span>] = [:]</span><br><span class="line">    <span class="keyword">var</span> urlMapS2L: [<span class="type">String</span>: <span class="type">String</span>] = [:]</span><br><span class="line">    <span class="comment">//短地址长度</span></span><br><span class="line">    <span class="keyword">let</span> shortLength = <span class="number">6</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">//原理就是对longUrl进行映射</span></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">encode</span><span class="params">(<span class="keyword">_</span> longUrl: String)</span></span> -&gt; <span class="type">String</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">let</span> s = urlMapL2S[longUrl] &#123;</span><br><span class="line">            <span class="keyword">return</span> s</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">var</span> res = <span class="string">&quot;&quot;</span></span><br><span class="line">        <span class="keyword">var</span> <span class="built_in">count</span> = seq</span><br><span class="line">        seq += <span class="number">1</span></span><br><span class="line">        <span class="keyword">while</span> <span class="built_in">count</span> != <span class="number">0</span> &#123;</span><br><span class="line">            res = <span class="type">String</span>(dictStr[dictStr.index(dictStr.startIndex, offsetBy: <span class="built_in">count</span> % dictStr.<span class="built_in">count</span>)]) + res</span><br><span class="line">            <span class="built_in">count</span> /= dictStr.characters.<span class="built_in">count</span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> <span class="keyword">_</span> <span class="keyword">in</span> res.characters.<span class="built_in">count</span> ..&lt; shortLength &#123;</span><br><span class="line">            res = <span class="string">&quot;0&quot;</span> + res</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        urlMapL2S[longUrl] = res</span><br><span class="line">        urlMapS2L[res] = longUrl</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> res</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">decode</span><span class="params">(<span class="keyword">_</span> shortUrl: String)</span></span> -&gt; <span class="type">String</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> urlMapS2L[shortUrl]!</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Example1"><a href="#Example1" class="headerlink" title="Example1"></a>Example1</h2><h2 id="Note"><a href="#Note" class="headerlink" title="Note"></a>Note</h2><h2 id="Infer"><a href="#Infer" class="headerlink" title="Infer"></a>Infer</h2><h2 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h2><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">////</span></span><br><span class="line"><span class="comment">////  main.swift</span></span><br><span class="line"><span class="comment">////  TestSwiftCommandLine</span></span><br><span class="line"><span class="comment">////</span></span><br><span class="line"><span class="comment">////  Created by Anubhav Gain on 2016/10/27.</span></span><br><span class="line"><span class="comment">////  Copyright © 2016年 Anubhav Gain. All rights reserved.</span></span><br><span class="line"><span class="comment">////</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> dictStr = <span class="string">&quot;0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ&quot;</span></span><br><span class="line">    <span class="keyword">var</span> seq     = <span class="number">0</span></span><br><span class="line">    <span class="keyword">var</span> urlMapL2S: [<span class="type">String</span>: <span class="type">String</span>] = [:]</span><br><span class="line">    <span class="keyword">var</span> urlMapS2L: [<span class="type">String</span>: <span class="type">String</span>] = [:]</span><br><span class="line">    <span class="comment">//短地址长度</span></span><br><span class="line">    <span class="keyword">let</span> shortLength = <span class="number">6</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">//原理就是对longUrl进行映射</span></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">encode</span><span class="params">(<span class="keyword">_</span> longUrl: String)</span></span> -&gt; <span class="type">String</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">let</span> s = urlMapL2S[longUrl] &#123;</span><br><span class="line">            <span class="keyword">return</span> s</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">var</span> res = <span class="string">&quot;&quot;</span></span><br><span class="line">        <span class="keyword">var</span> <span class="built_in">count</span> = seq</span><br><span class="line">        seq += <span class="number">1</span></span><br><span class="line">        <span class="keyword">while</span> <span class="built_in">count</span> != <span class="number">0</span> &#123;</span><br><span class="line">            res = <span class="type">String</span>(dictStr[dictStr.index(dictStr.startIndex, offsetBy: <span class="built_in">count</span> % dictStr.<span class="built_in">count</span>)]) + res</span><br><span class="line">            <span class="built_in">count</span> /= dictStr.characters.<span class="built_in">count</span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> <span class="keyword">_</span> <span class="keyword">in</span> res.characters.<span class="built_in">count</span> ..&lt; shortLength &#123;</span><br><span class="line">            res = <span class="string">&quot;0&quot;</span> + res</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        urlMapL2S[longUrl] = res</span><br><span class="line">        urlMapS2L[res] = longUrl</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> res</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">decode</span><span class="params">(<span class="keyword">_</span> shortUrl: String)</span></span> -&gt; <span class="type">String</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> urlMapS2L[shortUrl]!</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <h1 id="537-Complex-Number-Multiplication"><a href="#537-Complex-Number-Multiplication" class="headerlink" title="537. Complex Number Multiplication"></a>537. Complex Number Multiplication</h1><p>Given two strings representing two complex numbers.</p>
 <p>You need to return a string representing their multiplication. Note i2 = -1 according to the definition.</p>
@@ -128,7 +128,7 @@ Explanation: (1 - i) * (1 - i) = 1 + i2 - 2 * i = -2i, and you need convert it t
 </ol>
 <h2 id="Solution-1"><a href="#Solution-1" class="headerlink" title="Solution"></a>Solution</h2><p>　　这是一道复数相乘的题目,直接套公式上去就好了.算是考察Swift语法吧😂.</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Foundation</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">complexNumberMultiply</span><span class="params">(<span class="keyword">_</span> a: String, <span class="keyword">_</span> b: String)</span></span> -&gt; <span class="type">String</span> &#123;</span><br><span class="line">        <span class="comment">//去掉最后一个字符...</span></span><br><span class="line">        <span class="keyword">let</span> aArr = a[..&lt;a.index(before: a.endIndex)].<span class="built_in">split</span>(separator: <span class="string">&quot;+&quot;</span>)</span><br><span class="line">        <span class="keyword">let</span> bArr = b[..&lt;b.index(before: b.endIndex)].<span class="built_in">split</span>(separator: <span class="string">&quot;+&quot;</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">let</span> a = aArr[<span class="number">0</span>], b = aArr[<span class="number">1</span>]</span><br><span class="line">        <span class="keyword">let</span> <span class="built_in">c</span> = bArr[<span class="number">0</span>], d = bArr[<span class="number">1</span>]</span><br><span class="line">        <span class="comment">//按照复数乘法公式套进去就好了,公式我百度的.类似多项式相乘,注意 i^2=-1,这个是规定的</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;\(Int(a)! * Int(c)! - Int(b)! * Int(d)!)+\(Int(a)! * Int(d)! + Int(c)! * Int(b)!)i&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> s = <span class="type">Solution</span>()</span><br><span class="line"><span class="built_in">print</span>(s.complexNumberMultiply(<span class="string">&quot;1+-1i&quot;</span>,<span class="string">&quot;0+0i&quot;</span>))</span><br></pre></td></tr></table></figure>
-  
+
 	</div>
 		<footer class="article-footer clearfix">
 <div class="article-catetags">
@@ -140,7 +140,7 @@ Explanation: (1 - i) * (1 - i) = 1 + i2 - 2 * i = -2i, and you need convert it t
 
 
   <div class="article-tags">
-  
+
   <span></span> <a href="/tags/LetCode-Medium/">LetCode-Medium</a>
   </div>
 
@@ -149,20 +149,20 @@ Explanation: (1 - i) * (1 - i) = 1 + i2 - 2 * i = -2i, and you need convert it t
 
 
 	<div class="article-share" id="share">
-	
+
 	  <div data-url="http://yoursite.com/2017/05/18/2017-05-18-letcode-in-swift-medium/" data-title="LetCode in Swift (Medium) | C的博客" data-tsina="" class="share clearfix">
 	  </div>
-	
+
 	</div>
 
 
 </footer>
 
-   	       
+
 	</article>
-	
+
 <nav class="article-nav clearfix">
- 
+
  <div class="prev" >
  <a href="/2018/01/16/2018-01-16-Solving-ETH-network-synchronisation-failed/" title="彻底解决以太坊Geth客户端网络同步失败问题">
   <strong>上一篇：</strong><br/>
@@ -174,7 +174,7 @@ Explanation: (1 - i) * (1 - i) = 1 + i2 - 2 * i = -2i, and you need convert it t
 
 <div class="next">
 <a href="/2017/05/16/2017-05-17-letcode-in-swift/"  title="LetCode in Swift (Easy)">
- <strong>下一篇：</strong><br/> 
+ <strong>下一篇：</strong><br/>
  <span>LetCode in Swift (Easy)
 </span>
 </a>
@@ -182,7 +182,7 @@ Explanation: (1 - i) * (1 - i) = 1 + i2 - 2 * i = -2i, and you need convert it t
 
 </nav>
 
-	
+
 
 <section id="comments" class="comment">
   <div id="disqus_thread">
@@ -193,174 +193,174 @@ Explanation: (1 - i) * (1 - i) = 1 + i2 - 2 * i = -2i, and you need convert it t
 
 
 
-</div>  
+</div>
       <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
 
   <div id="toc" class="toc-aside">
   <strong class="toc-title">文章目录</strong>
- 
+
  <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#535-Encode-and-Decode-TinyURL"><span class="toc-number">3.</span> <span class="toc-text">535. Encode and Decode TinyURL</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Example1"><span class="toc-number">3.1.</span> <span class="toc-text">Example1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Note"><span class="toc-number">3.2.</span> <span class="toc-text">Note</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Infer"><span class="toc-number">3.3.</span> <span class="toc-text">Infer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Solution"><span class="toc-number">3.4.</span> <span class="toc-text">Solution</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#537-Complex-Number-Multiplication"><span class="toc-number">4.</span> <span class="toc-text">537. Complex Number Multiplication</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Example1-1"><span class="toc-number">4.1.</span> <span class="toc-text">Example1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Example1-2"><span class="toc-number">4.2.</span> <span class="toc-text">Example1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Note-1"><span class="toc-number">4.3.</span> <span class="toc-text">Note</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Solution-1"><span class="toc-number">4.4.</span> <span class="toc-text">Solution</span></a></li></ol></li></ol>
- 
+
   </div>
 
 <div id="asidepart">
 <div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
 <aside class="clearfix">
 
-  
+
 <div class="categorieslist">
 	<p class="asidetitle">分类</p>
 		<ul>
-		
-		  
+
+
 			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>4</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>2</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/生活/" title="生活">生活<sup>3</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
-		  
-		
+
+
 		</ul>
 </div>
 
 
-  
+
 <div class="tagslist">
 	<p class="asidetitle">标签</p>
 		<ul class="clearfix">
-		
-			
+
+
 				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/iOS/" title="iOS">iOS<sup>7</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Mac/" title="Mac">Mac<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/感想/" title="感想">感想<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Mac应用/" title="Mac应用">Mac应用<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
-			
-		
+
+
 		</ul>
 </div>
 
@@ -368,29 +368,29 @@ Explanation: (1 - i) * (1 - i) = 1 + i2 - 2 * i = -2i, and you need convert it t
   <div class="linkslist">
   <p class="asidetitle">友情链接</p>
     <ul>
-        
+
           <li>
-            
+
             	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
-            
+
           </li>
-        
+
           <li>
-            
+
             	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
-            
+
           </li>
-        
+
           <li>
-            
+
             	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
-            
+
           </li>
-        
+
     </ul>
 </div>
 
-  
+
 
 
   <div class="rsspart">
@@ -401,41 +401,41 @@ Explanation: (1 - i) * (1 - i) = 1 + i2 - 2 * i = -2i, and you need convert it t
 </div>
     </div>
     <footer><div id="footer" >
-	
+
 	<div class="line">
 		<span></span>
 		<div class="author"></div>
 	</div>
-	
-	
+
+
 	<section class="info">
 		<p> 无立足境，是方干净 <br/>
 			</p>
 	</section>
-	 
+
 	<div class="social-font" class="clearfix">
-		
-		
-		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
-		
-		
-		
-		
-		
-		
-		
-		
-		
+
+
+		<a href="https://github.com/Anubhav Gain543" target="_blank" class="icon-github" title="github"></a>
+
+
+
+
+
+
+
+
+
 	</div>
-			
-		
+
+
 
 		<p class="copyright">
-		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
-		
-		<a href="/about" target="_blank" title="Cocos">Cocos</a>
-		
-		
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024
+
+		<a href="/about" target="_blank" title="Anubhav Gain">Anubhav Gain</a>
+
+
 		</p>
 </div>
 </footer>
@@ -445,7 +445,7 @@ Explanation: (1 - i) * (1 - i) = 1 + i2 - 2 * i = -2i, and you need convert it t
 <script src="/js/jquery.qrcode-0.12.0.min.js"></script>
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   $('.navbar').click(function(){
     $('header nav').toggleClass('shownav');
   });
@@ -468,31 +468,31 @@ $(document).ready(function(){
   });
   o.click(function(){
     o.css('display', 'none').removeClass('beforeFadeIn');
-    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');
     m.removeClass('moveMain');
   });
   $(window).scroll(function(){
     o.css("top",Math.max(80,260-$(this).scrollTop()));
   });
-  
+
   $(window).resize(function(){
-    getSize(); 
+    getSize();
     if (myWidth >= 1024) {
       $('header nav').removeClass('shownav');
     }else{
       m.removeClass('moveMain');
       a.css('display', 'block').removeClass('fadeOut');
       o.css('display', 'none');
-      
+
       $('#toc.toc-aside').css('display', 'none');
-        
+
     }
   });
 });
 </script>
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   var ai = $('.article-content>iframe'),
       ae = $('.article-content>embed'),
       t  = $('#toc'),
@@ -519,7 +519,7 @@ $(document).ready(function(){
 
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   var $this = $('.share'),
       url = $this.attr('data-url'),
       encodedUrl = encodeURIComponent(url),
@@ -564,7 +564,7 @@ $(document).ready(function(){
   $('.article-share-qrcode').hover(function(){}, function(){
       $('.hoverqrcode').hide();
   });
-});   
+});
 </script>
 
 
@@ -572,7 +572,7 @@ $(document).ready(function(){
 
 <script type="text/javascript">
 
-var disqus_shortname = 'cocosdever';
+var disqus_shortname = 'Anubhav Gaindever';
 
 (function(){
   var dsq = document.createElement('script');
@@ -600,7 +600,7 @@ var disqus_shortname = 'cocosdever';
 <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
 <script src="/fancybox/jquery.fancybox.pack.js"></script>
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   $('.article-content').each(function(i){
     $(this).find('img').each(function(){
       if ($(this).parent().hasClass('fancybox')) return;
@@ -615,7 +615,7 @@ $(document).ready(function(){
   if($.fancybox){
     $('.fancybox').fancybox();
   }
-}); 
+});
 </script>
 
 
@@ -629,7 +629,7 @@ var _hmt = _hmt || [];
 (function() {
   var hm = document.createElement("script");
   hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
-  var s = document.getElementsByTagName("script")[0]; 
+  var s = document.getElementsByTagName("script")[0];
   s.parentNode.insertBefore(hm, s);
 })();
 </script>

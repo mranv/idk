@@ -3,14 +3,14 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  
+
     <title>分析UITextField输入内容的限制以及功能封装的方法 | C的博客</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
-    
-    <meta name="author" content="Cocos">
-    
 
-    
+    <meta name="author" content="Anubhav Gain">
+
+
+
     <meta name="description" content="文档更新说明 最后更新 2017年04月11日 首次更新 2017年04月7日  前言　　近期在项目中处理了不少和UITextField相关的需求,例如监听输入内容变化,代码修改TextField内容,限制长度,限制emoji表情输入等,在这里总结一下相关方法,给出一些意料之外的问题的解决方案. 事件监听与触发条件使用UITextFieldDelegate监听键盘输入　　常见的检测输入变化的代理应">
 <meta property="og:type" content="article">
 <meta property="og:title" content="分析UITextField输入内容的限制以及功能封装的方法">
@@ -20,20 +20,20 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2017-04-07T06:19:11.000Z">
 <meta property="article:modified_time" content="2017-04-11T07:48:52.000Z">
-<meta property="article:author" content="Cocos">
+<meta property="article:author" content="Anubhav Gain">
 <meta name="twitter:card" content="summary">
 
-    
+
     <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
-    
-    
+
+
     <link rel="icon" href="/img/favicon.ico">
-    
-    
+
+
     <link rel="apple-touch-icon" href="/img/jacman.jpg">
     <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
-    
-    
+
+
 <link rel="stylesheet" href="/css/style.css">
 <link rel="stylesheet" href="/%02.css">
 <link rel="stylesheet" href="/.css">
@@ -42,9 +42,9 @@
 
   <body>
     <header>
-      
+
 <div>
-		
+
 			<div id="textlogo">
 				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
 				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
@@ -54,55 +54,55 @@
 			<nav class="animated">
 				<ul>
 					<ul>
-					 
+
 						<li><a href="/">主页</a></li>
-					
+
 						<li><a href="/archives">归档</a></li>
-					
+
 						<li><a href="/tags">标签</a></li>
-					
+
 						<li><a href="/about">关于</a></li>
-					
+
 					<li>
- 					
+
 					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
 						<label>Search</label>
 						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
 						<input type="hidden" name="q" value="site:yoursite.com">
 					</form>
-					
+
 					</li>
 				</ul>
-			</nav>			
+			</nav>
 </div>
     </header>
     <div id="container">
       <div id="main" class="post" itemscope itemprop="blogPost">
-  
-	<article itemprop="articleBody"> 
+
+	<article itemprop="articleBody">
 		<header class="article-info clearfix">
   <h1 itemprop="name">
-    
+
       <a href="/2017/04/07/2017-04-07-TextField-limit-problem/" title="分析UITextField输入内容的限制以及功能封装的方法" itemprop="url">分析UITextField输入内容的限制以及功能封装的方法</a>
   </h1>
   <p class="article-author">By
-       
-		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
-		
+
+		<a href="/about" title="Anubhav Gain" target="_blank" itemprop="author">Anubhav Gain</a>
+
   <p class="article-time">
     <time datetime="2017-04-07T06:19:11.000Z" itemprop="datePublished"> 发表于 2017-04-07</time>
-    
+
   </p>
 </header>
 	<div class="article-content">
-		
+
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
-		
+
 			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8B%E4%BB%B6%E7%9B%91%E5%90%AC%E4%B8%8E%E8%A7%A6%E5%8F%91%E6%9D%A1%E4%BB%B6"><span class="toc-number">3.</span> <span class="toc-text">事件监听与触发条件</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8UITextFieldDelegate%E7%9B%91%E5%90%AC%E9%94%AE%E7%9B%98%E8%BE%93%E5%85%A5"><span class="toc-number">3.1.</span> <span class="toc-text">使用UITextFieldDelegate监听键盘输入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E6%8E%A7%E4%BB%B6Event%E7%9B%91%E5%90%AC"><span class="toc-number">3.2.</span> <span class="toc-text">使用控件Event监听</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8NSNotificationCenter%E7%9B%91%E5%90%AC%E9%94%AE%E7%9B%98%E8%BE%93%E5%85%A5"><span class="toc-number">3.3.</span> <span class="toc-text">使用NSNotificationCenter监听键盘输入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8KVO%E7%9B%91%E5%90%ACCoding%E5%BC%95%E8%B5%B7%E7%9A%84%E5%8F%98%E5%8C%96"><span class="toc-number">3.4.</span> <span class="toc-text">使用KVO监听Coding引起的变化</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%BE%93%E5%85%A5%E5%86%85%E5%AE%B9%E9%99%90%E5%88%B6"><span class="toc-number">4.</span> <span class="toc-text">输入内容限制</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%90%E5%88%B6%E5%86%85%E5%AE%B9%E9%95%BF%E5%BA%A6"><span class="toc-number">4.1.</span> <span class="toc-text">限制内容长度</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%99%90%E5%88%B6%E8%BE%93%E5%85%A5%E4%B8%AD%E6%96%87%E9%95%BF%E5%BA%A6"><span class="toc-number">4.1.1.</span> <span class="toc-text">限制输入中文长度</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%A6%E4%B8%80%E7%A7%8D%E9%99%90%E5%88%B6%E9%95%BF%E5%BA%A6%E7%9A%84%E6%96%B9%E6%A1%88"><span class="toc-number">4.2.</span> <span class="toc-text">另一种限制长度的方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%90%E5%88%B6%E8%BE%93%E5%85%A5%E5%86%85%E5%AE%B9%E7%B1%BB%E5%9E%8B"><span class="toc-number">4.3.</span> <span class="toc-text">限制输入内容类型</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B0%81%E8%A3%85%E9%99%90%E5%88%B6%E4%BB%A3%E7%A0%81"><span class="toc-number">5.</span> <span class="toc-text">封装限制代码</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A4%84%E7%90%86emoji%E8%A1%A8%E6%83%85"><span class="toc-number">6.</span> <span class="toc-text">处理emoji表情</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">7.</span> <span class="toc-text">总结</span></a></li></ol>
-		
+
 		</div>
-		
+
 		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
 <li>最后更新 2017年04月11日</li>
 <li>首次更新 2017年04月7日</li>
@@ -135,7 +135,7 @@
 
 <h2 id="限制输入内容类型"><a href="#限制输入内容类型" class="headerlink" title="限制输入内容类型"></a>限制输入内容类型</h2><p>　　常见的需求可能是限制一些特殊符号的输入,例如emoji表情,处理方法同理可通过shouldChangeCharactersInRange方法检测新增内容是否包含emoji,再决定是否允许输入.</p>
 <h1 id="封装限制代码"><a href="#封装限制代码" class="headerlink" title="封装限制代码"></a>封装限制代码</h1><p>　　不同的业务逻辑一般在处理输入限制的同时,还需要处理其他需求.比如注册界面,除了限制输入内容之外还需要检测两次代码是否一致,当不一致时要在界面上给出UI提示等.所以封装采用的方案最好是能轻松地融入实际业务逻辑,例如采用OC中的Category来封装.先看下面实际代码,再做说明:</p>
-<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  FMPriceTextField+Decimals2.h</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  Created by Cocos on 2016/11/22.</span></span><br><span class="line"><span class="comment">//  Copyright © 2016年 Cocos. All rights reserved.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#import <span class="meta-string">&lt;UIKit/UIKit.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">UITextField</span> (<span class="title">CCLimit</span>)</span></span><br><span class="line"><span class="comment">//只允许输入小数点2位数的小数类型内容,可以限制字符的总长度</span></span><br><span class="line">- (<span class="built_in">BOOL</span>)ccDecimals2_shouldChangeCharactersInRange:(<span class="built_in">NSRange</span>)range replacementString:(<span class="built_in">NSString</span> *)string limitLength:(<span class="built_in">NSInteger</span>)limitLength;</span><br><span class="line"></span><br><span class="line"><span class="comment">//只允许输入整数类型的内容,可以限制字符的总长度</span></span><br><span class="line">- (<span class="built_in">BOOL</span>)ccInteger_shouldChangeCharactersInRange:(<span class="built_in">NSRange</span>)range replacementString:(<span class="built_in">NSString</span> *)string limitLength:(<span class="built_in">NSInteger</span>)limitLength;</span><br><span class="line"></span><br><span class="line"><span class="comment">//只允许输入数字类型的内容,可以限制数字的最大值</span></span><br><span class="line">- (<span class="built_in">BOOL</span>)ccMaxNumber_shouldChangeCharactersInRange:(<span class="built_in">NSRange</span>)range replacementString:(<span class="built_in">NSString</span> *)string maxNumber:(<span class="keyword">double</span>)max;</span><br><span class="line"></span><br><span class="line"><span class="comment">//限制输入内容的总长度</span></span><br><span class="line">- (<span class="built_in">BOOL</span>)ccLength_shouldChangeCharactersInRange:(<span class="built_in">NSRange</span>)range replacementString:(<span class="built_in">NSString</span> *)string limitLength:(<span class="built_in">NSInteger</span>)limitLength;</span><br><span class="line"></span><br><span class="line"><span class="comment">//得到输入内容的总长度(假设本次输入被接受)</span></span><br><span class="line">- (<span class="built_in">NSInteger</span>)ccWholeLength_changeCharactersInRange:(<span class="built_in">NSRange</span>)range replacementString:(<span class="built_in">NSString</span> *)string;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  FMPriceTextField+Decimals2.m</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  Created by Cocos on 2016/11/22.</span></span><br><span class="line"><span class="comment">//  Copyright © 2016年 Cocos. All rights reserved.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#import <span class="meta-string">&quot;UITextField+CCLimit.h&quot;</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&quot;NSString+Extra.h&quot;</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&quot;NSString+Emoji.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">UITextField</span> (<span class="title">CCLimit</span>)</span></span><br><span class="line"></span><br><span class="line">- (<span class="built_in">BOOL</span>)ccDecimals2_shouldChangeCharactersInRange:(<span class="built_in">NSRange</span>)range replacementString:(<span class="built_in">NSString</span> *)string limitLength:(<span class="built_in">NSInteger</span>)limitLength &#123;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">NSCharacterSet</span> *set;</span><br><span class="line">    set = [[<span class="built_in">NSCharacterSet</span> characterSetWithCharactersInString:<span class="string">@&quot;0123456789.&quot;</span>] invertedSet];</span><br><span class="line">    <span class="keyword">if</span> ([string rangeOfCharacterFromSet:set].location != <span class="built_in">NSNotFound</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">self</span>.text.length == <span class="number">0</span> &amp;&amp; [string hasPrefix:<span class="string">@&quot;.&quot;</span>]) &#123;</span><br><span class="line">        <span class="comment">//Start with &quot;.&quot; when the textField.text.length is 0</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">    &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">NSString</span> *deletedStr = [<span class="keyword">self</span>.text stringByReplacingCharactersInRange:range withString:<span class="string">@&quot;&quot;</span>];</span><br><span class="line">        <span class="built_in">NSString</span> *wholeStr = [<span class="built_in">NSString</span> stringWithFormat:<span class="string">@&quot;%@%@&quot;</span>, deletedStr, string];</span><br><span class="line">        <span class="built_in">NSArray</span> *strComAry = [wholeStr componentsSeparatedByString:<span class="string">@&quot;.&quot;</span>];</span><br><span class="line">        <span class="keyword">if</span> (wholeStr.length &gt; limitLength) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">        &#125;<span class="keyword">else</span> <span class="keyword">if</span> ([wholeStr countOccurencesOfString:<span class="string">@&quot;.&quot;</span>] &gt; <span class="number">1</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">        &#125;<span class="keyword">else</span> <span class="keyword">if</span> (strComAry.count == <span class="number">2</span>)&#123;</span><br><span class="line">            <span class="built_in">NSString</span> *decimalString = strComAry[<span class="number">1</span>];</span><br><span class="line">            <span class="keyword">if</span> (decimalString.length &gt; <span class="number">2</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">BOOL</span>)ccMaxNumber_shouldChangeCharactersInRange:(<span class="built_in">NSRange</span>)range replacementString:(<span class="built_in">NSString</span> *)string maxNumber:(<span class="keyword">double</span>)max &#123;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">NSCharacterSet</span> *set;</span><br><span class="line">    set = [[<span class="built_in">NSCharacterSet</span> characterSetWithCharactersInString:<span class="string">@&quot;0123456789.&quot;</span>] invertedSet];</span><br><span class="line">    <span class="keyword">if</span> ([string rangeOfCharacterFromSet:set].location != <span class="built_in">NSNotFound</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">    &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">NSString</span> *deletedStr = [<span class="keyword">self</span>.text stringByReplacingCharactersInRange:range withString:<span class="string">@&quot;&quot;</span>];</span><br><span class="line">        <span class="built_in">NSString</span> *wholeStr = [<span class="built_in">NSString</span> stringWithFormat:<span class="string">@&quot;%@%@&quot;</span>, deletedStr, string];</span><br><span class="line">        <span class="keyword">if</span> ([wholeStr doubleValue] &gt; max) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">BOOL</span>)ccInteger_shouldChangeCharactersInRange:(<span class="built_in">NSRange</span>)range replacementString:(<span class="built_in">NSString</span> *)string limitLength:(<span class="built_in">NSInteger</span>)limitLength &#123;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">NSCharacterSet</span> *set = [<span class="built_in">NSCharacterSet</span> decimalDigitCharacterSet];</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (string.length != <span class="number">0</span> &amp;&amp; [string rangeOfCharacterFromSet:set].location == <span class="built_in">NSNotFound</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> ([<span class="keyword">self</span> ccWholeLength_changeCharactersInRange:range replacementString:string] &gt; limitLength) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">BOOL</span>)ccLength_shouldChangeCharactersInRange:(<span class="built_in">NSRange</span>)range replacementString:(<span class="built_in">NSString</span> *)string limitLength:(<span class="built_in">NSInteger</span>)limitLength &#123;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">if</span> ([<span class="keyword">self</span> ccWholeLength_changeCharactersInRange:range replacementString:string] &gt; limitLength) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">NSInteger</span>)ccWholeLength_changeCharactersInRange:(<span class="built_in">NSRange</span>)range replacementString:(<span class="built_in">NSString</span> *)string &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">self</span>.text.length + string.length - range.length;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  FMPriceTextField+Decimals2.h</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  Created by Anubhav Gain on 2016/11/22.</span></span><br><span class="line"><span class="comment">//  Copyright © 2016年 Anubhav Gain. All rights reserved.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#import <span class="meta-string">&lt;UIKit/UIKit.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">UITextField</span> (<span class="title">CCLimit</span>)</span></span><br><span class="line"><span class="comment">//只允许输入小数点2位数的小数类型内容,可以限制字符的总长度</span></span><br><span class="line">- (<span class="built_in">BOOL</span>)ccDecimals2_shouldChangeCharactersInRange:(<span class="built_in">NSRange</span>)range replacementString:(<span class="built_in">NSString</span> *)string limitLength:(<span class="built_in">NSInteger</span>)limitLength;</span><br><span class="line"></span><br><span class="line"><span class="comment">//只允许输入整数类型的内容,可以限制字符的总长度</span></span><br><span class="line">- (<span class="built_in">BOOL</span>)ccInteger_shouldChangeCharactersInRange:(<span class="built_in">NSRange</span>)range replacementString:(<span class="built_in">NSString</span> *)string limitLength:(<span class="built_in">NSInteger</span>)limitLength;</span><br><span class="line"></span><br><span class="line"><span class="comment">//只允许输入数字类型的内容,可以限制数字的最大值</span></span><br><span class="line">- (<span class="built_in">BOOL</span>)ccMaxNumber_shouldChangeCharactersInRange:(<span class="built_in">NSRange</span>)range replacementString:(<span class="built_in">NSString</span> *)string maxNumber:(<span class="keyword">double</span>)max;</span><br><span class="line"></span><br><span class="line"><span class="comment">//限制输入内容的总长度</span></span><br><span class="line">- (<span class="built_in">BOOL</span>)ccLength_shouldChangeCharactersInRange:(<span class="built_in">NSRange</span>)range replacementString:(<span class="built_in">NSString</span> *)string limitLength:(<span class="built_in">NSInteger</span>)limitLength;</span><br><span class="line"></span><br><span class="line"><span class="comment">//得到输入内容的总长度(假设本次输入被接受)</span></span><br><span class="line">- (<span class="built_in">NSInteger</span>)ccWholeLength_changeCharactersInRange:(<span class="built_in">NSRange</span>)range replacementString:(<span class="built_in">NSString</span> *)string;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  FMPriceTextField+Decimals2.m</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  Created by Anubhav Gain on 2016/11/22.</span></span><br><span class="line"><span class="comment">//  Copyright © 2016年 Anubhav Gain. All rights reserved.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#import <span class="meta-string">&quot;UITextField+CCLimit.h&quot;</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&quot;NSString+Extra.h&quot;</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&quot;NSString+Emoji.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">UITextField</span> (<span class="title">CCLimit</span>)</span></span><br><span class="line"></span><br><span class="line">- (<span class="built_in">BOOL</span>)ccDecimals2_shouldChangeCharactersInRange:(<span class="built_in">NSRange</span>)range replacementString:(<span class="built_in">NSString</span> *)string limitLength:(<span class="built_in">NSInteger</span>)limitLength &#123;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">NSCharacterSet</span> *set;</span><br><span class="line">    set = [[<span class="built_in">NSCharacterSet</span> characterSetWithCharactersInString:<span class="string">@&quot;0123456789.&quot;</span>] invertedSet];</span><br><span class="line">    <span class="keyword">if</span> ([string rangeOfCharacterFromSet:set].location != <span class="built_in">NSNotFound</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">self</span>.text.length == <span class="number">0</span> &amp;&amp; [string hasPrefix:<span class="string">@&quot;.&quot;</span>]) &#123;</span><br><span class="line">        <span class="comment">//Start with &quot;.&quot; when the textField.text.length is 0</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">    &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">NSString</span> *deletedStr = [<span class="keyword">self</span>.text stringByReplacingCharactersInRange:range withString:<span class="string">@&quot;&quot;</span>];</span><br><span class="line">        <span class="built_in">NSString</span> *wholeStr = [<span class="built_in">NSString</span> stringWithFormat:<span class="string">@&quot;%@%@&quot;</span>, deletedStr, string];</span><br><span class="line">        <span class="built_in">NSArray</span> *strComAry = [wholeStr componentsSeparatedByString:<span class="string">@&quot;.&quot;</span>];</span><br><span class="line">        <span class="keyword">if</span> (wholeStr.length &gt; limitLength) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">        &#125;<span class="keyword">else</span> <span class="keyword">if</span> ([wholeStr countOccurencesOfString:<span class="string">@&quot;.&quot;</span>] &gt; <span class="number">1</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">        &#125;<span class="keyword">else</span> <span class="keyword">if</span> (strComAry.count == <span class="number">2</span>)&#123;</span><br><span class="line">            <span class="built_in">NSString</span> *decimalString = strComAry[<span class="number">1</span>];</span><br><span class="line">            <span class="keyword">if</span> (decimalString.length &gt; <span class="number">2</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">BOOL</span>)ccMaxNumber_shouldChangeCharactersInRange:(<span class="built_in">NSRange</span>)range replacementString:(<span class="built_in">NSString</span> *)string maxNumber:(<span class="keyword">double</span>)max &#123;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">NSCharacterSet</span> *set;</span><br><span class="line">    set = [[<span class="built_in">NSCharacterSet</span> characterSetWithCharactersInString:<span class="string">@&quot;0123456789.&quot;</span>] invertedSet];</span><br><span class="line">    <span class="keyword">if</span> ([string rangeOfCharacterFromSet:set].location != <span class="built_in">NSNotFound</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">    &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">NSString</span> *deletedStr = [<span class="keyword">self</span>.text stringByReplacingCharactersInRange:range withString:<span class="string">@&quot;&quot;</span>];</span><br><span class="line">        <span class="built_in">NSString</span> *wholeStr = [<span class="built_in">NSString</span> stringWithFormat:<span class="string">@&quot;%@%@&quot;</span>, deletedStr, string];</span><br><span class="line">        <span class="keyword">if</span> ([wholeStr doubleValue] &gt; max) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">BOOL</span>)ccInteger_shouldChangeCharactersInRange:(<span class="built_in">NSRange</span>)range replacementString:(<span class="built_in">NSString</span> *)string limitLength:(<span class="built_in">NSInteger</span>)limitLength &#123;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">NSCharacterSet</span> *set = [<span class="built_in">NSCharacterSet</span> decimalDigitCharacterSet];</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (string.length != <span class="number">0</span> &amp;&amp; [string rangeOfCharacterFromSet:set].location == <span class="built_in">NSNotFound</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> ([<span class="keyword">self</span> ccWholeLength_changeCharactersInRange:range replacementString:string] &gt; limitLength) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">BOOL</span>)ccLength_shouldChangeCharactersInRange:(<span class="built_in">NSRange</span>)range replacementString:(<span class="built_in">NSString</span> *)string limitLength:(<span class="built_in">NSInteger</span>)limitLength &#123;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">if</span> ([<span class="keyword">self</span> ccWholeLength_changeCharactersInRange:range replacementString:string] &gt; limitLength) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">NSInteger</span>)ccWholeLength_changeCharactersInRange:(<span class="built_in">NSRange</span>)range replacementString:(<span class="built_in">NSString</span> *)string &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">self</span>.text.length + string.length - range.length;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
 
 <p>　　上面分别是对我们公司项目某些常用需求的封装,使用方法也很简单,在对应的代理方法内调用Category里面的方法进行处理就可以了.即可以单独使用,也方便在具体代理方法中使用Category的方法的同时加上自己的其他需求(例如下面例子,结合实际需求同时处理了两个输入框).另外封装的不同功能也可以组合起来使用,看下面例子.</p>
 <figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//在某个视图里面实现UITextField的代理</span></span><br><span class="line"><span class="comment">//当前视图一共代理了两个UITextField,数量和价格,所以在UITextField代理方法里面,分别处理了数量和价格的限制,其中处理价格的时候又将封装的功能组合起来使用,分别是限制小数点2位数和数字最大值</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">pragma</span> mark - UITextFieldDelegate</span></span><br><span class="line">- (<span class="built_in">BOOL</span>)textField:(<span class="built_in">UITextField</span> *)textField shouldChangeCharactersInRange:(<span class="built_in">NSRange</span>)range replacementString:(<span class="built_in">NSString</span> *)string &#123;</span><br><span class="line">    <span class="keyword">if</span> (textField == <span class="keyword">self</span>.amountDUView.textField) &#123;</span><br><span class="line">        <span class="keyword">return</span> [<span class="keyword">self</span>.amountDUView.textField ccInteger_shouldChangeCharactersInRange:range replacementString:string limitLength:<span class="number">5</span>];</span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span> (textField == <span class="keyword">self</span>.priceDUView.textField) &#123;</span><br><span class="line">        <span class="keyword">return</span> [<span class="keyword">self</span>.priceDUView.textField ccDecimals2_shouldChangeCharactersInRange:range replacementString:string limitLength:<span class="number">4</span>] &amp;&amp;</span><br><span class="line">        [<span class="keyword">self</span>.priceDUView.textField ccMaxNumber_shouldChangeCharactersInRange:range replacementString:string maxNumber:<span class="number">1</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -145,7 +145,7 @@
 　　
 　　
 　　</p>
-  
+
 	</div>
 		<footer class="article-footer clearfix">
 <div class="article-catetags">
@@ -161,20 +161,20 @@
 
 
 	<div class="article-share" id="share">
-	
+
 	  <div data-url="http://yoursite.com/2017/04/07/2017-04-07-TextField-limit-problem/" data-title="分析UITextField输入内容的限制以及功能封装的方法 | C的博客" data-tsina="" class="share clearfix">
 	  </div>
-	
+
 	</div>
 
 
 </footer>
 
-   	       
+
 	</article>
-	
+
 <nav class="article-nav clearfix">
- 
+
  <div class="prev" >
  <a href="/2017/04/12/2017-04-12-high-quality-articles-recommended/" title="计算机领域高质量博文推荐">
   <strong>上一篇：</strong><br/>
@@ -186,7 +186,7 @@
 
 <div class="next">
 <a href="/2017/01/05/2017-01-05-UI-stuck-when-customizing-interactivePopGestureRecognizer-in-view-controller/"  title="设置控制器的interactivePopGestureRecognizer.delegate后容易出现界面卡死现象.">
- <strong>下一篇：</strong><br/> 
+ <strong>下一篇：</strong><br/>
  <span>设置控制器的interactivePopGestureRecognizer.delegate后容易出现界面卡死现象.
 </span>
 </a>
@@ -194,7 +194,7 @@
 
 </nav>
 
-	
+
 
 <section id="comments" class="comment">
   <div id="disqus_thread">
@@ -205,174 +205,174 @@
 
 
 
-</div>  
+</div>
       <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
 
   <div id="toc" class="toc-aside">
   <strong class="toc-title">文章目录</strong>
- 
+
  <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8B%E4%BB%B6%E7%9B%91%E5%90%AC%E4%B8%8E%E8%A7%A6%E5%8F%91%E6%9D%A1%E4%BB%B6"><span class="toc-number">3.</span> <span class="toc-text">事件监听与触发条件</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8UITextFieldDelegate%E7%9B%91%E5%90%AC%E9%94%AE%E7%9B%98%E8%BE%93%E5%85%A5"><span class="toc-number">3.1.</span> <span class="toc-text">使用UITextFieldDelegate监听键盘输入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E6%8E%A7%E4%BB%B6Event%E7%9B%91%E5%90%AC"><span class="toc-number">3.2.</span> <span class="toc-text">使用控件Event监听</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8NSNotificationCenter%E7%9B%91%E5%90%AC%E9%94%AE%E7%9B%98%E8%BE%93%E5%85%A5"><span class="toc-number">3.3.</span> <span class="toc-text">使用NSNotificationCenter监听键盘输入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8KVO%E7%9B%91%E5%90%ACCoding%E5%BC%95%E8%B5%B7%E7%9A%84%E5%8F%98%E5%8C%96"><span class="toc-number">3.4.</span> <span class="toc-text">使用KVO监听Coding引起的变化</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%BE%93%E5%85%A5%E5%86%85%E5%AE%B9%E9%99%90%E5%88%B6"><span class="toc-number">4.</span> <span class="toc-text">输入内容限制</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%90%E5%88%B6%E5%86%85%E5%AE%B9%E9%95%BF%E5%BA%A6"><span class="toc-number">4.1.</span> <span class="toc-text">限制内容长度</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%99%90%E5%88%B6%E8%BE%93%E5%85%A5%E4%B8%AD%E6%96%87%E9%95%BF%E5%BA%A6"><span class="toc-number">4.1.1.</span> <span class="toc-text">限制输入中文长度</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%A6%E4%B8%80%E7%A7%8D%E9%99%90%E5%88%B6%E9%95%BF%E5%BA%A6%E7%9A%84%E6%96%B9%E6%A1%88"><span class="toc-number">4.2.</span> <span class="toc-text">另一种限制长度的方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%90%E5%88%B6%E8%BE%93%E5%85%A5%E5%86%85%E5%AE%B9%E7%B1%BB%E5%9E%8B"><span class="toc-number">4.3.</span> <span class="toc-text">限制输入内容类型</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B0%81%E8%A3%85%E9%99%90%E5%88%B6%E4%BB%A3%E7%A0%81"><span class="toc-number">5.</span> <span class="toc-text">封装限制代码</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A4%84%E7%90%86emoji%E8%A1%A8%E6%83%85"><span class="toc-number">6.</span> <span class="toc-text">处理emoji表情</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">7.</span> <span class="toc-text">总结</span></a></li></ol>
- 
+
   </div>
 
 <div id="asidepart">
 <div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
 <aside class="clearfix">
 
-  
+
 <div class="categorieslist">
 	<p class="asidetitle">分类</p>
 		<ul>
-		
-		  
+
+
 			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>4</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>2</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/生活/" title="生活">生活<sup>3</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
-		  
-		
+
+
 		</ul>
 </div>
 
 
-  
+
 <div class="tagslist">
 	<p class="asidetitle">标签</p>
 		<ul class="clearfix">
-		
-			
+
+
 				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/iOS/" title="iOS">iOS<sup>7</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Mac/" title="Mac">Mac<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/感想/" title="感想">感想<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Mac应用/" title="Mac应用">Mac应用<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
-			
-		
+
+
 		</ul>
 </div>
 
@@ -380,29 +380,29 @@
   <div class="linkslist">
   <p class="asidetitle">友情链接</p>
     <ul>
-        
+
           <li>
-            
+
             	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
-            
+
           </li>
-        
+
           <li>
-            
+
             	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
-            
+
           </li>
-        
+
           <li>
-            
+
             	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
-            
+
           </li>
-        
+
     </ul>
 </div>
 
-  
+
 
 
   <div class="rsspart">
@@ -413,41 +413,41 @@
 </div>
     </div>
     <footer><div id="footer" >
-	
+
 	<div class="line">
 		<span></span>
 		<div class="author"></div>
 	</div>
-	
-	
+
+
 	<section class="info">
 		<p> 无立足境，是方干净 <br/>
 			</p>
 	</section>
-	 
+
 	<div class="social-font" class="clearfix">
-		
-		
-		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
-		
-		
-		
-		
-		
-		
-		
-		
-		
+
+
+		<a href="https://github.com/Anubhav Gain543" target="_blank" class="icon-github" title="github"></a>
+
+
+
+
+
+
+
+
+
 	</div>
-			
-		
+
+
 
 		<p class="copyright">
-		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
-		
-		<a href="/about" target="_blank" title="Cocos">Cocos</a>
-		
-		
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024
+
+		<a href="/about" target="_blank" title="Anubhav Gain">Anubhav Gain</a>
+
+
 		</p>
 </div>
 </footer>
@@ -457,7 +457,7 @@
 <script src="/js/jquery.qrcode-0.12.0.min.js"></script>
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   $('.navbar').click(function(){
     $('header nav').toggleClass('shownav');
   });
@@ -480,31 +480,31 @@ $(document).ready(function(){
   });
   o.click(function(){
     o.css('display', 'none').removeClass('beforeFadeIn');
-    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');
     m.removeClass('moveMain');
   });
   $(window).scroll(function(){
     o.css("top",Math.max(80,260-$(this).scrollTop()));
   });
-  
+
   $(window).resize(function(){
-    getSize(); 
+    getSize();
     if (myWidth >= 1024) {
       $('header nav').removeClass('shownav');
     }else{
       m.removeClass('moveMain');
       a.css('display', 'block').removeClass('fadeOut');
       o.css('display', 'none');
-      
+
       $('#toc.toc-aside').css('display', 'none');
-        
+
     }
   });
 });
 </script>
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   var ai = $('.article-content>iframe'),
       ae = $('.article-content>embed'),
       t  = $('#toc'),
@@ -531,7 +531,7 @@ $(document).ready(function(){
 
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   var $this = $('.share'),
       url = $this.attr('data-url'),
       encodedUrl = encodeURIComponent(url),
@@ -576,7 +576,7 @@ $(document).ready(function(){
   $('.article-share-qrcode').hover(function(){}, function(){
       $('.hoverqrcode').hide();
   });
-});   
+});
 </script>
 
 
@@ -584,7 +584,7 @@ $(document).ready(function(){
 
 <script type="text/javascript">
 
-var disqus_shortname = 'cocosdever';
+var disqus_shortname = 'Anubhav Gaindever';
 
 (function(){
   var dsq = document.createElement('script');
@@ -612,7 +612,7 @@ var disqus_shortname = 'cocosdever';
 <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
 <script src="/fancybox/jquery.fancybox.pack.js"></script>
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   $('.article-content').each(function(i){
     $(this).find('img').each(function(){
       if ($(this).parent().hasClass('fancybox')) return;
@@ -627,7 +627,7 @@ $(document).ready(function(){
   if($.fancybox){
     $('.fancybox').fancybox();
   }
-}); 
+});
 </script>
 
 
@@ -641,7 +641,7 @@ var _hmt = _hmt || [];
 (function() {
   var hm = document.createElement("script");
   hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
-  var s = document.getElementsByTagName("script")[0]; 
+  var s = document.getElementsByTagName("script")[0];
   s.parentNode.insertBefore(hm, s);
 })();
 </script>

@@ -3,14 +3,14 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  
+
     <title>Mac上XPC多进程通讯的完整解决方案 | C的博客</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
-    
-    <meta name="author" content="Cocos">
-    
 
-    
+    <meta name="author" content="Anubhav Gain">
+
+
+
     <meta name="description" content="Mac上XPC多进程通讯的完整解决方案文档更新说明 最后更新 2021年4月1日 首次更新 2021年4月1日  前言本文主要讲述如何在Mac上利用XPC技术实现多进程通讯，包括全局双向通讯，合法性校验，通讯协议版本校验，以及多线程注意事项等四部分。 经过半个月的开发，目前已经开发完相关功能，包括上面几点，本文会讲述每一个部分的技术细节，相信能给桌面开发者一些灵感和提示。 忘了说了，这篇本来是3月">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Mac上XPC多进程通讯的完整解决方案">
@@ -22,21 +22,21 @@
 <meta property="og:image" content="http://yoursite.com/images/5508402f-2386-4379-9525-69a9bd5cec6c.png">
 <meta property="article:published_time" content="2021-04-03T08:23:35.000Z">
 <meta property="article:modified_time" content="2021-04-03T08:29:34.809Z">
-<meta property="article:author" content="Cocos">
+<meta property="article:author" content="Anubhav Gain">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://yoursite.com/images/98485037-5285-4258-a244-6b4c0390a72f.png">
 
-    
+
     <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
-    
-    
+
+
     <link rel="icon" href="/img/favicon.ico">
-    
-    
+
+
     <link rel="apple-touch-icon" href="/img/jacman.jpg">
     <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
-    
-    
+
+
 <link rel="stylesheet" href="/css/style.css">
 <link rel="stylesheet" href="/%02.css">
 <link rel="stylesheet" href="/.css">
@@ -45,9 +45,9 @@
 
   <body>
     <header>
-      
+
 <div>
-		
+
 			<div id="textlogo">
 				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
 				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
@@ -57,55 +57,55 @@
 			<nav class="animated">
 				<ul>
 					<ul>
-					 
+
 						<li><a href="/">主页</a></li>
-					
+
 						<li><a href="/archives">归档</a></li>
-					
+
 						<li><a href="/tags">标签</a></li>
-					
+
 						<li><a href="/about">关于</a></li>
-					
+
 					<li>
- 					
+
 					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
 						<label>Search</label>
 						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
 						<input type="hidden" name="q" value="site:yoursite.com">
 					</form>
-					
+
 					</li>
 				</ul>
-			</nav>			
+			</nav>
 </div>
     </header>
     <div id="container">
       <div id="main" class="post" itemscope itemprop="blogPost">
-  
-	<article itemprop="articleBody"> 
+
+	<article itemprop="articleBody">
 		<header class="article-info clearfix">
   <h1 itemprop="name">
-    
+
       <a href="/2021/04/03/xpc-communication/" title="Mac上XPC多进程通讯的完整解决方案" itemprop="url">Mac上XPC多进程通讯的完整解决方案</a>
   </h1>
   <p class="article-author">By
-       
-		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
-		
+
+		<a href="/about" title="Anubhav Gain" target="_blank" itemprop="author">Anubhav Gain</a>
+
   <p class="article-time">
     <time datetime="2021-04-03T08:23:35.000Z" itemprop="datePublished"> 发表于 2021-04-03</time>
-    
+
   </p>
 </header>
 	<div class="article-content">
-		
+
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
-		
+
 			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Mac%E4%B8%8AXPC%E5%A4%9A%E8%BF%9B%E7%A8%8B%E9%80%9A%E8%AE%AF%E7%9A%84%E5%AE%8C%E6%95%B4%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">1.</span> <span class="toc-text">Mac上XPC多进程通讯的完整解决方案</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">2.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">3.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%8C%E5%90%91%E9%80%9A%E8%AE%AF"><span class="toc-number">4.</span> <span class="toc-text">双向通讯</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%90%88%E6%B3%95%E6%80%A7%E6%A0%A1%E9%AA%8C"><span class="toc-number">5.</span> <span class="toc-text">合法性校验</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="toc-number">6.</span> <span class="toc-text">多线程注意事项</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">7.</span> <span class="toc-text">总结</span></a></li></ol>
-		
+
 		</div>
-		
+
 		<h1 id="Mac上XPC多进程通讯的完整解决方案"><a href="#Mac上XPC多进程通讯的完整解决方案" class="headerlink" title="Mac上XPC多进程通讯的完整解决方案"></a>Mac上XPC多进程通讯的完整解决方案</h1><h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
 <li>最后更新 2021年4月1日</li>
 <li>首次更新 2021年4月1日</li>
@@ -131,7 +131,7 @@
 <p><img src="/images/5508402f-2386-4379-9525-69a9bd5cec6c.png"></p>
 <p>上面也是用到了Mac的全局通知，主程序订阅了全局通知，得到服务进程确认信息后才会继续往下走。</p>
 <p>下面是服务进程匿名端口接收连接的Delegate代码。验证请求方合法性，并可以及时关闭非法请求。</p>
-<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">InternalAnonymousListenerDelegate</span>: <span class="title">NSObject</span>, <span class="title">NSXPCListenerDelegate</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">let</span> instance = <span class="type">InternalAnonymousListenerDelegate</span>()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">listener</span><span class="params">(<span class="keyword">_</span> listener: NSXPCListener, shouldAcceptNewConnection newConnection: NSXPCConnection)</span></span> -&gt; <span class="type">Bool</span> &#123;</span><br><span class="line">        <span class="comment">// This method is where the NSXPCListener configures, accepts, and resumes a new incoming NSXPCConnection.</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// Configure the connection.</span></span><br><span class="line">        <span class="comment">// First, set the interface that the exported object implements.</span></span><br><span class="line">        newConnection.exportedInterface = <span class="type">NSXPCInterface</span>(with: <span class="type">InternalAnonymousServiceProtocol</span>.<span class="keyword">self</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Next, set the object that the connection exports. All messages sent on the connection to this service will be sent to the exported object to handle. The connection retains the exported object.</span></span><br><span class="line">        newConnection.exportedObject = <span class="type">InternalAnonymousService</span>.center</span><br><span class="line"></span><br><span class="line">        newConnection.remoteObjectInterface = <span class="type">NSXPCInterface</span>(with: <span class="type">MainAppXPCServiceProtocol</span>.<span class="keyword">self</span>)</span><br><span class="line">        <span class="keyword">let</span> appServ = newConnection.remoteObjectProxyWithErrorHandler &#123; (err) <span class="keyword">in</span></span><br><span class="line">            newConnection.invalidate()</span><br><span class="line">        &#125; <span class="keyword">as</span>! <span class="type">MainAppXPCServiceProtocol</span> <span class="comment">//主程序暴露的协议</span></span><br><span class="line">        <span class="type">InternalAnonymousXPC</span>.instance.appServ = <span class="type">Serv</span></span><br><span class="line">        <span class="comment">// Resuming the connection allows the system to deliver more incoming messages.</span></span><br><span class="line">        newConnection.resume()</span><br><span class="line"></span><br><span class="line">        <span class="comment">//这里也可以直接判断进程信息来确定进程是否合法 </span></span><br><span class="line">        <span class="type">NSLog</span>(<span class="string">&quot;ServiceDelegate: auditSessionIdentifier:\(newConnection.auditSessionIdentifier), processIdentifier:\(newConnection.processIdentifier)&quot;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> !<span class="type">InternalAnonymousService</span>.acceptNewConnection &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 对连接方进行校验</span></span><br><span class="line">        sdkServ.reverseAuth &#123; (key) <span class="keyword">in</span></span><br><span class="line">            <span class="comment">// 推送全局通知, 告知校验结果</span></span><br><span class="line">            <span class="keyword">let</span> nfcenter = <span class="type">CFNotificationCenterGetDistributedCenter</span>()</span><br><span class="line"></span><br><span class="line">            <span class="keyword">var</span> authDic:[<span class="type">String</span>:<span class="type">String</span>]? = [:]</span><br><span class="line">            <span class="keyword">if</span> key != <span class="string">&quot;key123&quot;</span> &#123;</span><br><span class="line">                <span class="type">InternalAnonymousService</span>.acceptNewConnection = <span class="literal">false</span></span><br><span class="line">                newConnection.invalidate()</span><br><span class="line">                authDic = <span class="literal">nil</span></span><br><span class="line">                <span class="type">InternalAnonymousXPC</span>.instance.appServ = <span class="literal">nil</span></span><br><span class="line">                <span class="type">NSLog</span>(<span class="string">&quot;xpc auth faild&quot;</span>)</span><br><span class="line">            &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="type">NSLog</span>(<span class="string">&quot;xpc auth success&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="type">CFNotificationCenterPostNotification</span>(nfcenter, <span class="type">CFNotificationName</span>(<span class="string">&quot;com.cocos.xpc.reverseAuth&quot;</span> <span class="keyword">as</span> <span class="type">CFString</span>), <span class="literal">nil</span>, authDic <span class="keyword">as</span> <span class="type">CFDictionary?</span>, <span class="literal">false</span>)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="type">InternalAnonymousService</span>.acceptNewConnection</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">InternalAnonymousListenerDelegate</span>: <span class="title">NSObject</span>, <span class="title">NSXPCListenerDelegate</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">let</span> instance = <span class="type">InternalAnonymousListenerDelegate</span>()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">listener</span><span class="params">(<span class="keyword">_</span> listener: NSXPCListener, shouldAcceptNewConnection newConnection: NSXPCConnection)</span></span> -&gt; <span class="type">Bool</span> &#123;</span><br><span class="line">        <span class="comment">// This method is where the NSXPCListener configures, accepts, and resumes a new incoming NSXPCConnection.</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// Configure the connection.</span></span><br><span class="line">        <span class="comment">// First, set the interface that the exported object implements.</span></span><br><span class="line">        newConnection.exportedInterface = <span class="type">NSXPCInterface</span>(with: <span class="type">InternalAnonymousServiceProtocol</span>.<span class="keyword">self</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Next, set the object that the connection exports. All messages sent on the connection to this service will be sent to the exported object to handle. The connection retains the exported object.</span></span><br><span class="line">        newConnection.exportedObject = <span class="type">InternalAnonymousService</span>.center</span><br><span class="line"></span><br><span class="line">        newConnection.remoteObjectInterface = <span class="type">NSXPCInterface</span>(with: <span class="type">MainAppXPCServiceProtocol</span>.<span class="keyword">self</span>)</span><br><span class="line">        <span class="keyword">let</span> appServ = newConnection.remoteObjectProxyWithErrorHandler &#123; (err) <span class="keyword">in</span></span><br><span class="line">            newConnection.invalidate()</span><br><span class="line">        &#125; <span class="keyword">as</span>! <span class="type">MainAppXPCServiceProtocol</span> <span class="comment">//主程序暴露的协议</span></span><br><span class="line">        <span class="type">InternalAnonymousXPC</span>.instance.appServ = <span class="type">Serv</span></span><br><span class="line">        <span class="comment">// Resuming the connection allows the system to deliver more incoming messages.</span></span><br><span class="line">        newConnection.resume()</span><br><span class="line"></span><br><span class="line">        <span class="comment">//这里也可以直接判断进程信息来确定进程是否合法 </span></span><br><span class="line">        <span class="type">NSLog</span>(<span class="string">&quot;ServiceDelegate: auditSessionIdentifier:\(newConnection.auditSessionIdentifier), processIdentifier:\(newConnection.processIdentifier)&quot;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> !<span class="type">InternalAnonymousService</span>.acceptNewConnection &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 对连接方进行校验</span></span><br><span class="line">        sdkServ.reverseAuth &#123; (key) <span class="keyword">in</span></span><br><span class="line">            <span class="comment">// 推送全局通知, 告知校验结果</span></span><br><span class="line">            <span class="keyword">let</span> nfcenter = <span class="type">CFNotificationCenterGetDistributedCenter</span>()</span><br><span class="line"></span><br><span class="line">            <span class="keyword">var</span> authDic:[<span class="type">String</span>:<span class="type">String</span>]? = [:]</span><br><span class="line">            <span class="keyword">if</span> key != <span class="string">&quot;key123&quot;</span> &#123;</span><br><span class="line">                <span class="type">InternalAnonymousService</span>.acceptNewConnection = <span class="literal">false</span></span><br><span class="line">                newConnection.invalidate()</span><br><span class="line">                authDic = <span class="literal">nil</span></span><br><span class="line">                <span class="type">InternalAnonymousXPC</span>.instance.appServ = <span class="literal">nil</span></span><br><span class="line">                <span class="type">NSLog</span>(<span class="string">&quot;xpc auth faild&quot;</span>)</span><br><span class="line">            &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="type">NSLog</span>(<span class="string">&quot;xpc auth success&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="type">CFNotificationCenterPostNotification</span>(nfcenter, <span class="type">CFNotificationName</span>(<span class="string">&quot;com.Anubhav Gain.xpc.reverseAuth&quot;</span> <span class="keyword">as</span> <span class="type">CFString</span>), <span class="literal">nil</span>, authDic <span class="keyword">as</span> <span class="type">CFDictionary?</span>, <span class="literal">false</span>)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="type">InternalAnonymousService</span>.acceptNewConnection</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <p>上面演示了服务进程如何对主程序进行合法性校验。主程序可以调用服务进程提供的版本检查接口，确定主程序是否能和服务进程正常通讯。毕竟如果服务进程的版本不兼容，那么XPC通讯约定的Protocol就没法正常调用了。</p>
 <h1 id="多线程注意事项"><a href="#多线程注意事项" class="headerlink" title="多线程注意事项"></a>多线程注意事项</h1><p>涉及到的多线程编码主要是要防止死锁和错误调用<code>DispatchGroup</code> 。</p>
@@ -142,7 +142,7 @@
 <p>比如上面submitVersion，是服务端XPC定义的接口，做线程同步的时候，先对group做一次<code>leave</code> ，但是回调必包被出发的时间是不确定的，主要取决XPC服务启动和响应的时间，所以需要用一个weak告知编译器弱引用waiter变量，并在waiter为nil时不调用<code>leave</code> 。</p>
 <p>上文说的中介XPC中也有类似处理，这里就不再复述了。</p>
 <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>本文主要是提出了多进程通讯中的XPC技术的常见需求的解决方案，对于XPC具体代码的编写没有太多涉及，可以参考上文提供的文章，那里有详细的使用教程。</p>
-  
+
 	</div>
 		<footer class="article-footer clearfix">
 <div class="article-catetags">
@@ -153,20 +153,20 @@
 
 
 	<div class="article-share" id="share">
-	
+
 	  <div data-url="http://yoursite.com/2021/04/03/xpc-communication/" data-title="Mac上XPC多进程通讯的完整解决方案 | C的博客" data-tsina="" class="share clearfix">
 	  </div>
-	
+
 	</div>
 
 
 </footer>
 
-   	       
+
 	</article>
-	
+
 <nav class="article-nav clearfix">
- 
+
  <div class="prev" >
  <a href="/2021/05/22/prevent-dynamic-debug/" title="低成本防静态分析和防动态调试的解决方案">
   <strong>上一篇：</strong><br/>
@@ -178,7 +178,7 @@
 
 <div class="next">
 <a href="/2021/01/31/mac-hotfix/"  title="Mac程序的热修复实现思路">
- <strong>下一篇：</strong><br/> 
+ <strong>下一篇：</strong><br/>
  <span>Mac程序的热修复实现思路
 </span>
 </a>
@@ -186,7 +186,7 @@
 
 </nav>
 
-	
+
 
 <section id="comments" class="comment">
   <div id="disqus_thread">
@@ -197,174 +197,174 @@
 
 
 
-</div>  
+</div>
       <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
 
   <div id="toc" class="toc-aside">
   <strong class="toc-title">文章目录</strong>
- 
+
  <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Mac%E4%B8%8AXPC%E5%A4%9A%E8%BF%9B%E7%A8%8B%E9%80%9A%E8%AE%AF%E7%9A%84%E5%AE%8C%E6%95%B4%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">1.</span> <span class="toc-text">Mac上XPC多进程通讯的完整解决方案</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">2.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">3.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%8C%E5%90%91%E9%80%9A%E8%AE%AF"><span class="toc-number">4.</span> <span class="toc-text">双向通讯</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%90%88%E6%B3%95%E6%80%A7%E6%A0%A1%E9%AA%8C"><span class="toc-number">5.</span> <span class="toc-text">合法性校验</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="toc-number">6.</span> <span class="toc-text">多线程注意事项</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">7.</span> <span class="toc-text">总结</span></a></li></ol>
- 
+
   </div>
 
 <div id="asidepart">
 <div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
 <aside class="clearfix">
 
-  
+
 <div class="categorieslist">
 	<p class="asidetitle">分类</p>
 		<ul>
-		
-		  
+
+
 			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>4</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>2</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/生活/" title="生活">生活<sup>3</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
-		  
-		
+
+
 		</ul>
 </div>
 
 
-  
+
 <div class="tagslist">
 	<p class="asidetitle">标签</p>
 		<ul class="clearfix">
-		
-			
+
+
 				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/iOS/" title="iOS">iOS<sup>7</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Mac/" title="Mac">Mac<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/感想/" title="感想">感想<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Mac应用/" title="Mac应用">Mac应用<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
-			
-		
+
+
 		</ul>
 </div>
 
@@ -372,29 +372,29 @@
   <div class="linkslist">
   <p class="asidetitle">友情链接</p>
     <ul>
-        
+
           <li>
-            
+
             	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
-            
+
           </li>
-        
+
           <li>
-            
+
             	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
-            
+
           </li>
-        
+
           <li>
-            
+
             	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
-            
+
           </li>
-        
+
     </ul>
 </div>
 
-  
+
 
 
   <div class="rsspart">
@@ -405,41 +405,41 @@
 </div>
     </div>
     <footer><div id="footer" >
-	
+
 	<div class="line">
 		<span></span>
 		<div class="author"></div>
 	</div>
-	
-	
+
+
 	<section class="info">
 		<p> 无立足境，是方干净 <br/>
 			</p>
 	</section>
-	 
+
 	<div class="social-font" class="clearfix">
-		
-		
-		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
-		
-		
-		
-		
-		
-		
-		
-		
-		
+
+
+		<a href="https://github.com/Anubhav Gain543" target="_blank" class="icon-github" title="github"></a>
+
+
+
+
+
+
+
+
+
 	</div>
-			
-		
+
+
 
 		<p class="copyright">
-		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
-		
-		<a href="/about" target="_blank" title="Cocos">Cocos</a>
-		
-		
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024
+
+		<a href="/about" target="_blank" title="Anubhav Gain">Anubhav Gain</a>
+
+
 		</p>
 </div>
 </footer>
@@ -449,7 +449,7 @@
 <script src="/js/jquery.qrcode-0.12.0.min.js"></script>
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   $('.navbar').click(function(){
     $('header nav').toggleClass('shownav');
   });
@@ -472,31 +472,31 @@ $(document).ready(function(){
   });
   o.click(function(){
     o.css('display', 'none').removeClass('beforeFadeIn');
-    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');
     m.removeClass('moveMain');
   });
   $(window).scroll(function(){
     o.css("top",Math.max(80,260-$(this).scrollTop()));
   });
-  
+
   $(window).resize(function(){
-    getSize(); 
+    getSize();
     if (myWidth >= 1024) {
       $('header nav').removeClass('shownav');
     }else{
       m.removeClass('moveMain');
       a.css('display', 'block').removeClass('fadeOut');
       o.css('display', 'none');
-      
+
       $('#toc.toc-aside').css('display', 'none');
-        
+
     }
   });
 });
 </script>
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   var ai = $('.article-content>iframe'),
       ae = $('.article-content>embed'),
       t  = $('#toc'),
@@ -523,7 +523,7 @@ $(document).ready(function(){
 
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   var $this = $('.share'),
       url = $this.attr('data-url'),
       encodedUrl = encodeURIComponent(url),
@@ -568,7 +568,7 @@ $(document).ready(function(){
   $('.article-share-qrcode').hover(function(){}, function(){
       $('.hoverqrcode').hide();
   });
-});   
+});
 </script>
 
 
@@ -576,7 +576,7 @@ $(document).ready(function(){
 
 <script type="text/javascript">
 
-var disqus_shortname = 'cocosdever';
+var disqus_shortname = 'Anubhav Gaindever';
 
 (function(){
   var dsq = document.createElement('script');
@@ -604,7 +604,7 @@ var disqus_shortname = 'cocosdever';
 <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
 <script src="/fancybox/jquery.fancybox.pack.js"></script>
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   $('.article-content').each(function(i){
     $(this).find('img').each(function(){
       if ($(this).parent().hasClass('fancybox')) return;
@@ -619,7 +619,7 @@ $(document).ready(function(){
   if($.fancybox){
     $('.fancybox').fancybox();
   }
-}); 
+});
 </script>
 
 
@@ -633,7 +633,7 @@ var _hmt = _hmt || [];
 (function() {
   var hm = document.createElement("script");
   hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
-  var s = document.getElementsByTagName("script")[0]; 
+  var s = document.getElementsByTagName("script")[0];
   s.parentNode.insertBefore(hm, s);
 })();
 </script>

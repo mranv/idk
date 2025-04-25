@@ -3,14 +3,14 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  
+
     <title>实现一个60帧的QQ音乐首页(高性价比的性能优化方案) | C的博客</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
-    
-    <meta name="author" content="Cocos">
-    
 
-    
+    <meta name="author" content="Anubhav Gain">
+
+
+
     <meta name="description" content="文档更新说明 最后更新 2020年03月22日 首次更新 2020年03月27日  前言　　现在的iPhone性能越来越好, 正常开发一个界面都很少会遇到影响体验的卡顿. 但是如果把APP放到比较老的型号上, 卡顿就非常常见了. 利用这篇文章, 结合一下实际的案例QQ音乐首页, 聊一聊解决卡顿的基本思想和方法论. 这是QQ音乐的界面　　　　　　 这是Demo的界面, 部分素材找不到就临时用别的代替">
 <meta property="og:type" content="article">
 <meta property="og:title" content="实现一个60帧的QQ音乐首页(高性价比的性能优化方案)">
@@ -48,22 +48,22 @@
 <meta property="og:image" content="http://yoursite.com/images/qq-music-cache-image.jpg">
 <meta property="article:published_time" content="2020-03-22T15:13:51.000Z">
 <meta property="article:modified_time" content="2020-03-30T02:00:19.000Z">
-<meta property="article:author" content="Cocos">
+<meta property="article:author" content="Anubhav Gain">
 <meta property="article:tag" content="UI">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://yoursite.com/images/qq-music.jpg">
 
-    
+
     <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
-    
-    
+
+
     <link rel="icon" href="/img/favicon.ico">
-    
-    
+
+
     <link rel="apple-touch-icon" href="/img/jacman.jpg">
     <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
-    
-    
+
+
 <link rel="stylesheet" href="/css/style.css">
 <link rel="stylesheet" href="/%02.css">
 <link rel="stylesheet" href="/.css">
@@ -72,9 +72,9 @@
 
   <body>
     <header>
-      
+
 <div>
-		
+
 			<div id="textlogo">
 				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
 				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
@@ -84,55 +84,55 @@
 			<nav class="animated">
 				<ul>
 					<ul>
-					 
+
 						<li><a href="/">主页</a></li>
-					
+
 						<li><a href="/archives">归档</a></li>
-					
+
 						<li><a href="/tags">标签</a></li>
-					
+
 						<li><a href="/about">关于</a></li>
-					
+
 					<li>
- 					
+
 					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
 						<label>Search</label>
 						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
 						<input type="hidden" name="q" value="site:yoursite.com">
 					</form>
-					
+
 					</li>
 				</ul>
-			</nav>			
+			</nav>
 </div>
     </header>
     <div id="container">
       <div id="main" class="post" itemscope itemprop="blogPost">
-  
-	<article itemprop="articleBody"> 
+
+	<article itemprop="articleBody">
 		<header class="article-info clearfix">
   <h1 itemprop="name">
-    
+
       <a href="/2020/03/22/2020-03-22-Implementing-a-60-frame-QQ-Music-Homepage/" title="实现一个60帧的QQ音乐首页(高性价比的性能优化方案)" itemprop="url">实现一个60帧的QQ音乐首页(高性价比的性能优化方案)</a>
   </h1>
   <p class="article-author">By
-       
-		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
-		
+
+		<a href="/about" title="Anubhav Gain" target="_blank" itemprop="author">Anubhav Gain</a>
+
   <p class="article-time">
     <time datetime="2020-03-22T15:13:51.000Z" itemprop="datePublished"> 发表于 2020-03-22</time>
-    
+
   </p>
 </header>
 	<div class="article-content">
-		
+
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
-		
+
 			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%BA%90%E7%A0%81%E4%B8%8B%E8%BD%BD"><span class="toc-number">3.</span> <span class="toc-text">源码下载</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%A6%96%E9%A1%B5%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%80%9D%E8%B7%AF"><span class="toc-number">4.</span> <span class="toc-text">首页的实现思路</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E4%BD%93UI%E7%BB%93%E6%9E%84"><span class="toc-number">4.1.</span> <span class="toc-text">整体UI结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%83%E5%B1%80%E6%96%B9%E5%BC%8F"><span class="toc-number">4.2.</span> <span class="toc-text">布局方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A6%96%E9%A1%B5%E7%B1%BB%E5%9E%8B%E5%88%92%E5%88%86"><span class="toc-number">4.3.</span> <span class="toc-text">首页类型划分</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A1%B6%E9%83%A8%E6%90%9C%E7%B4%A2%E6%A1%86"><span class="toc-number">4.3.1.</span> <span class="toc-text">顶部搜索框</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Banner"><span class="toc-number">4.3.2.</span> <span class="toc-text">Banner</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%BA%E5%AE%9A%E5%86%85%E5%AE%B9%E7%9A%84%E8%A7%86%E5%9B%BE"><span class="toc-number">4.3.3.</span> <span class="toc-text">固定内容的视图</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%AA%E5%90%91%E7%80%91%E5%B8%83%E6%B5%81"><span class="toc-number">4.3.4.</span> <span class="toc-text">横向瀑布流</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%84%E7%A7%8D%E4%B8%8D%E5%90%8C%E7%9A%84CollectionViewCell"><span class="toc-number">4.3.5.</span> <span class="toc-text">各种不同的CollectionViewCell</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96"><span class="toc-number">5.</span> <span class="toc-text">代码优化</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#GPU-%E4%BC%98%E5%8C%96"><span class="toc-number">5.1.</span> <span class="toc-text">GPU 优化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#iOS%E7%9A%84%E6%B8%B2%E6%9F%93%E8%BF%87%E7%A8%8B"><span class="toc-number">5.1.1.</span> <span class="toc-text">iOS的渲染过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%B8%B2%E6%9F%93-%E5%85%89%E6%A0%85%E5%8C%96"><span class="toc-number">5.1.2.</span> <span class="toc-text">什么是渲染? 光栅化?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFGPU%E6%B8%B2%E6%9F%93-%E4%BB%80%E4%B9%88%E6%98%AFCPU%E6%B8%B2%E6%9F%93"><span class="toc-number">5.1.3.</span> <span class="toc-text">什么是GPU渲染, 什么是CPU渲染?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BC%9A%E5%87%BA%E7%8E%B0%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93"><span class="toc-number">5.1.4.</span> <span class="toc-text">为什么会出现离屏渲染?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E4%BC%98%E5%8C%96-tag-v1"><span class="toc-number">5.1.5.</span> <span class="toc-text">开始优化 tag v1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E4%BC%98%E5%8C%96-tag-v1-1"><span class="toc-number">5.1.6.</span> <span class="toc-text">开始优化 tag v1.1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GPU%E7%9A%84%E5%85%B6%E4%BB%96%E4%BC%98%E5%8C%96"><span class="toc-number">5.1.7.</span> <span class="toc-text">GPU的其他优化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CPU-%E4%BC%98%E5%8C%96"><span class="toc-number">5.2.</span> <span class="toc-text">CPU 优化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#CPU%E7%9A%84%E5%87%A0%E7%A7%8D%E5%B8%B8%E8%A7%81%E4%BC%98%E5%8C%96%E6%80%9D%E8%B7%AF"><span class="toc-number">5.2.1.</span> <span class="toc-text">CPU的几种常见优化思路</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E4%BC%98%E5%8C%96-v2-0"><span class="toc-number">5.2.2.</span> <span class="toc-text">开始优化 v2.0</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#CPU%E7%9A%84%E5%85%B6%E4%BB%96%E4%BC%98%E5%8C%96"><span class="toc-number">6.</span> <span class="toc-text">CPU的其他优化</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="toc-number">7.</span> <span class="toc-text">参考文章</span></a></li></ol>
-		
+
 		</div>
-		
+
 		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
 <li>最后更新 2020年03月22日</li>
 <li>首次更新 2020年03月27日</li>
@@ -140,7 +140,7 @@
 <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>　　现在的iPhone性能越来越好, 正常开发一个界面都很少会遇到影响体验的卡顿. 但是如果把APP放到比较老的型号上, 卡顿就非常常见了. 利用这篇文章, 结合一下实际的案例QQ音乐首页, 聊一聊解决卡顿的基本思想和方法论.</p>
 <p>这是QQ音乐的界面<br>　　<div align=center><br>　　<img src="/images/qq-music.jpg" width=30% /><img src="/images/qq-music2.jpg" width=30% /><br>　　</div></p>
 <p>这是Demo的界面, 部分素材找不到就临时用别的代替一下, 效果基本一致<br>　　<div align=center><br>　　<img src="/images/qq-music-homepage.jpg" width=30% /><img src="/images/qq-music-homepage2.jpg" width=30% /><br>　　</div><br>　　<br>演示的机器是iPhone 6 Plus, iOS 10.2, Xcode 11.3</p>
-<h1 id="源码下载"><a href="#源码下载" class="headerlink" title="源码下载"></a>源码下载</h1><p><a target="_blank" rel="noopener" href="https://github.com/cocos543/QQMusicHomePage">QQMusicHomePage</a></p>
+<h1 id="源码下载"><a href="#源码下载" class="headerlink" title="源码下载"></a>源码下载</h1><p><a target="_blank" rel="noopener" href="https://github.com/Anubhav Gain543/QQMusicHomePage">QQMusicHomePage</a></p>
 <h1 id="首页的实现思路"><a href="#首页的实现思路" class="headerlink" title="首页的实现思路"></a>首页的实现思路</h1><h2 id="整体UI结构"><a href="#整体UI结构" class="headerlink" title="整体UI结构"></a>整体UI结构</h2><p>先用一个<strong>UITableView</strong>实现界面的整体, 而每一个能够进行左右滚动的UITableViewCell, 都嵌套一个<strong>UICollectionView</strong>来做.<br>　　<br>虽然说UICollectionView比较重量级, 不过我在老古董iPhone6 Plus上看, CPU占有率只有10%左右, 完全可以接受的.<br>　　<br>至于其他的能支持横向滚动并且复用视图的组件, 这东西我个人认为, 只有系统提供的视图无法优化到满意的情况下, 再去造轮子或者用新轮子, 要看看额外做的工作和得到的收益是不是值得.
 　　</p>
 <div align=center>
@@ -356,7 +356,7 @@
 <p>目前我测试了一下, 滚动已经比QQ音乐流畅了, 其他的篇幅有限精力优先, 我就不做了, 本文如有错误, 还请指正谢谢.</p>
 <h1 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h1><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/72653360">关于iOS离屏渲染的深入研究</a></p>
 <p><a target="_blank" rel="noopener" href="https://blog.ibireme.com/2015/11/12/smooth_user_interfaces_for_ios/">保持界面流畅的技巧</a></p>
-  
+
 	</div>
 		<footer class="article-footer clearfix">
 <div class="article-catetags">
@@ -368,7 +368,7 @@
 
 
   <div class="article-tags">
-  
+
   <span></span> <a href="/tags/UI/">UI</a>
   </div>
 
@@ -377,20 +377,20 @@
 
 
 	<div class="article-share" id="share">
-	
+
 	  <div data-url="http://yoursite.com/2020/03/22/2020-03-22-Implementing-a-60-frame-QQ-Music-Homepage/" data-title="实现一个60帧的QQ音乐首页(高性价比的性能优化方案) | C的博客" data-tsina="" class="share clearfix">
 	  </div>
-	
+
 	</div>
 
 
 </footer>
 
-   	       
+
 	</article>
-	
+
 <nav class="article-nav clearfix">
- 
+
  <div class="prev" >
  <a href="/2020/04/11/2020-04-11-uncommon-syntax-summary-of-objc-runtime/" title="objc runtime 源码中一些少见的语法汇总">
   <strong>上一篇：</strong><br/>
@@ -402,7 +402,7 @@
 
 <div class="next">
 <a href="/2020/03/08/2020-03-08-sheet-view-ui-libary/"  title="CCSheetView -- 提供横竖滚动的行列视图组件">
- <strong>下一篇：</strong><br/> 
+ <strong>下一篇：</strong><br/>
  <span>CCSheetView -- 提供横竖滚动的行列视图组件
 </span>
 </a>
@@ -410,7 +410,7 @@
 
 </nav>
 
-	
+
 
 <section id="comments" class="comment">
   <div id="disqus_thread">
@@ -421,174 +421,174 @@
 
 
 
-</div>  
+</div>
       <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
 
   <div id="toc" class="toc-aside">
   <strong class="toc-title">文章目录</strong>
- 
+
  <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%BA%90%E7%A0%81%E4%B8%8B%E8%BD%BD"><span class="toc-number">3.</span> <span class="toc-text">源码下载</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%A6%96%E9%A1%B5%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%80%9D%E8%B7%AF"><span class="toc-number">4.</span> <span class="toc-text">首页的实现思路</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E4%BD%93UI%E7%BB%93%E6%9E%84"><span class="toc-number">4.1.</span> <span class="toc-text">整体UI结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%83%E5%B1%80%E6%96%B9%E5%BC%8F"><span class="toc-number">4.2.</span> <span class="toc-text">布局方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A6%96%E9%A1%B5%E7%B1%BB%E5%9E%8B%E5%88%92%E5%88%86"><span class="toc-number">4.3.</span> <span class="toc-text">首页类型划分</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A1%B6%E9%83%A8%E6%90%9C%E7%B4%A2%E6%A1%86"><span class="toc-number">4.3.1.</span> <span class="toc-text">顶部搜索框</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Banner"><span class="toc-number">4.3.2.</span> <span class="toc-text">Banner</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%BA%E5%AE%9A%E5%86%85%E5%AE%B9%E7%9A%84%E8%A7%86%E5%9B%BE"><span class="toc-number">4.3.3.</span> <span class="toc-text">固定内容的视图</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%AA%E5%90%91%E7%80%91%E5%B8%83%E6%B5%81"><span class="toc-number">4.3.4.</span> <span class="toc-text">横向瀑布流</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%84%E7%A7%8D%E4%B8%8D%E5%90%8C%E7%9A%84CollectionViewCell"><span class="toc-number">4.3.5.</span> <span class="toc-text">各种不同的CollectionViewCell</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96"><span class="toc-number">5.</span> <span class="toc-text">代码优化</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#GPU-%E4%BC%98%E5%8C%96"><span class="toc-number">5.1.</span> <span class="toc-text">GPU 优化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#iOS%E7%9A%84%E6%B8%B2%E6%9F%93%E8%BF%87%E7%A8%8B"><span class="toc-number">5.1.1.</span> <span class="toc-text">iOS的渲染过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%B8%B2%E6%9F%93-%E5%85%89%E6%A0%85%E5%8C%96"><span class="toc-number">5.1.2.</span> <span class="toc-text">什么是渲染? 光栅化?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFGPU%E6%B8%B2%E6%9F%93-%E4%BB%80%E4%B9%88%E6%98%AFCPU%E6%B8%B2%E6%9F%93"><span class="toc-number">5.1.3.</span> <span class="toc-text">什么是GPU渲染, 什么是CPU渲染?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BC%9A%E5%87%BA%E7%8E%B0%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93"><span class="toc-number">5.1.4.</span> <span class="toc-text">为什么会出现离屏渲染?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E4%BC%98%E5%8C%96-tag-v1"><span class="toc-number">5.1.5.</span> <span class="toc-text">开始优化 tag v1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E4%BC%98%E5%8C%96-tag-v1-1"><span class="toc-number">5.1.6.</span> <span class="toc-text">开始优化 tag v1.1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GPU%E7%9A%84%E5%85%B6%E4%BB%96%E4%BC%98%E5%8C%96"><span class="toc-number">5.1.7.</span> <span class="toc-text">GPU的其他优化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CPU-%E4%BC%98%E5%8C%96"><span class="toc-number">5.2.</span> <span class="toc-text">CPU 优化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#CPU%E7%9A%84%E5%87%A0%E7%A7%8D%E5%B8%B8%E8%A7%81%E4%BC%98%E5%8C%96%E6%80%9D%E8%B7%AF"><span class="toc-number">5.2.1.</span> <span class="toc-text">CPU的几种常见优化思路</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E4%BC%98%E5%8C%96-v2-0"><span class="toc-number">5.2.2.</span> <span class="toc-text">开始优化 v2.0</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#CPU%E7%9A%84%E5%85%B6%E4%BB%96%E4%BC%98%E5%8C%96"><span class="toc-number">6.</span> <span class="toc-text">CPU的其他优化</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="toc-number">7.</span> <span class="toc-text">参考文章</span></a></li></ol>
- 
+
   </div>
 
 <div id="asidepart">
 <div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
 <aside class="clearfix">
 
-  
+
 <div class="categorieslist">
 	<p class="asidetitle">分类</p>
 		<ul>
-		
-		  
+
+
 			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>4</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>2</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/生活/" title="生活">生活<sup>3</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
-		  
-		
+
+
 		</ul>
 </div>
 
 
-  
+
 <div class="tagslist">
 	<p class="asidetitle">标签</p>
 		<ul class="clearfix">
-		
-			
+
+
 				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/iOS/" title="iOS">iOS<sup>7</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Mac/" title="Mac">Mac<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/感想/" title="感想">感想<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Mac应用/" title="Mac应用">Mac应用<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
-			
-		
+
+
 		</ul>
 </div>
 
@@ -596,29 +596,29 @@
   <div class="linkslist">
   <p class="asidetitle">友情链接</p>
     <ul>
-        
+
           <li>
-            
+
             	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
-            
+
           </li>
-        
+
           <li>
-            
+
             	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
-            
+
           </li>
-        
+
           <li>
-            
+
             	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
-            
+
           </li>
-        
+
     </ul>
 </div>
 
-  
+
 
 
   <div class="rsspart">
@@ -629,41 +629,41 @@
 </div>
     </div>
     <footer><div id="footer" >
-	
+
 	<div class="line">
 		<span></span>
 		<div class="author"></div>
 	</div>
-	
-	
+
+
 	<section class="info">
 		<p> 无立足境，是方干净 <br/>
 			</p>
 	</section>
-	 
+
 	<div class="social-font" class="clearfix">
-		
-		
-		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
-		
-		
-		
-		
-		
-		
-		
-		
-		
+
+
+		<a href="https://github.com/Anubhav Gain543" target="_blank" class="icon-github" title="github"></a>
+
+
+
+
+
+
+
+
+
 	</div>
-			
-		
+
+
 
 		<p class="copyright">
-		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
-		
-		<a href="/about" target="_blank" title="Cocos">Cocos</a>
-		
-		
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024
+
+		<a href="/about" target="_blank" title="Anubhav Gain">Anubhav Gain</a>
+
+
 		</p>
 </div>
 </footer>
@@ -673,7 +673,7 @@
 <script src="/js/jquery.qrcode-0.12.0.min.js"></script>
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   $('.navbar').click(function(){
     $('header nav').toggleClass('shownav');
   });
@@ -696,31 +696,31 @@ $(document).ready(function(){
   });
   o.click(function(){
     o.css('display', 'none').removeClass('beforeFadeIn');
-    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');
     m.removeClass('moveMain');
   });
   $(window).scroll(function(){
     o.css("top",Math.max(80,260-$(this).scrollTop()));
   });
-  
+
   $(window).resize(function(){
-    getSize(); 
+    getSize();
     if (myWidth >= 1024) {
       $('header nav').removeClass('shownav');
     }else{
       m.removeClass('moveMain');
       a.css('display', 'block').removeClass('fadeOut');
       o.css('display', 'none');
-      
+
       $('#toc.toc-aside').css('display', 'none');
-        
+
     }
   });
 });
 </script>
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   var ai = $('.article-content>iframe'),
       ae = $('.article-content>embed'),
       t  = $('#toc'),
@@ -747,7 +747,7 @@ $(document).ready(function(){
 
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   var $this = $('.share'),
       url = $this.attr('data-url'),
       encodedUrl = encodeURIComponent(url),
@@ -792,7 +792,7 @@ $(document).ready(function(){
   $('.article-share-qrcode').hover(function(){}, function(){
       $('.hoverqrcode').hide();
   });
-});   
+});
 </script>
 
 
@@ -800,7 +800,7 @@ $(document).ready(function(){
 
 <script type="text/javascript">
 
-var disqus_shortname = 'cocosdever';
+var disqus_shortname = 'Anubhav Gaindever';
 
 (function(){
   var dsq = document.createElement('script');
@@ -828,7 +828,7 @@ var disqus_shortname = 'cocosdever';
 <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
 <script src="/fancybox/jquery.fancybox.pack.js"></script>
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   $('.article-content').each(function(i){
     $(this).find('img').each(function(){
       if ($(this).parent().hasClass('fancybox')) return;
@@ -843,7 +843,7 @@ $(document).ready(function(){
   if($.fancybox){
     $('.fancybox').fancybox();
   }
-}); 
+});
 </script>
 
 
@@ -857,7 +857,7 @@ var _hmt = _hmt || [];
 (function() {
   var hm = document.createElement("script");
   hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
-  var s = document.getElementsByTagName("script")[0]; 
+  var s = document.getElementsByTagName("script")[0];
   s.parentNode.insertBefore(hm, s);
 })();
 </script>

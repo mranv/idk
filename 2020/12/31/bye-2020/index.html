@@ -3,14 +3,14 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  
+
     <title>聊一聊桌面程序开发和2020年总结 | C的博客</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
-    
-    <meta name="author" content="Cocos">
-    
 
-    
+    <meta name="author" content="Anubhav Gain">
+
+
+
     <meta name="description" content="聊一聊桌面程序和移动端程序的开发思路差异和2020年总结前言2020年马上就要过去了，这个月的博文憋到现在才写，实在是有原因的，倒不是说工作太忙没空写，而是没有心思写。 和去年相比，2020年经历的事情多了，也艰难了。我的年总总结，大概要从5月开始算起。 工作上工作上，经历了5月份的裁员风波到6月份的入职新公司，再到7月份又接到多个offer，让我从心理层面上是有很多波动的，生活就是在不断经历各种">
 <meta property="og:type" content="article">
 <meta property="og:title" content="聊一聊桌面程序开发和2020年总结">
@@ -20,21 +20,21 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2020-12-31T13:24:02.000Z">
 <meta property="article:modified_time" content="2021-02-08T05:47:44.945Z">
-<meta property="article:author" content="Cocos">
+<meta property="article:author" content="Anubhav Gain">
 <meta property="article:tag" content="Mac应用">
 <meta name="twitter:card" content="summary">
 
-    
+
     <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
-    
-    
+
+
     <link rel="icon" href="/img/favicon.ico">
-    
-    
+
+
     <link rel="apple-touch-icon" href="/img/jacman.jpg">
     <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
-    
-    
+
+
 <link rel="stylesheet" href="/css/style.css">
 <link rel="stylesheet" href="/%02.css">
 <link rel="stylesheet" href="/.css">
@@ -43,9 +43,9 @@
 
   <body>
     <header>
-      
+
 <div>
-		
+
 			<div id="textlogo">
 				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
 				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
@@ -55,55 +55,55 @@
 			<nav class="animated">
 				<ul>
 					<ul>
-					 
+
 						<li><a href="/">主页</a></li>
-					
+
 						<li><a href="/archives">归档</a></li>
-					
+
 						<li><a href="/tags">标签</a></li>
-					
+
 						<li><a href="/about">关于</a></li>
-					
+
 					<li>
- 					
+
 					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
 						<label>Search</label>
 						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
 						<input type="hidden" name="q" value="site:yoursite.com">
 					</form>
-					
+
 					</li>
 				</ul>
-			</nav>			
+			</nav>
 </div>
     </header>
     <div id="container">
       <div id="main" class="post" itemscope itemprop="blogPost">
-  
-	<article itemprop="articleBody"> 
+
+	<article itemprop="articleBody">
 		<header class="article-info clearfix">
   <h1 itemprop="name">
-    
+
       <a href="/2020/12/31/bye-2020/" title="聊一聊桌面程序开发和2020年总结" itemprop="url">聊一聊桌面程序开发和2020年总结</a>
   </h1>
   <p class="article-author">By
-       
-		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
-		
+
+		<a href="/about" title="Anubhav Gain" target="_blank" itemprop="author">Anubhav Gain</a>
+
   <p class="article-time">
     <time datetime="2020-12-31T13:24:02.000Z" itemprop="datePublished"> 发表于 2020-12-31</time>
-    
+
   </p>
 </header>
 	<div class="article-content">
-		
+
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
-		
+
 			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%81%8A%E4%B8%80%E8%81%8A%E6%A1%8C%E9%9D%A2%E7%A8%8B%E5%BA%8F%E5%92%8C%E7%A7%BB%E5%8A%A8%E7%AB%AF%E7%A8%8B%E5%BA%8F%E7%9A%84%E5%BC%80%E5%8F%91%E6%80%9D%E8%B7%AF%E5%B7%AE%E5%BC%82%E5%92%8C2020%E5%B9%B4%E6%80%BB%E7%BB%93"><span class="toc-number">1.</span> <span class="toc-text">聊一聊桌面程序和移动端程序的开发思路差异和2020年总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E4%B8%8A"><span class="toc-number">3.</span> <span class="toc-text">工作上</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E4%B8%8A%E7%9A%84%E6%94%B6%E8%8E%B7"><span class="toc-number">4.</span> <span class="toc-text">工作上的收获</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%94%B6%E8%8E%B7%E4%B9%8B%EF%BC%8C%E6%8E%8C%E6%8F%A1%E5%AE%89%E5%85%A8%E5%BA%94%E7%94%A8%E7%9A%84%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80"><span class="toc-number">4.1.</span> <span class="toc-text">收获之，掌握安全应用的开发基础</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%9F%E6%B4%BB%E4%B8%8A%E7%9A%84%E6%94%B6%E8%8E%B7"><span class="toc-number">4.2.</span> <span class="toc-text">生活上的收获</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2021%E5%B9%B4%E7%9B%AE%E6%A0%87"><span class="toc-number">5.</span> <span class="toc-text">2021年目标</span></a></li></ol>
-		
+
 		</div>
-		
+
 		<h1 id="聊一聊桌面程序和移动端程序的开发思路差异和2020年总结"><a href="#聊一聊桌面程序和移动端程序的开发思路差异和2020年总结" class="headerlink" title="聊一聊桌面程序和移动端程序的开发思路差异和2020年总结"></a>聊一聊桌面程序和移动端程序的开发思路差异和2020年总结</h1><h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>2020年马上就要过去了，这个月的博文憋到现在才写，实在是有原因的，倒不是说工作太忙没空写，而是没有心思写。</p>
 <p>和去年相比，2020年经历的事情多了，也艰难了。我的年总总结，大概要从5月开始算起。</p>
 <h1 id="工作上"><a href="#工作上" class="headerlink" title="工作上"></a>工作上</h1><p>工作上，经历了5月份的裁员风波到6月份的入职新公司，再到7月份又接到多个offer，让我从心理层面上是有很多波动的，生活就是在不断经历各种选择，每个人都希望作出各种最优的选择，但是这是不太可能的，大部分情况都是基于当前最需要什么来决定选择什么。</p>
@@ -126,14 +126,14 @@
 <h2 id="生活上的收获"><a href="#生活上的收获" class="headerlink" title="生活上的收获"></a>生活上的收获</h2><p>2020年，在生活上的收获都超过了以往。10月份结婚领证，11月份达成留在深圳的目标，其中的经历就不多说了，只有过来人，才能明白其中的艰难。目前还在苦苦审批，希望一切顺利，让我能在2021年能够全面发力。</p>
 <h1 id="2021年目标"><a href="#2021年目标" class="headerlink" title="2021年目标"></a>2021年目标</h1><p>目前初步定下的目标，工作上，能完全成为一名合格的安全工程师：熟悉汇编和反编译，熟悉常用逆向手段，掌握内核开发基础。又或者能成为一名资深iOS移动端工程师，具体走哪条路，还要看明年的机遇。</p>
 <p>生活上，希望审批一切顺利，让我能放宽心，再无顾虑勇往直前，从摆酒，蜜月旅行，到备孕，稳步进行。</p>
-  
+
 	</div>
 		<footer class="article-footer clearfix">
 <div class="article-catetags">
 
 
   <div class="article-tags">
-  
+
   <span></span> <a href="/tags/Mac应用/">Mac应用</a>
   </div>
 
@@ -142,20 +142,20 @@
 
 
 	<div class="article-share" id="share">
-	
+
 	  <div data-url="http://yoursite.com/2020/12/31/bye-2020/" data-title="聊一聊桌面程序开发和2020年总结 | C的博客" data-tsina="" class="share clearfix">
 	  </div>
-	
+
 	</div>
 
 
 </footer>
 
-   	       
+
 	</article>
-	
+
 <nav class="article-nav clearfix">
- 
+
  <div class="prev" >
  <a href="/2021/01/31/mac-hotfix/" title="Mac程序的热修复实现思路">
   <strong>上一篇：</strong><br/>
@@ -167,7 +167,7 @@
 
 <div class="next">
 <a href="/2020/11/22/Explore-the-principle-of-mac-os-x-and-ios-process-creation-from-the-kernel/"  title="从内核探究Mac OS X和iOS App 进程的创建原理">
- <strong>下一篇：</strong><br/> 
+ <strong>下一篇：</strong><br/>
  <span>从内核探究Mac OS X和iOS App 进程的创建原理
 </span>
 </a>
@@ -175,7 +175,7 @@
 
 </nav>
 
-	
+
 
 <section id="comments" class="comment">
   <div id="disqus_thread">
@@ -186,174 +186,174 @@
 
 
 
-</div>  
+</div>
       <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
 
   <div id="toc" class="toc-aside">
   <strong class="toc-title">文章目录</strong>
- 
+
  <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%81%8A%E4%B8%80%E8%81%8A%E6%A1%8C%E9%9D%A2%E7%A8%8B%E5%BA%8F%E5%92%8C%E7%A7%BB%E5%8A%A8%E7%AB%AF%E7%A8%8B%E5%BA%8F%E7%9A%84%E5%BC%80%E5%8F%91%E6%80%9D%E8%B7%AF%E5%B7%AE%E5%BC%82%E5%92%8C2020%E5%B9%B4%E6%80%BB%E7%BB%93"><span class="toc-number">1.</span> <span class="toc-text">聊一聊桌面程序和移动端程序的开发思路差异和2020年总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E4%B8%8A"><span class="toc-number">3.</span> <span class="toc-text">工作上</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E4%B8%8A%E7%9A%84%E6%94%B6%E8%8E%B7"><span class="toc-number">4.</span> <span class="toc-text">工作上的收获</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%94%B6%E8%8E%B7%E4%B9%8B%EF%BC%8C%E6%8E%8C%E6%8F%A1%E5%AE%89%E5%85%A8%E5%BA%94%E7%94%A8%E7%9A%84%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80"><span class="toc-number">4.1.</span> <span class="toc-text">收获之，掌握安全应用的开发基础</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%9F%E6%B4%BB%E4%B8%8A%E7%9A%84%E6%94%B6%E8%8E%B7"><span class="toc-number">4.2.</span> <span class="toc-text">生活上的收获</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2021%E5%B9%B4%E7%9B%AE%E6%A0%87"><span class="toc-number">5.</span> <span class="toc-text">2021年目标</span></a></li></ol>
- 
+
   </div>
 
 <div id="asidepart">
 <div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
 <aside class="clearfix">
 
-  
+
 <div class="categorieslist">
 	<p class="asidetitle">分类</p>
 		<ul>
-		
-		  
+
+
 			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>4</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>2</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/生活/" title="生活">生活<sup>3</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
-		  
-		
+
+
 		</ul>
 </div>
 
 
-  
+
 <div class="tagslist">
 	<p class="asidetitle">标签</p>
 		<ul class="clearfix">
-		
-			
+
+
 				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/iOS/" title="iOS">iOS<sup>7</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Mac/" title="Mac">Mac<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/感想/" title="感想">感想<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Mac应用/" title="Mac应用">Mac应用<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
-			
-		
+
+
 		</ul>
 </div>
 
@@ -361,29 +361,29 @@
   <div class="linkslist">
   <p class="asidetitle">友情链接</p>
     <ul>
-        
+
           <li>
-            
+
             	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
-            
+
           </li>
-        
+
           <li>
-            
+
             	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
-            
+
           </li>
-        
+
           <li>
-            
+
             	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
-            
+
           </li>
-        
+
     </ul>
 </div>
 
-  
+
 
 
   <div class="rsspart">
@@ -394,41 +394,41 @@
 </div>
     </div>
     <footer><div id="footer" >
-	
+
 	<div class="line">
 		<span></span>
 		<div class="author"></div>
 	</div>
-	
-	
+
+
 	<section class="info">
 		<p> 无立足境，是方干净 <br/>
 			</p>
 	</section>
-	 
+
 	<div class="social-font" class="clearfix">
-		
-		
-		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
-		
-		
-		
-		
-		
-		
-		
-		
-		
+
+
+		<a href="https://github.com/Anubhav Gain543" target="_blank" class="icon-github" title="github"></a>
+
+
+
+
+
+
+
+
+
 	</div>
-			
-		
+
+
 
 		<p class="copyright">
-		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
-		
-		<a href="/about" target="_blank" title="Cocos">Cocos</a>
-		
-		
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024
+
+		<a href="/about" target="_blank" title="Anubhav Gain">Anubhav Gain</a>
+
+
 		</p>
 </div>
 </footer>
@@ -438,7 +438,7 @@
 <script src="/js/jquery.qrcode-0.12.0.min.js"></script>
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   $('.navbar').click(function(){
     $('header nav').toggleClass('shownav');
   });
@@ -461,31 +461,31 @@ $(document).ready(function(){
   });
   o.click(function(){
     o.css('display', 'none').removeClass('beforeFadeIn');
-    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');
     m.removeClass('moveMain');
   });
   $(window).scroll(function(){
     o.css("top",Math.max(80,260-$(this).scrollTop()));
   });
-  
+
   $(window).resize(function(){
-    getSize(); 
+    getSize();
     if (myWidth >= 1024) {
       $('header nav').removeClass('shownav');
     }else{
       m.removeClass('moveMain');
       a.css('display', 'block').removeClass('fadeOut');
       o.css('display', 'none');
-      
+
       $('#toc.toc-aside').css('display', 'none');
-        
+
     }
   });
 });
 </script>
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   var ai = $('.article-content>iframe'),
       ae = $('.article-content>embed'),
       t  = $('#toc'),
@@ -512,7 +512,7 @@ $(document).ready(function(){
 
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   var $this = $('.share'),
       url = $this.attr('data-url'),
       encodedUrl = encodeURIComponent(url),
@@ -557,7 +557,7 @@ $(document).ready(function(){
   $('.article-share-qrcode').hover(function(){}, function(){
       $('.hoverqrcode').hide();
   });
-});   
+});
 </script>
 
 
@@ -565,7 +565,7 @@ $(document).ready(function(){
 
 <script type="text/javascript">
 
-var disqus_shortname = 'cocosdever';
+var disqus_shortname = 'Anubhav Gaindever';
 
 (function(){
   var dsq = document.createElement('script');
@@ -593,7 +593,7 @@ var disqus_shortname = 'cocosdever';
 <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
 <script src="/fancybox/jquery.fancybox.pack.js"></script>
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   $('.article-content').each(function(i){
     $(this).find('img').each(function(){
       if ($(this).parent().hasClass('fancybox')) return;
@@ -608,7 +608,7 @@ $(document).ready(function(){
   if($.fancybox){
     $('.fancybox').fancybox();
   }
-}); 
+});
 </script>
 
 
@@ -622,7 +622,7 @@ var _hmt = _hmt || [];
 (function() {
   var hm = document.createElement("script");
   hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
-  var s = document.getElementsByTagName("script")[0]; 
+  var s = document.getElementsByTagName("script")[0];
   s.parentNode.insertBefore(hm, s);
 })();
 </script>

@@ -3,14 +3,14 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  
+
     <title>CCSheetView -- 提供横竖滚动的行列视图组件 | C的博客</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
-    
-    <meta name="author" content="Cocos">
-    
 
-    
+    <meta name="author" content="Anubhav Gain">
+
+
+
     <meta name="description" content="文档更新说明 最后更新 2020年03月08日 首次更新 2020年03月08日  CCSheetViewCCSheetView源码 功能介绍CCSheetView继承自UITableView, 它实现了Cell的横向滚动功能, 并且支持多个Cell横向同步滚动, 效果看起来就像Office Excel, 能展示出行列视图. 用户可以通过继承内部的Component, 来定制自己的Cell界面.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="CCSheetView -- 提供横竖滚动的行列视图组件">
@@ -18,25 +18,25 @@
 <meta property="og:site_name" content="C的博客">
 <meta property="og:description" content="文档更新说明 最后更新 2020年03月08日 首次更新 2020年03月08日  CCSheetViewCCSheetView源码 功能介绍CCSheetView继承自UITableView, 它实现了Cell的横向滚动功能, 并且支持多个Cell横向同步滚动, 效果看起来就像Office Excel, 能展示出行列视图. 用户可以通过继承内部的Component, 来定制自己的Cell界面.">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://raw.githubusercontent.com/cocos543/CCSheetView/dev/demo.gif">
+<meta property="og:image" content="https://raw.githubusercontent.com/Anubhav Gain543/CCSheetView/dev/demo.gif">
 <meta property="article:published_time" content="2020-03-08T11:34:10.000Z">
 <meta property="article:modified_time" content="2020-03-08T11:48:23.000Z">
-<meta property="article:author" content="Cocos">
+<meta property="article:author" content="Anubhav Gain">
 <meta property="article:tag" content="UI">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/cocos543/CCSheetView/dev/demo.gif">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/Anubhav Gain543/CCSheetView/dev/demo.gif">
 
-    
+
     <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
-    
-    
+
+
     <link rel="icon" href="/img/favicon.ico">
-    
-    
+
+
     <link rel="apple-touch-icon" href="/img/jacman.jpg">
     <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
-    
-    
+
+
 <link rel="stylesheet" href="/css/style.css">
 <link rel="stylesheet" href="/%02.css">
 <link rel="stylesheet" href="/.css">
@@ -45,9 +45,9 @@
 
   <body>
     <header>
-      
+
 <div>
-		
+
 			<div id="textlogo">
 				<h1 class="site-name"><a href="/" title="C的博客">C的博客</a></h1>
 				<h2 class="blog-motto">不识庐山真面目,只缘身在此山中.</h2>
@@ -57,67 +57,67 @@
 			<nav class="animated">
 				<ul>
 					<ul>
-					 
+
 						<li><a href="/">主页</a></li>
-					
+
 						<li><a href="/archives">归档</a></li>
-					
+
 						<li><a href="/tags">标签</a></li>
-					
+
 						<li><a href="/about">关于</a></li>
-					
+
 					<li>
- 					
+
 					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
 						<label>Search</label>
 						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
 						<input type="hidden" name="q" value="site:yoursite.com">
 					</form>
-					
+
 					</li>
 				</ul>
-			</nav>			
+			</nav>
 </div>
     </header>
     <div id="container">
       <div id="main" class="post" itemscope itemprop="blogPost">
-  
-	<article itemprop="articleBody"> 
+
+	<article itemprop="articleBody">
 		<header class="article-info clearfix">
   <h1 itemprop="name">
-    
+
       <a href="/2020/03/08/2020-03-08-sheet-view-ui-libary/" title="CCSheetView -- 提供横竖滚动的行列视图组件" itemprop="url">CCSheetView -- 提供横竖滚动的行列视图组件</a>
   </h1>
   <p class="article-author">By
-       
-		<a href="/about" title="Cocos" target="_blank" itemprop="author">Cocos</a>
-		
+
+		<a href="/about" title="Anubhav Gain" target="_blank" itemprop="author">Anubhav Gain</a>
+
   <p class="article-time">
     <time datetime="2020-03-08T11:34:10.000Z" itemprop="datePublished"> 发表于 2020-03-08</time>
-    
+
   </p>
 </header>
 	<div class="article-content">
-		
+
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
-		
+
 			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#CCSheetView"><span class="toc-number">2.</span> <span class="toc-text">CCSheetView</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%9F%E8%83%BD%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.1.</span> <span class="toc-text">功能介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%BC%E5%AE%B9%E6%80%A7"><span class="toc-number">2.2.</span> <span class="toc-text">兼容性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85"><span class="toc-number">2.3.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%99%E7%A8%8B"><span class="toc-number">2.4.</span> <span class="toc-text">教程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%9C%E8%80%85"><span class="toc-number">2.5.</span> <span class="toc-text">作者</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#License"><span class="toc-number">2.6.</span> <span class="toc-text">License</span></a></li></ol></li></ol>
-		
+
 		</div>
-		
+
 		<h1 id="文档更新说明"><a href="#文档更新说明" class="headerlink" title="文档更新说明"></a>文档更新说明</h1><ul>
 <li>最后更新 2020年03月08日</li>
 <li>首次更新 2020年03月08日</li>
 </ul>
-<h1 id="CCSheetView"><a href="#CCSheetView" class="headerlink" title="CCSheetView"></a>CCSheetView</h1><p><a target="_blank" rel="noopener" href="https://github.com/cocos543/CCSheetView">CCSheetView源码</a></p>
+<h1 id="CCSheetView"><a href="#CCSheetView" class="headerlink" title="CCSheetView"></a>CCSheetView</h1><p><a target="_blank" rel="noopener" href="https://github.com/Anubhav Gain543/CCSheetView">CCSheetView源码</a></p>
 <h2 id="功能介绍"><a href="#功能介绍" class="headerlink" title="功能介绍"></a>功能介绍</h2><p><strong>CCSheetView</strong>继承自<strong>UITableView</strong>, 它实现了Cell的横向滚动功能, 并且支持多个Cell横向同步滚动, 效果看起来就像Office Excel, 能展示出行列视图. 用户可以通过继承内部的Component, 来定制自己的Cell界面.</p>
 <p>其中Component内部已经集成了一个UICollectionView, 并提供了UIScrollView和UICollectionView两个属性(指向同一个CollectionView), 用户可以向UICollectionView注册新的ColumnCell来定制列UI, 这样的好处是横向滚动也支持复用, 也可以简单使用UIScrollView作为横向滚动的承载视图. 或者完成重写Component的布局, 自己设计Cell. </p>
 <p> 需要注意的是, Cell和Header子类必须要继承自Component, 提供UIScrollView或者子类, 这个是支持横向滚动的关键.</p>
 <p>具体定制方法可以继续往下看<code>教程</code>部分.</p>
 <p><strong>效果图:</strong></p>
 <div>
-<img src="https://raw.githubusercontent.com/cocos543/CCSheetView/dev/demo.gif"  width="40%"/>
+<img src="https://raw.githubusercontent.com/Anubhav Gain543/CCSheetView/dev/demo.gif"  width="40%"/>
 </div>
 
 
@@ -140,9 +140,9 @@
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="built_in">UIView</span> *)tableView:(CCSheetView *)tableView viewForHeaderInSection:(<span class="built_in">NSInteger</span>)section &#123;</span><br><span class="line">    <span class="comment">// 要支持横向滚动的header, 必须调用dequeueReusableHeaderFooterViewWithIdentifier:forSection方法, 这样这个header才会跟着所在的section里的cell同步滚动.</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (section == <span class="number">1</span>) &#123;</span><br><span class="line">        CCSheetHeaderComponent *header = [tableView dequeueReusableHeaderFooterViewWithIdentifier:CCSheetHeaderComponentReuseIdentifier forSection:section];</span><br><span class="line">        <span class="keyword">return</span> header;</span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span> (section == <span class="number">2</span>) &#123;</span><br><span class="line">        CCFirstColumnFixedSheetHeader *header = [tableView dequeueReusableHeaderFooterViewWithIdentifier:CCFirstColumnFixedSheetHeaderReuseIdentifier forSection:section];</span><br><span class="line">        header.firstColumnTitleLabel.text = <span class="string">@&quot;首列标题&quot;</span>;</span><br><span class="line">        <span class="built_in">NSInteger</span> count = [<span class="keyword">self</span> sheetView:tableView columnsNumberAndWidthsInSection:section].count - <span class="number">1</span>;</span><br><span class="line">        <span class="built_in">NSMutableArray</span> *contents = @[].mutableCopy;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; count; i++) &#123;</span><br><span class="line">            [contents addObject:<span class="string">@&quot;列标题&quot;</span>];</span><br><span class="line">        &#125;</span><br><span class="line">        header.contentItems = contents;</span><br><span class="line">        <span class="keyword">return</span> header;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">UITableViewCell</span> *)tableView:(CCSheetView *)tableView cellForRowAtIndexPath:(<span class="built_in">NSIndexPath</span> *)indexPath &#123;</span><br><span class="line">    <span class="keyword">if</span> (indexPath.section == <span class="number">1</span>) &#123;</span><br><span class="line">        CCSheetCellComponent *cell = [tableView dequeueReusableCellWithIdentifier:CCSheetCellComponentReuseIdentifier forIndexPath:indexPath];</span><br><span class="line">        cell.didSelectedBlock = ^(<span class="built_in">NSIndexPath</span> * _Nonnull indexPath) &#123;</span><br><span class="line">            <span class="built_in">NSLog</span>(<span class="string">@&quot;select %@&quot;</span>, indexPath);</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">return</span> cell;</span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span>(indexPath.section == <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="comment">// CCFirstColumnFixedSheetCell是内置的可用视图, 开发者可以自己重新开发自己的Cell</span></span><br><span class="line">        CCFirstColumnFixedSheetCell *cell = [tableView dequeueReusableCellWithIdentifier:CCFirstColumnFixedSheetCellReuseIdentifier forIndexPath:indexPath];</span><br><span class="line">        CCFirstColumnFixedFirstItem *item = [[CCFirstColumnFixedFirstItem alloc] init];</span><br><span class="line">        item.icon = [<span class="built_in">UIImage</span> imageNamed:<span class="string">@&quot;icon001&quot;</span>];</span><br><span class="line">        item.title = [[<span class="built_in">NSAttributedString</span> alloc] initWithString:<span class="string">@&quot;固定列&quot;</span>];</span><br><span class="line">        cell.firstItem = item;</span><br><span class="line">        </span><br><span class="line">        </span><br><span class="line">        <span class="built_in">NSMutableArray</span> *contents = @[].mutableCopy;</span><br><span class="line">        <span class="comment">//contentItems的数量和列数对应, contentItems.count+1等于总列数</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; [<span class="keyword">self</span> sheetView:tableView columnsNumberAndWidthsInSection:indexPath.section].count - <span class="number">1</span>; i++) &#123;</span><br><span class="line">            CCFirstColumnFixedContentItem *item = [[CCFirstColumnFixedContentItem alloc] initWithIdentifier:CCSheetViewColumnCellOneTextReuseIdentifier];</span><br><span class="line">            item.texts = @[[[<span class="built_in">NSAttributedString</span> alloc] initWithString:[<span class="built_in">NSString</span> stringWithFormat:<span class="string">@&quot;滚动列%@&quot;</span>, @(i)]]];</span><br><span class="line">            [contents addObject:item];</span><br><span class="line">        &#125;</span><br><span class="line">        cell.contentItems = contents;</span><br><span class="line">        </span><br><span class="line">        cell.didSelectedBlock = ^(<span class="built_in">NSIndexPath</span> * _Nonnull indexPath) &#123;</span><br><span class="line">            <span class="built_in">NSLog</span>(<span class="string">@&quot;select %@&quot;</span>, indexPath);</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">return</span> cell;</span><br><span class="line">    &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">UITableViewCell</span> *cell = [tableView dequeueReusableCellWithIdentifier:<span class="string">@&quot;Cell&quot;</span> forIndexPath:indexPath];</span><br><span class="line">        <span class="built_in">UILabel</span> *label = [cell viewWithTag:<span class="number">1</span>];</span><br><span class="line">        label.text = <span class="string">@&quot;这是一个普通Cell&quot;</span>;</span><br><span class="line">        <span class="keyword">return</span> cell;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
-<h2 id="作者"><a href="#作者" class="headerlink" title="作者"></a>作者</h2><p>Cocos543, <a href="mailto:&#53;&#52;&#51;&#51;&#x31;&#52;&#54;&#48;&#50;&#x40;&#x71;&#113;&#46;&#x63;&#x6f;&#109;">&#53;&#52;&#51;&#51;&#x31;&#52;&#54;&#48;&#50;&#x40;&#x71;&#113;&#46;&#x63;&#x6f;&#109;</a></p>
+<h2 id="作者"><a href="#作者" class="headerlink" title="作者"></a>作者</h2><p>Anubhav Gain543, <a href="mailto:&#53;&#52;&#51;&#51;&#x31;&#52;&#54;&#48;&#50;&#x40;&#x71;&#113;&#46;&#x63;&#x6f;&#109;">&#53;&#52;&#51;&#51;&#x31;&#52;&#54;&#48;&#50;&#x40;&#x71;&#113;&#46;&#x63;&#x6f;&#109;</a></p>
 <h2 id="License"><a href="#License" class="headerlink" title="License"></a>License</h2><p>CCSheetView is available under the MIT license. See the LICENSE file for more info.</p>
-  
+
 	</div>
 		<footer class="article-footer clearfix">
 <div class="article-catetags">
@@ -154,7 +154,7 @@
 
 
   <div class="article-tags">
-  
+
   <span></span> <a href="/tags/UI/">UI</a>
   </div>
 
@@ -163,20 +163,20 @@
 
 
 	<div class="article-share" id="share">
-	
+
 	  <div data-url="http://yoursite.com/2020/03/08/2020-03-08-sheet-view-ui-libary/" data-title="CCSheetView -- 提供横竖滚动的行列视图组件 | C的博客" data-tsina="" class="share clearfix">
 	  </div>
-	
+
 	</div>
 
 
 </footer>
 
-   	       
+
 	</article>
-	
+
 <nav class="article-nav clearfix">
- 
+
  <div class="prev" >
  <a href="/2020/03/22/2020-03-22-Implementing-a-60-frame-QQ-Music-Homepage/" title="实现一个60帧的QQ音乐首页(高性价比的性能优化方案)">
   <strong>上一篇：</strong><br/>
@@ -188,7 +188,7 @@
 
 <div class="next">
 <a href="/2020/03/05/2020-03-05-Solve-the-click-conflicts-in-UITableView-nested-UICollectionView/"  title="解决UITableView嵌套UICollectionView出现的点击冲突问题(实现点击穿透)的另一种思路">
- <strong>下一篇：</strong><br/> 
+ <strong>下一篇：</strong><br/>
  <span>解决UITableView嵌套UICollectionView出现的点击冲突问题(实现点击穿透)的另一种思路
 </span>
 </a>
@@ -196,7 +196,7 @@
 
 </nav>
 
-	
+
 
 <section id="comments" class="comment">
   <div id="disqus_thread">
@@ -207,174 +207,174 @@
 
 
 
-</div>  
+</div>
       <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
 
   <div id="toc" class="toc-aside">
   <strong class="toc-title">文章目录</strong>
- 
+
  <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E6%A1%A3%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">文档更新说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#CCSheetView"><span class="toc-number">2.</span> <span class="toc-text">CCSheetView</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%9F%E8%83%BD%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.1.</span> <span class="toc-text">功能介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%BC%E5%AE%B9%E6%80%A7"><span class="toc-number">2.2.</span> <span class="toc-text">兼容性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85"><span class="toc-number">2.3.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%99%E7%A8%8B"><span class="toc-number">2.4.</span> <span class="toc-text">教程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%9C%E8%80%85"><span class="toc-number">2.5.</span> <span class="toc-text">作者</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#License"><span class="toc-number">2.6.</span> <span class="toc-text">License</span></a></li></ol></li></ol>
- 
+
   </div>
 
 <div id="asidepart">
 <div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
 <aside class="clearfix">
 
-  
+
 <div class="categorieslist">
 	<p class="asidetitle">分类</p>
 		<ul>
-		
-		  
+
+
 			<li><a href="/categories/Blockchain/" title="Blockchain">Blockchain<sup>7</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/C/" title="C++">C++<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/Golang/" title="Golang">Golang<sup>5</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/LetCode/" title="LetCode">LetCode<sup>10</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/Mac应用/" title="Mac应用">Mac应用<sup>4</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/iOS/" title="iOS">iOS<sup>28</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/iOS安全/" title="iOS安全">iOS安全<sup>2</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/其他/" title="其他">其他<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/安全/" title="安全">安全<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/底层原理/" title="底层原理">底层原理<sup>2</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/架构与设计/" title="架构与设计">架构与设计<sup>6</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/生活/" title="生活">生活<sup>3</sup></a></li>
-		  
-		
-		  
+
+
+
 			<li><a href="/categories/网络/" title="网络">网络<sup>1</sup></a></li>
-		  
-		
+
+
 		</ul>
 </div>
 
 
-  
+
 <div class="tagslist">
 	<p class="asidetitle">标签</p>
 		<ul class="clearfix">
-		
-			
+
+
 				<li><a href="/tags/Swift/" title="Swift">Swift<sup>7</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/iOS/" title="iOS">iOS<sup>7</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/LetCode-Easy/" title="LetCode-Easy">LetCode-Easy<sup>6</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Ethereum/" title="Ethereum">Ethereum<sup>6</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/可扩展/" title="可扩展">可扩展<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/安全/" title="安全">安全<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/LetCode-Medium/" title="LetCode-Medium">LetCode-Medium<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Mac/" title="Mac">Mac<sup>4</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/类库/" title="类库">类库<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/goroutine/" title="goroutine">goroutine<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/PHP/" title="PHP">PHP<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/iOS动画/" title="iOS动画">iOS动画<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Tree/" title="Tree">Tree<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/runtime/" title="runtime">runtime<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/感想/" title="感想">感想<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/Mac应用/" title="Mac应用">Mac应用<sup>2</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/逆向工程/" title="逆向工程">逆向工程<sup>1</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/异常/" title="异常">异常<sup>1</sup></a></li>
-			
-		
-			
+
+
+
 				<li><a href="/tags/博文推荐/" title="博文推荐">博文推荐<sup>1</sup></a></li>
-			
-		
+
+
 		</ul>
 </div>
 
@@ -382,29 +382,29 @@
   <div class="linkslist">
   <p class="asidetitle">友情链接</p>
     <ul>
-        
+
           <li>
-            
+
             	<a href="https://www.google.com.hk" target="_blank" title="共同的老师">共同的老师</a>
-            
+
           </li>
-        
+
           <li>
-            
+
             	<a href="http://tengj.top" target="_blank" title="嘟嘟独立博客">嘟嘟独立博客</a>
-            
+
           </li>
-        
+
           <li>
-            
+
             	<a href="https://blog.6ag.cn" target="_blank" title="六阿哥博客">六阿哥博客</a>
-            
+
           </li>
-        
+
     </ul>
 </div>
 
-  
+
 
 
   <div class="rsspart">
@@ -415,41 +415,41 @@
 </div>
     </div>
     <footer><div id="footer" >
-	
+
 	<div class="line">
 		<span></span>
 		<div class="author"></div>
 	</div>
-	
-	
+
+
 	<section class="info">
 		<p> 无立足境，是方干净 <br/>
 			</p>
 	</section>
-	 
+
 	<div class="social-font" class="clearfix">
-		
-		
-		<a href="https://github.com/cocos543" target="_blank" class="icon-github" title="github"></a>
-		
-		
-		
-		
-		
-		
-		
-		
-		
+
+
+		<a href="https://github.com/Anubhav Gain543" target="_blank" class="icon-github" title="github"></a>
+
+
+
+
+
+
+
+
+
 	</div>
-			
-		
+
+
 
 		<p class="copyright">
-		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
-		
-		<a href="/about" target="_blank" title="Cocos">Cocos</a>
-		
-		
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024
+
+		<a href="/about" target="_blank" title="Anubhav Gain">Anubhav Gain</a>
+
+
 		</p>
 </div>
 </footer>
@@ -459,7 +459,7 @@
 <script src="/js/jquery.qrcode-0.12.0.min.js"></script>
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   $('.navbar').click(function(){
     $('header nav').toggleClass('shownav');
   });
@@ -482,31 +482,31 @@ $(document).ready(function(){
   });
   o.click(function(){
     o.css('display', 'none').removeClass('beforeFadeIn');
-    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');
     m.removeClass('moveMain');
   });
   $(window).scroll(function(){
     o.css("top",Math.max(80,260-$(this).scrollTop()));
   });
-  
+
   $(window).resize(function(){
-    getSize(); 
+    getSize();
     if (myWidth >= 1024) {
       $('header nav').removeClass('shownav');
     }else{
       m.removeClass('moveMain');
       a.css('display', 'block').removeClass('fadeOut');
       o.css('display', 'none');
-      
+
       $('#toc.toc-aside').css('display', 'none');
-        
+
     }
   });
 });
 </script>
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   var ai = $('.article-content>iframe'),
       ae = $('.article-content>embed'),
       t  = $('#toc'),
@@ -533,7 +533,7 @@ $(document).ready(function(){
 
 
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   var $this = $('.share'),
       url = $this.attr('data-url'),
       encodedUrl = encodeURIComponent(url),
@@ -578,7 +578,7 @@ $(document).ready(function(){
   $('.article-share-qrcode').hover(function(){}, function(){
       $('.hoverqrcode').hide();
   });
-});   
+});
 </script>
 
 
@@ -586,7 +586,7 @@ $(document).ready(function(){
 
 <script type="text/javascript">
 
-var disqus_shortname = 'cocosdever';
+var disqus_shortname = 'Anubhav Gaindever';
 
 (function(){
   var dsq = document.createElement('script');
@@ -614,7 +614,7 @@ var disqus_shortname = 'cocosdever';
 <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
 <script src="/fancybox/jquery.fancybox.pack.js"></script>
 <script type="text/javascript">
-$(document).ready(function(){ 
+$(document).ready(function(){
   $('.article-content').each(function(i){
     $(this).find('img').each(function(){
       if ($(this).parent().hasClass('fancybox')) return;
@@ -629,7 +629,7 @@ $(document).ready(function(){
   if($.fancybox){
     $('.fancybox').fancybox();
   }
-}); 
+});
 </script>
 
 
@@ -643,7 +643,7 @@ var _hmt = _hmt || [];
 (function() {
   var hm = document.createElement("script");
   hm.src = "//hm.baidu.com/hm.js?c7eea4ba5ad764e80b289322c5854596";
-  var s = document.getElementsByTagName("script")[0]; 
+  var s = document.getElementsByTagName("script")[0];
   s.parentNode.insertBefore(hm, s);
 })();
 </script>
