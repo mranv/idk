@@ -14,35 +14,35 @@
     <meta name="description" content="文档更新说明 2018-03-28 修改fillMode部分类型描述 2016-03-25 完成全文 2016-03-24 完成4.3 2016-03-22 完成4.1,4.2 2016-03-21 初稿前言　　接触iOS应用开发不久,对于很多我暂时不清楚怎么实现的功能效果都挺感兴趣的.iOS开发中,动画特效是必不可少的一部分,最近学习了一下动画,顺便花了点时间实现了一个虫子嚅动的动画效果并写成一">
 <meta property="og:type" content="article">
 <meta property="og:title" content="用代码来实现你喜欢的动画效果 — 虫儿跑">
-<meta property="og:url" content="https://mranv.github.io/idk/2016/03/21/2016-03-21-iOS-animation-design-of-the-worm-run/index.html">
+<meta property="og:url" content="https://iknowmranv.pages.dev/2016/03/21/2016-03-21-iOS-animation-design-of-the-worm-run/index.html">
 <meta property="og:site_name" content="C的博客">
 <meta property="og:description" content="文档更新说明 2018-03-28 修改fillMode部分类型描述 2016-03-25 完成全文 2016-03-24 完成4.3 2016-03-22 完成4.1,4.2 2016-03-21 初稿前言　　接触iOS应用开发不久,对于很多我暂时不清楚怎么实现的功能效果都挺感兴趣的.iOS开发中,动画特效是必不可少的一部分,最近学习了一下动画,顺便花了点时间实现了一个虫子嚅动的动画效果并写成一">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://mranv.github.io/idk/images/a-diligent-worm.gif">
-<meta property="og:image" content="https://mranv.github.io/idk/images/Core-Animation-Classes.png">
-<meta property="og:image" content="https://mranv.github.io/idk/images/kCAMediaTimingFunctionLinear.png">
-<meta property="og:image" content="https://mranv.github.io/idk/images/kCAMediaTimingFunctionEaseIn.png">
-<meta property="og:image" content="https://mranv.github.io/idk/images/kCAMediaTimingFunctionEaseOut.png">
-<meta property="og:image" content="https://mranv.github.io/idk/images/kCAMediaTimingFunctionEaseInEaseOut.png">
-<meta property="og:image" content="https://mranv.github.io/idk/images/kCAMediaTimingFunctionDefault.png">
-<meta property="og:image" content="https://mranv.github.io/idk/images/full-worm-red.png">
-<meta property="og:image" content="https://mranv.github.io/idk/images/worm-strokeEndAm1.gif">
-<meta property="og:image" content="https://mranv.github.io/idk/images/worm-strokeStartAm1.gif">
-<meta property="og:image" content="https://mranv.github.io/idk/images/worm-strokeEndAm1-strokeStartAm1.gif">
-<meta property="og:image" content="https://mranv.github.io/idk/images/worm-strokeEndAm2.gif">
-<meta property="og:image" content="https://mranv.github.io/idk/images/worm-strokeStartAm2.gif">
-<meta property="og:image" content="https://mranv.github.io/idk/images/worm-strokeEndAm1&2-strokeStartAm1&2.gif">
-<meta property="og:image" content="https://mranv.github.io/idk/images/worm-strokeEndAm1&2-strokeStartAm1&2-translation.x.gif">
-<meta property="og:image" content="https://mranv.github.io/idk/images/worm-first&secondLayer.gif">
-<meta property="og:image" content="https://mranv.github.io/idk/images/worm-first&second&thirdLayer.gif">
-<meta property="og:image" content="https://mranv.github.io/idk/images/a-diligent-worm-in-iOS.gif">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/a-diligent-worm.gif">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/Core-Animation-Classes.png">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/kCAMediaTimingFunctionLinear.png">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/kCAMediaTimingFunctionEaseIn.png">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/kCAMediaTimingFunctionEaseOut.png">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/kCAMediaTimingFunctionEaseInEaseOut.png">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/kCAMediaTimingFunctionDefault.png">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/full-worm-red.png">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/worm-strokeEndAm1.gif">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/worm-strokeStartAm1.gif">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/worm-strokeEndAm1-strokeStartAm1.gif">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/worm-strokeEndAm2.gif">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/worm-strokeStartAm2.gif">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/worm-strokeEndAm1&2-strokeStartAm1&2.gif">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/worm-strokeEndAm1&2-strokeStartAm1&2-translation.x.gif">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/worm-first&secondLayer.gif">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/worm-first&second&thirdLayer.gif">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/a-diligent-worm-in-iOS.gif">
 <meta property="article:published_time" content="2016-03-21T11:49:50.000Z">
 <meta property="article:modified_time" content="2018-03-28T09:49:54.000Z">
 <meta property="article:author" content="Anubhav Gain">
 <meta property="article:tag" content="iOS动画">
 <meta property="article:tag" content="HUD">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://mranv.github.io/idk/images/a-diligent-worm.gif">
+<meta name="twitter:image" content="https://iknowmranv.pages.dev/images/a-diligent-worm.gif">
 
 
     <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
@@ -240,7 +240,7 @@
 
 	<div class="article-share" id="share">
 
-	  <div data-url="https://mranv.github.io/idk/2016/03/21/2016-03-21-iOS-animation-design-of-the-worm-run/" data-title="用代码来实现你喜欢的动画效果 — 虫儿跑 | C的博客" data-tsina="" class="share clearfix">
+	  <div data-url="https://iknowmranv.pages.dev/2016/03/21/2016-03-21-iOS-animation-design-of-the-worm-run/" data-title="用代码来实现你喜欢的动画效果 — 虫儿跑 | C的博客" data-tsina="" class="share clearfix">
 	  </div>
 
 	</div>

@@ -14,23 +14,23 @@
     <meta name="description" content="前言提高程序的逆向成本，是很多保密性高的代码所必备操作。其中高成本的方案，有加壳，虚拟机保护等，这些方案对项目的改动较大。低成本的方案一般是代码混淆之类，可以最大程度减少代码改动。 最近项目刚好需要增强代码安全性，提高逆向难度，经过几天的摸索已经找到了一个低成本高收益的方案。下面会从防静态分析，防止动态调试两个方面入手。 本文针对C语言做处理，其他语言思路一样，可能还有更便利的方法。只不过一般安全">
 <meta property="og:type" content="article">
 <meta property="og:title" content="低成本防静态分析和防动态调试的解决方案">
-<meta property="og:url" content="https://mranv.github.io/idk/2021/05/22/prevent-dynamic-debug/index.html">
+<meta property="og:url" content="https://iknowmranv.pages.dev/2021/05/22/prevent-dynamic-debug/index.html">
 <meta property="og:site_name" content="C的博客">
 <meta property="og:description" content="前言提高程序的逆向成本，是很多保密性高的代码所必备操作。其中高成本的方案，有加壳，虚拟机保护等，这些方案对项目的改动较大。低成本的方案一般是代码混淆之类，可以最大程度减少代码改动。 最近项目刚好需要增强代码安全性，提高逆向难度，经过几天的摸索已经找到了一个低成本高收益的方案。下面会从防静态分析，防止动态调试两个方面入手。 本文针对C语言做处理，其他语言思路一样，可能还有更便利的方法。只不过一般安全">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://mranv.github.io/idk/images/48c897e0-e8bc-4093-93c9-c99442abbeee.png">
-<meta property="og:image" content="https://mranv.github.io/idk/images/6aa7668a-14a7-4b8a-89df-803f733b8828.png">
-<meta property="og:image" content="https://mranv.github.io/idk/images/59762328-9bf2-4695-aa89-850671c6473f.png">
-<meta property="og:image" content="https://mranv.github.io/idk/images/583f1669-6f58-4ebf-8fe6-6343360b7ed5.png">
-<meta property="og:image" content="https://mranv.github.io/idk/images/9798d868-740f-4c02-b798-d40ecdfd80bc.png">
-<meta property="og:image" content="https://mranv.github.io/idk/images/2904c4f8-aa04-404f-9e09-8ad30ca5d102.png">
-<meta property="og:image" content="https://mranv.github.io/idk/images/c146bdf9-03b6-4d1b-bbb6-b6382c70a83c.png">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/48c897e0-e8bc-4093-93c9-c99442abbeee.png">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/6aa7668a-14a7-4b8a-89df-803f733b8828.png">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/59762328-9bf2-4695-aa89-850671c6473f.png">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/583f1669-6f58-4ebf-8fe6-6343360b7ed5.png">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/9798d868-740f-4c02-b798-d40ecdfd80bc.png">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/2904c4f8-aa04-404f-9e09-8ad30ca5d102.png">
+<meta property="og:image" content="https://iknowmranv.pages.dev/images/c146bdf9-03b6-4d1b-bbb6-b6382c70a83c.png">
 <meta property="article:published_time" content="2021-05-22T11:39:02.000Z">
 <meta property="article:modified_time" content="2021-05-22T11:43:56.813Z">
 <meta property="article:author" content="Anubhav Gain">
 <meta property="article:tag" content="Mac应用">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://mranv.github.io/idk/images/48c897e0-e8bc-4093-93c9-c99442abbeee.png">
+<meta name="twitter:image" content="https://iknowmranv.pages.dev/images/48c897e0-e8bc-4093-93c9-c99442abbeee.png">
 
 
     <link rel="alternative" href="/atom.xml" title="C的博客" type="application/atom+xml">
@@ -172,7 +172,7 @@
 
 	<div class="article-share" id="share">
 
-	  <div data-url="https://mranv.github.io/idk/2021/05/22/prevent-dynamic-debug/" data-title="低成本防静态分析和防动态调试的解决方案 | C的博客" data-tsina="" class="share clearfix">
+	  <div data-url="https://iknowmranv.pages.dev/2021/05/22/prevent-dynamic-debug/" data-title="低成本防静态分析和防动态调试的解决方案 | C的博客" data-tsina="" class="share clearfix">
 	  </div>
 
 	</div>
