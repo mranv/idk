@@ -1,0 +1,202 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Translation Demo - Anubhav Gain</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/i18n.js"></script>
+  <style>
+    .demo-container {
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+      border-radius: 8px;
+    }
+    .demo-section {
+      margin: 20px 0;
+      padding: 20px;
+      background: white;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .demo-section h3 {
+      margin-top: 0;
+      color: #333;
+    }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-top: 10px;
+    }
+    .demo-item {
+      padding: 10px;
+      background: #f9f9f9;
+      border: 1px solid #eee;
+      border-radius: 4px;
+    }
+    .demo-label {
+      font-weight: bold;
+      color: #666;
+      font-size: 12px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .demo-value {
+      font-size: 16px;
+      color: #333;
+    }
+    .language-info {
+      text-align: center;
+      padding: 20px;
+      background: #e8f0ff;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    .current-lang {
+      font-size: 24px;
+      font-weight: bold;
+      color: #4a69bd;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <h1 style="text-align: center;">Translation System Demo</h1>
+    
+    <div class="language-info">
+      <p>Current Language: <span class="current-lang" id="current-lang-display">Loading...</span></p>
+      <p>Use the language switcher in the top-right corner to change languages</p>
+    </div>
+
+    <div class="demo-section">
+      <h3>Site Information</h3>
+      <div class="demo-grid">
+        <div class="demo-item">
+          <div class="demo-label">Site Title</div>
+          <div class="demo-value" data-i18n="site.title">Anubhav Gain</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-label">Site Motto</div>
+          <div class="demo-value" data-i18n="site.motto">আমি পাহাড়ে থাকি বলে লু পর্বতের আসল চেহারা জানি না।</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h3>Navigation Menu</h3>
+      <div class="demo-grid">
+        <div class="demo-item">
+          <div class="demo-label">Home</div>
+          <div class="demo-value" data-i18n="nav.home">主页</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-label">Archives</div>
+          <div class="demo-value" data-i18n="nav.archives">归档</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-label">Tags</div>
+          <div class="demo-value" data-i18n="nav.tags">标签</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-label">About</div>
+          <div class="demo-value" data-i18n="nav.about">关于</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-label">Search</div>
+          <div class="demo-value" data-i18n="nav.search">搜索</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-label">Menu</div>
+          <div class="demo-value" data-i18n="nav.menu">菜单</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h3>UI Elements</h3>
+      <div class="demo-grid">
+        <div class="demo-item">
+          <div class="demo-label">Table of Contents</div>
+          <div class="demo-value" data-i18n="ui.toc">文章目录</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-label">Published On</div>
+          <div class="demo-value" data-i18n="ui.publishedOn">发表于</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-label">Read More</div>
+          <div class="demo-value" data-i18n="ui.readMore">阅读全文</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-label">Categories</div>
+          <div class="demo-value" data-i18n="ui.categories">分类</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h3>Months</h3>
+      <div class="demo-grid">
+        <div class="demo-item">
+          <div class="demo-label">January</div>
+          <div class="demo-value" data-i18n="months.january">一月</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-label">June</div>
+          <div class="demo-value" data-i18n="months.june">六月</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-label">September</div>
+          <div class="demo-value" data-i18n="months.september">九月</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-label">December</div>
+          <div class="demo-value" data-i18n="months.december">十二月</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h3>Sample Date Display</h3>
+      <p>Date formatting example: <span data-date="2024-06-26T12:35:02.000Z">2024-06-26</span></p>
+    </div>
+  </div>
+
+  <script>
+    // Update current language display
+    function updateLanguageDisplay() {
+      var langDisplay = document.getElementById('current-lang-display');
+      if (langDisplay && window.i18n) {
+        var langNames = {
+          'zh-CN': '中文 (Chinese)',
+          'en': 'English',
+          'bn': 'বাংলা (Bengali)',
+          'hi': 'हिन्दी (Hindi)'
+        };
+        langDisplay.textContent = langNames[window.i18n.currentLang] || window.i18n.currentLang;
+      }
+    }
+
+    // Update display when page loads and when language changes
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(updateLanguageDisplay, 100);
+      });
+    } else {
+      setTimeout(updateLanguageDisplay, 100);
+    }
+
+    // Listen for language changes
+    var originalSetLang = window.i18n && window.i18n.setLang;
+    if (originalSetLang) {
+      window.i18n.setLang = function(lang) {
+        originalSetLang.call(window.i18n, lang);
+        setTimeout(updateLanguageDisplay, 100);
+      };
+    }
+  </script>
+</body>
+</html>

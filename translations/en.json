@@ -1,0 +1,46 @@
+{
+  "site": {
+    "title": "Anubhav Gain",
+    "motto": "Because I live in the mountains, I don't know the true face of Mount Lu."
+  },
+  "nav": {
+    "home": "Home",
+    "archives": "Archives",
+    "tags": "Tags",
+    "about": "About",
+    "search": "Search",
+    "menu": "Menu"
+  },
+  "ui": {
+    "toc": "Table of Contents",
+    "publishedOn": "Published on",
+    "readMore": "Read more",
+    "categories": "Categories",
+    "tags": "Tags",
+    "prev": "Previous",
+    "next": "Next",
+    "backToTop": "Back to Top",
+    "shareOn": "Share on",
+    "comments": "Comments",
+    "searchPlaceholder": "Type and hit enter"
+  },
+  "months": {
+    "january": "January",
+    "february": "February",
+    "march": "March",
+    "april": "April",
+    "may": "May",
+    "june": "June",
+    "july": "July",
+    "august": "August",
+    "september": "September",
+    "october": "October",
+    "november": "November",
+    "december": "December"
+  },
+  "dateFormat": {
+    "year": "year",
+    "month": "month",
+    "day": "day"
+  }
+}

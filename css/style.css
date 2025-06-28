@@ -2353,3 +2353,47 @@ pre .javascript .function {
     display: none !important;
   }
 }
+
+/* Language Switcher Styles */
+.language-switcher {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.language-switcher .lang-icon {
+  font-size: 20px;
+}
+
+.language-switcher select {
+  padding: 5px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+}
+
+.language-switcher select:hover {
+  border-color: #999;
+}
+
+.language-switcher select:focus {
+  border-color: #4a69bd;
+  box-shadow: 0 0 0 2px rgba(74, 105, 189, 0.2);
+}
+
+@media only screen and (max-width: 768px) {
+  .language-switcher {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin: 10px 0;
+    justify-content: center;
+  }
+}
