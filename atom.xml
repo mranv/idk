@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Anubhav Gain - Cybersecurity Expert & Tech Blog</title>
+  <subtitle>Distinguished cybersecurity professional specializing in XDR/OXDR platforms, enterprise security architecture, and threat detection systems.</subtitle>
+  <link href="https://iknowmranv.pages.dev/atom.xml" rel="self"/>
+  <link href="https://iknowmranv.pages.dev/"/>
+  <updated>2024-06-26T12:35:02.000Z</updated>
+  <id>https://iknowmranv.pages.dev/</id>
+  <author>
+    <name>Anubhav Gain</name>
+    <email>iamanubhavgain@gmail.com</email>
+  </author>
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>我又回来了，博客好久没更新了</title>
+    <link href="https://iknowmranv.pages.dev/2024/06/26/I-m-back/"/>
+    <id>https://iknowmranv.pages.dev/2024/06/26/I-m-back/</id>
+    <published>2024-06-26T12:35:02.000Z</published>
+    <updated>2024-06-26T12:35:02.000Z</updated>
+    <content type="html"><![CDATA[<p>文档更新说明<br>最后更新 2024年06月26日<br>首次更新 2024年06月26日</p>
+<p>正文　　博客很久很久没有更新了，算了一下，从21年最后一天到现在，已过去了两年半，908天了。AI发展太快了，问了一声ChatGPT就给出来天数: )</p>
+<p>其实21年写完最后一篇博客之后，是打算元旦过</p>]]></content>
+    <summary type="html">文档更新说明
+最后更新 2024年06月26日
+首次更新 2024年06月26日
+
+正文　　博客很久很久没有更新了，算了一下，从21年最后一天到现在，已过去了两年半，908天了。AI发展太快了，问了一声ChatGPT就给出来天数: )
+其实21年写完最后一篇博客之后，是打算元旦过</summary>
+    <category term="生活" scheme="https://iknowmranv.pages.dev/categories/%E7%94%9F%E6%B4%BB/"/>
+    <category term="感想" scheme="https://iknowmranv.pages.dev/tags/%E6%84%9F%E6%83%B3/"/>
+  </entry>
+  
+  <entry>
+    <title>MacOS系统扩展SystemExtensions深入实践</title>
+    <link href="https://iknowmranv.pages.dev/2021/12/31/macos-system-extensions/"/>
+    <id>https://iknowmranv.pages.dev/2021/12/31/macos-system-extensions/</id>
+    <published>2021-12-31T13:21:33.000Z</published>
+    <updated>2021-12-31T13:21:33.000Z</updated>
+    <content type="html"><![CDATA[<p>前言从iOS转入Mac安全类产品的开发已经有一年半时间了，我也从一开始负责网络和UI模块慢慢追加负责内核模块的开发和维护，总体看，Mac开发的各种功能的实现思路和方法，要比iOS广阔很多，能接触到的计算机知识体系也更加完整，收获很多。</p>
+<p>言归正传，今年苹果发布了M1芯片，在M1芯片</p>]]></content>
+    <summary type="html">前言从iOS转入Mac安全类产品的开发已经有一年半时间了，我也从一开始负责网络和UI模块慢慢追加负责内核模块的开发和维护，总体看，Mac开发的各种功能的实现思路和方法，要比iOS广阔很多，能接触到的计算机知识体系也更加完整，收获很多。
+言归正传，今年苹果发布了M1芯片，在M1芯片</summary>
+    <category term="Mac应用" scheme="https://iknowmranv.pages.dev/categories/Mac%E5%BA%94%E7%94%A8/"/>
+    <category term="MacOS" scheme="https://iknowmranv.pages.dev/tags/MacOS/"/>
+    <category term="System-Extension" scheme="https://iknowmranv.pages.dev/tags/System-Extension/"/>
+  </entry>
+  
+  <entry>
+    <title>利用LLDB动态调试定位Crash原因</title>
+    <link href="https://iknowmranv.pages.dev/2021/10/12/using-lldb/"/>
+    <id>https://iknowmranv.pages.dev/2021/10/12/using-lldb/</id>
+    <published>2021-10-12T01:44:05.000Z</published>
+    <updated>2021-10-12T01:44:05.000Z</updated>
+    <content type="html"><![CDATA[<p>前言LLDB是LLVM项目里面一个使用非常广泛的调试器，配合debugserver，对本地调试或者远程调试都有很好的支持。</p>
+<p>网上也有很多关于这两个程序的介绍，这里就不多说了，本文主要记录了我在实际工作中遇到的两个例子，利用LLDB的调试功能，在没有代码的情况下，定位Crash的具</p>]]></content>
+    <summary type="html">前言LLDB是LLVM项目里面一个使用非常广泛的调试器，配合debugserver，对本地调试或者远程调试都有很好的支持。
+网上也有很多关于这两个程序的介绍，这里就不多说了，本文主要记录了我在实际工作中遇到的两个例子，利用LLDB的调试功能，在没有代码的情况下，定位Crash的具</summary>
+    <category term="Mac应用" scheme="https://iknowmranv.pages.dev/categories/Mac%E5%BA%94%E7%94%A8/"/>
+    <category term="Mac" scheme="https://iknowmranv.pages.dev/tags/Mac/"/>
+  </entry>
+  
+  <entry>
+    <title>分享近期Mac应用开发的一些想法</title>
+    <link href="https://iknowmranv.pages.dev/2021/07/10/some-idea-for-mac-dev/"/>
+    <id>https://iknowmranv.pages.dev/2021/07/10/some-idea-for-mac-dev/</id>
+    <published>2021-07-10T01:46:07.000Z</published>
+    <updated>2021-07-10T01:46:07.000Z</updated>
+    <content type="html"><![CDATA[<p>前言这段时间做的几个Mac需求，都属于非常规需求，网上找不到标准答案，只能自己调研，自己设计思路，然后结合产品设计最后实现功能。其中有一些思路值得记录分享一下。本文不会公开全部细节，只记录思路。</p>
+<p>拦截全局URL跳转需求背景：通常在App内点击某个URL，系统会帮我们打开默认的浏览</p>]]></content>
+    <summary type="html">前言这段时间做的几个Mac需求，都属于非常规需求，网上找不到标准答案，只能自己调研，自己设计思路，然后结合产品设计最后实现功能。其中有一些思路值得记录分享一下。本文不会公开全部细节，只记录思路。
+拦截全局URL跳转需求背景：通常在App内点击某个URL，系统会帮我们打开默认的浏览</summary>
+    <category term="Mac应用" scheme="https://iknowmranv.pages.dev/categories/Mac%E5%BA%94%E7%94%A8/"/>
+    <category term="Mac" scheme="https://iknowmranv.pages.dev/tags/Mac/"/>
+  </entry>
+  
+  <entry>
+    <title>低成本防静态分析和防动态调试的解决方案</title>
+    <link href="https://iknowmranv.pages.dev/2021/05/22/prevent-dynamic-debug/"/>
+    <id>https://iknowmranv.pages.dev/2021/05/22/prevent-dynamic-debug/</id>
+    <published>2021-05-22T11:39:02.000Z</published>
+    <updated>2021-05-22T11:39:02.000Z</updated>
+    <content type="html"><![CDATA[<p>前言提高程序的逆向成本，是很多保密性高的代码所必备操作。其中高成本的方案，有加壳，虚拟机保护等，这些方案对项目的改动较大。低成本的方案一般是代码混淆之类，可以最大程度减少代码改动。</p>
+<p>最近项目刚好需要增强代码安全性，提高逆向难度，经过几天的摸索已经找到了一个低成本高收益的方案。下面</p>]]></content>
+    <summary type="html">前言提高程序的逆向成本，是很多保密性高的代码所必备操作。其中高成本的方案，有加壳，虚拟机保护等，这些方案对项目的改动较大。低成本的方案一般是代码混淆之类，可以最大程度减少代码改动。
+最近项目刚好需要增强代码安全性，提高逆向难度，经过几天的摸索已经找到了一个低成本高收益的方案。下面</summary>
+    <category term="安全" scheme="https://iknowmranv.pages.dev/categories/%E5%AE%89%E5%85%A8/"/>
+    <category term="安全" scheme="https://iknowmranv.pages.dev/tags/%E5%AE%89%E5%85%A8/"/>
+  </entry>
+  
+  <entry>
+    <title>Mac上XPC多进程通讯的完整解决方案</title>
+    <link href="https://iknowmranv.pages.dev/2021/04/03/xpc-communication/"/>
+    <id>https://iknowmranv.pages.dev/2021/04/03/xpc-communication/</id>
+    <published>2021-04-03T08:23:35.000Z</published>
+    <updated>2021-04-03T08:23:35.000Z</updated>
+    <content type="html"><![CDATA[<p>Mac上XPC多进程通讯的完整解决方案文档更新说明<br>最后更新 2021年4月1日<br>首次更新 2021年4月1日</p>
+<p>前言本文主要讲述如何在Mac上利用XPC技术实现多进程通讯，包括全局双向通讯，合法性校验，通讯协议版本校验，以及多线程注意事项等四部分。</p>
+<p>经过半个月的开发，目前已经开</p>]]></content>
+    <summary type="html">Mac上XPC多进程通讯的完整解决方案文档更新说明
+最后更新 2021年4月1日
+首次更新 2021年4月1日
+
+前言本文主要讲述如何在Mac上利用XPC技术实现多进程通讯，包括全局双向通讯，合法性校验，通讯协议版本校验，以及多线程注意事项等四部分。
+经过半个月的开发，目前已经开</summary>
+    <category term="iOS" scheme="https://iknowmranv.pages.dev/categories/iOS/"/>
+    <category term="iOS-Mac" scheme="https://iknowmranv.pages.dev/tags/iOS-Mac/"/>
+  </entry>
+  
+  <entry>
+    <title>Mac程序的热修复实现思路</title>
+    <link href="https://iknowmranv.pages.dev/2021/01/31/mac-hotfix/"/>
+    <id>https://iknowmranv.pages.dev/2021/01/31/mac-hotfix/</id>
+    <published>2021-01-31T05:23:38.000Z</published>
+    <updated>2021-01-31T05:23:38.000Z</updated>
+    <content type="html"><![CDATA[<p>Mac程序的热修复实现思路前言Mac的热修复，相比iOS来说，从设计上思路要开阔很多。iOS的热修复需要借助runtime，让原生逻辑从原先的oc进入js环境执行，然后热修复时下载js脚本替换原来的代码。而且还被苹果商店给禁止了。</p>
+<p>Mac的热修复功能，可以从进程模块替换的角度考虑</p>]]></content>
+    <summary type="html">Mac程序的热修复实现思路前言Mac的热修复，相比iOS来说，从设计上思路要开阔很多。iOS的热修复需要借助runtime，让原生逻辑从原先的oc进入js环境执行，然后热修复时下载js脚本替换原来的代码。而且还被苹果商店给禁止了。
+Mac的热修复功能，可以从进程模块替换的角度考虑</summary>
+    <category term="Mac应用" scheme="https://iknowmranv.pages.dev/categories/Mac%E5%BA%94%E7%94%A8/"/>
+    <category term="Mac" scheme="https://iknowmranv.pages.dev/tags/Mac/"/>
+  </entry>
+  
+  <entry>
+    <title>聊一聊桌面程序开发和2020年总结</title>
+    <link href="https://iknowmranv.pages.dev/2020/12/31/bye-2020/"/>
+    <id>https://iknowmranv.pages.dev/2020/12/31/bye-2020/</id>
+    <published>2020-12-31T13:24:02.000Z</published>
+    <updated>2020-12-31T13:24:02.000Z</updated>
+    <content type="html"><![CDATA[<p>聊一聊桌面程序和移动端程序的开发思路差异和2020年总结前言2020年马上就要过去了，这个月的博文憋到现在才写，实在是有原因的，倒不是说工作太忙没空写，而是没有心思写。</p>
+<p>和去年相比，2020年经历的事情多了，也艰难了。我的年总总结，大概要从5月开始算起。</p>
+<p>工作上工作上，经历了5月</p>]]></content>
+    <summary type="html">聊一聊桌面程序和移动端程序的开发思路差异和2020年总结前言2020年马上就要过去了，这个月的博文憋到现在才写，实在是有原因的，倒不是说工作太忙没空写，而是没有心思写。
+和去年相比，2020年经历的事情多了，也艰难了。我的年总总结，大概要从5月开始算起。
+工作上工作上，经历了5月</summary>
+    <category term="生活" scheme="https://iknowmranv.pages.dev/categories/%E7%94%9F%E6%B4%BB/"/>
+    <category term="感想" scheme="https://iknowmranv.pages.dev/tags/%E6%84%9F%E6%83%B3/"/>
+    <category term="Mac应用" scheme="https://iknowmranv.pages.dev/tags/Mac%E5%BA%94%E7%94%A8/"/>
+  </entry>
+  
+  <entry>
+    <title>从内核探究Mac OS X和iOS App 进程的创建原理</title>
+    <link href="https://iknowmranv.pages.dev/2020/11/22/Explore-the-principle-of-mac-os-x-and-ios-process-creation-from-the-kernel/"/>
+    <id>https://iknowmranv.pages.dev/2020/11/22/Explore-the-principle-of-mac-os-x-and-ios-process-creation-from-the-kernel/</id>
+    <published>2020-11-22T02:26:31.000Z</published>
+    <updated>2020-11-22T02:26:31.000Z</updated>
+    <content type="html"><![CDATA[<p>文档更新说明<br>最后更新 2020年11月22日<br>首次更新 2020年11月22日</p>
+<p>前言如果问一个稍微有些经验的iOS开发者，App是如何运行的，他可能会说从main函数开始运行。被谁启动的？他可能知道iOS的App是由一个叫SpringBoard进程启动的。我们都知道，iPho</p>]]></content>
+    <summary type="html">文档更新说明
+最后更新 2020年11月22日
+首次更新 2020年11月22日
+
+前言如果问一个稍微有些经验的iOS开发者，App是如何运行的，他可能会说从main函数开始运行。被谁启动的？他可能知道iOS的App是由一个叫SpringBoard进程启动的。我们都知道，iPho</summary>
+    <category term="底层原理" scheme="https://iknowmranv.pages.dev/categories/%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/"/>
+    <category term="Mac" scheme="https://iknowmranv.pages.dev/tags/Mac/"/>
+    <category term="iOS底层" scheme="https://iknowmranv.pages.dev/tags/iOS%E5%BA%95%E5%B1%82/"/>
+  </entry>
+  
+  <entry>
+    <title>设计客户端的文件传输和管理功能</title>
+    <link href="https://iknowmranv.pages.dev/2020/10/24/design-fileshare-function/"/>
+    <id>https://iknowmranv.pages.dev/2020/10/24/design-fileshare-function/</id>
+    <published>2020-10-24T06:20:20.000Z</published>
+    <updated>2020-10-24T06:20:20.000Z</updated>
+    <content type="html"><![CDATA[<p>文档更新说明<br>最后更新 2020年10月24日<br>首次更新 2020年10月24日</p>
+<p>前言　　经过一个月的高强度开发, 终于在本周五提测了Mac端的文件传输管理模块的新功能, 现在可以抽空写一写总结了.<br>本文主要是讲述我是如何与团队成员分工合作开发一个完整功能, 包括如何高效率分</p>]]></content>
+    <summary type="html">文档更新说明
+最后更新 2020年10月24日
+首次更新 2020年10月24日
+
+前言　　经过一个月的高强度开发, 终于在本周五提测了Mac端的文件传输管理模块的新功能, 现在可以抽空写一写总结了.
+本文主要是讲述我是如何与团队成员分工合作开发一个完整功能, 包括如何高效率分</summary>
+    <category term="架构与设计" scheme="https://iknowmranv.pages.dev/categories/%E6%9E%B6%E6%9E%84%E4%B8%8E%E8%AE%BE%E8%AE%A1/"/>
+    <category term="Mac应用" scheme="https://iknowmranv.pages.dev/tags/Mac%E5%BA%94%E7%94%A8/"/>
+  </entry>
+  
+  <entry>
+    <title>理解MachO的动态绑定(Lazy bind 和 Non-lazy bind)</title>
+    <link href="https://iknowmranv.pages.dev/2020/09/13/understanding-rebase-and-bind/"/>
+    <id>https://iknowmranv.pages.dev/2020/09/13/understanding-rebase-and-bind/</id>
+    <published>2020-09-13T15:18:55.000Z</published>
+    <updated>2020-09-13T15:18:55.000Z</updated>
+    <content type="html"><![CDATA[<p>前言最近团队里有同学对fishhook的原理很感兴趣，我刚好之前也研究过，然后也有一些新的理解，所以打算写个文章梳理一下，并给大家分享fishhook的原理。fishhook主要做的事情就是rebind_symbols，即动态地重新绑定符号，所以搞清楚符号绑定对于理解fishhook的原理非常重要。rebind_symbols是面向C函数的，编译出来的MachO文件中还有Objective-C相关的信息，这部分要用到method swizzle相关技术，在文末会顺带一起提。</p>]]></content>
+    <summary type="html">前言最近团队里有同学对fishhook的原理很感兴趣，我刚好之前也研究过，然后也有一些新的理解，所以打算写个文章梳理一下，并给大家分享fishhook的原理。fishhook主要做的事情就是rebind_symbols，即动态地重新绑定符号，所以搞清楚符号绑定对于理解fishhook的原理非常重要。rebind_symbols是面向C函数的，编译出来的MachO文件中还有Objective-C相关的信息，这部分要用到method swizzle相关技术，在文末会顺带一起提。</summary>
+    <category term="底层原理" scheme="https://iknowmranv.pages.dev/categories/%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/"/>
+    <category term="iOS底层" scheme="https://iknowmranv.pages.dev/tags/iOS%E5%BA%95%E5%B1%82/"/>
+  </entry>
+  
+  <entry>
+    <title>利用NetworkExtension实现一个本地网络代理App</title>
+    <link href="https://iknowmranv.pages.dev/2020/08/15/dns-proxy-server/"/>
+    <id>https://iknowmranv.pages.dev/2020/08/15/dns-proxy-server/</id>
+    <published>2020-08-15T11:15:05.000Z</published>
+    <updated>2020-08-15T11:15:05.000Z</updated>
+    <content type="html"><![CDATA[<p>前言在Mac开发中，有时候要做一些网络代理或者过滤的功能，就需要用NetworkExtension。比如我们想实现Http抓包，就可以实现一个本地代理服务器，把需要抓包的APP的流量代理到这个本地代理App，代理App再转发流量。NetworkExtension由iOS9引进来，相关使用资料不算多。最近在测试NEDNSProxyProvider，想利用这个做一个DNS劫持的App，顺便记录一下。</p>]]></content>
+    <summary type="html">前言在Mac开发中，有时候要做一些网络代理或者过滤的功能，就需要用NetworkExtension。比如我们想实现Http抓包，就可以实现一个本地代理服务器，把需要抓包的APP的流量代理到这个本地代理App，代理App再转发流量。NetworkExtension由iOS9引进来，相关使用资料不算多。最近在测试NEDNSProxyProvider，想利用这个做一个DNS劫持的App，顺便记录一下。</summary>
+    <category term="网络" scheme="https://iknowmranv.pages.dev/categories/%E7%BD%91%E7%BB%9C/"/>
+    <category term="dns" scheme="https://iknowmranv.pages.dev/tags/dns/"/>
+  </entry>
+  
+  <entry>
+    <title>理解x509证书，从根证书到https</title>
+    <link href="https://iknowmranv.pages.dev/2020/07/22/understand-x509-certificates/"/>
+    <id>https://iknowmranv.pages.dev/2020/07/22/understand-x509-certificates/</id>
+    <published>2020-07-22T14:02:44.000Z</published>
+    <updated>2020-07-22T14:02:44.000Z</updated>
+    <content type="html"><![CDATA[<p>前言x509证书广泛应用在https网站，电子邮件，vpn，移动设备管理等领域，它由一个权威的CA机构签发，用户拿到证书后，可以信任由证书签名的内容。本文主要讨论https网站中的证书使用。</p>]]></content>
+    <summary type="html">前言x509证书广泛应用在https网站，电子邮件，vpn，移动设备管理等领域，它由一个权威的CA机构签发，用户拿到证书后，可以信任由证书签名的内容。本文主要讨论https网站中的证书使用。</summary>
+    <category term="其他" scheme="https://iknowmranv.pages.dev/categories/%E5%85%B6%E4%BB%96/"/>
+    <category term="HTTPS" scheme="https://iknowmranv.pages.dev/tags/HTTPS/"/>
+  </entry>
+  
+  <entry>
+    <title>团队的第一个开源iOS项目，还差了点什么？</title>
+    <link href="https://iknowmranv.pages.dev/2020/06/14/new-start-for-2020/"/>
+    <id>https://iknowmranv.pages.dev/2020/06/14/new-start-for-2020/</id>
+    <published>2020-06-14T08:25:25.000Z</published>
+    <updated>2020-06-14T08:25:25.000Z</updated>
+    <content type="html"><![CDATA[<p>前言2020 3月份疫情没过去，虽然没有上班，但是也没闲着。团队有个做桌面端的，但由于种种原因，项目没法启动起来，所以大家就合计合计，看看能否做个能马上产出价值的项目来，至少证明团队能搞事。</p>
+<p>4月份 大家一致同意做个竞品追踪App，用来拉取App Store竞品的版本更新记录，评论等等。因为大家都是移动端开发的，并且我是iOS开发的，那就决定先做iOS版本。</p>]]></content>
+    <summary type="html">前言2020 3月份疫情没过去，虽然没有上班，但是也没闲着。团队有个做桌面端的，但由于种种原因，项目没法启动起来，所以大家就合计合计，看看能否做个能马上产出价值的项目来，至少证明团队能搞事。
+4月份 大家一致同意做个竞品追踪App，用来拉取App Store竞品的版本更新记录，评论等等。因为大家都是移动端开发的，并且我是iOS开发的，那就决定先做iOS版本。</summary>
+    <category term="iOS" scheme="https://iknowmranv.pages.dev/categories/iOS/"/>
+    <category term="工作" scheme="https://iknowmranv.pages.dev/tags/%E5%B7%A5%E4%BD%9C/"/>
+  </entry>
+  
+  <entry>
+    <title>开发Swift第三方库应该知道的东西</title>
+    <link href="https://iknowmranv.pages.dev/2020/05/21/start-deep-learning-swift/"/>
+    <id>https://iknowmranv.pages.dev/2020/05/21/start-deep-learning-swift/</id>
+    <published>2020-05-21T14:33:12.000Z</published>
+    <updated>2020-05-21T14:33:12.000Z</updated>
+    <content type="html"><![CDATA[<p>前言在iOS13推出SwiftUI和Combine之后，可以预见的是未来Swift语言会变得越来越流行，甚至成为iOS开发的主流。所以，现在是时候入坑Swift了。</p>
+<p>尽管我平时的项目都是用ObjC开发的，但我在18年的时候其实就开始写简单的Swift代码了，说来惭愧。19年的时候跟着同事看了几天的Swift文档，这次真的是简单看了看。直到最近，我开始尝试用Swift开发第三方库，才慢慢地体会到了一些Swift的精髓，当然还有很多坑。</p>]]></content>
+    <summary type="html">前言在iOS13推出SwiftUI和Combine之后，可以预见的是未来Swift语言会变得越来越流行，甚至成为iOS开发的主流。所以，现在是时候入坑Swift了。
+尽管我平时的项目都是用ObjC开发的，但我在18年的时候其实就开始写简单的Swift代码了，说来惭愧。19年的时候跟着同事看了几天的Swift文档，这次真的是简单看了看。直到最近，我开始尝试用Swift开发第三方库，才慢慢地体会到了一些Swift的精髓，当然还有很多坑。</summary>
+    <category term="iOS" scheme="https://iknowmranv.pages.dev/categories/iOS/"/>
+    <category term="Swift" scheme="https://iknowmranv.pages.dev/tags/Swift/"/>
+  </entry>
+  
+  <entry>
+    <title>我在2020年5月被裁员了</title>
+    <link href="https://iknowmranv.pages.dev/2020/05/06/was-laid-off-in-2020/"/>
+    <id>https://iknowmranv.pages.dev/2020/05/06/was-laid-off-in-2020/</id>
+    <published>2020-05-06T15:28:34.000Z</published>
+    <updated>2020-05-06T15:28:34.000Z</updated>
+    <content type="html"><![CDATA[<p>前言我从去年换工作后一直没有写过工作相关的文章，一方面是新工作确实比较忙，另一方面是还没有沉淀下来一些能写出来分享的东西，所以工作相关的文章就一直没写了。直到前几天，我被裁员了。说实话，也不算意外，今年疫情影响很大，公司效益不佳，原来的业务做不下去就要大裁员了。</p>]]></content>
+    <summary type="html">前言我从去年换工作后一直没有写过工作相关的文章，一方面是新工作确实比较忙，另一方面是还没有沉淀下来一些能写出来分享的东西，所以工作相关的文章就一直没写了。直到前几天，我被裁员了。说实话，也不算意外，今年疫情影响很大，公司效益不佳，原来的业务做不下去就要大裁员了。</summary>
+    <category term="生活" scheme="https://iknowmranv.pages.dev/categories/%E7%94%9F%E6%B4%BB/"/>
+    <category term="工作" scheme="https://iknowmranv.pages.dev/tags/%E5%B7%A5%E4%BD%9C/"/>
+  </entry>
+  
+  <entry>
+    <title>优雅地获取OC对象和Core Foundation对象的引用计数</title>
+    <link href="https://iknowmranv.pages.dev/2020/04/19/correctly-get-the-reference-count-of-oc-object-and-cf-object/"/>
+    <id>https://iknowmranv.pages.dev/2020/04/19/correctly-get-the-reference-count-of-oc-object-and-cf-object/</id>
+    <published>2020-04-19T13:47:28.000Z</published>
+    <updated>2020-04-19T13:47:28.000Z</updated>
+    <content type="html"><![CDATA[<p>前言在iOS开发中，如果让你去打印一个正常OC对象的引用计数的值，你会怎么做？很多开发者可能使用<code>retainCount</code>或者<code>CFGetRetainCount</code>方法，如下面这样。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSObject</span> *obj = [<span class="built_in">NSObject</span> new];</span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;%lu&quot;</span>, (<span class="keyword">unsigned</span> <span class="keyword">long</span>)[obj retainCount]);</span><br><span class="line"><span class="comment">// result: 1</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">NSObject</span> *obj2 = [<span class="built_in">NSObject</span> new];</span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;%ld&quot;</span>, <span class="built_in">CFGetRetainCount</span>((<span class="keyword">__bridge</span> <span class="built_in">CFTypeRef</span>)(obj2)));</span><br><span class="line"><span class="comment">// result: 1</span></span><br></pre></td></tr></table></figure>]]></content>
+    <summary type="html">前言在iOS开发中，如果让你去打印一个正常OC对象的引用计数的值，你会怎么做？很多开发者可能使用retainCount或者CFGetRetainCount方法，如下面这样。
+1234567NSObject *obj = [NSObject new];NSLog(@&quot;%lu&quot;, (unsigned long)[obj retainCount]);// result: 1NSObject *obj2 = [NSObject new];NSLog(@&quot;%ld&quot;, CFGetRetainCount((__bridge CFTypeRef)(obj2)));// result: 1</summary>
+    <category term="iOS" scheme="https://iknowmranv.pages.dev/categories/iOS/"/>
+    <category term="runtime" scheme="https://iknowmranv.pages.dev/tags/runtime/"/>
+  </entry>
+  
+  <entry>
+    <title>ObjC runtime的不常见语法特性总结</title>
+    <link href="https://iknowmranv.pages.dev/2020/04/11/uncommon-syntax-summary-of-objc-runtime/"/>
+    <id>https://iknowmranv.pages.dev/2020/04/11/uncommon-syntax-summary-of-objc-runtime/</id>
+    <published>2020-04-11T13:55:49.000Z</published>
+    <updated>2020-04-11T13:55:49.000Z</updated>
+    <content type="html"><![CDATA[<p>前言在阅读ObjC runtime源码的过程中，我发现了很多在平时开发中不常见的语法特性，于是想总结一下。这些语法中，有些是编译器的特性（attribute），有些是GCC对C的拓展（C extensions），还有一些是C++、C11的语法，它们在其他的项目中也有所应用。如果平时比较少看runtime源码，又或者对这些语法掌握程度不够，看到它们时可能会觉得疑惑，在本文中，我会对下面这些语法分别举例并说明它们的用法。</p>]]></content>
+    <summary type="html">前言在阅读ObjC runtime源码的过程中，我发现了很多在平时开发中不常见的语法特性，于是想总结一下。这些语法中，有些是编译器的特性（attribute），有些是GCC对C的拓展（C extensions），还有一些是C++、C11的语法，它们在其他的项目中也有所应用。如果平时比较少看runtime源码，又或者对这些语法掌握程度不够，看到它们时可能会觉得疑惑，在本文中，我会对下面这些语法分别举例并说明它们的用法。</summary>
+    <category term="iOS" scheme="https://iknowmranv.pages.dev/categories/iOS/"/>
+    <category term="runtime" scheme="https://iknowmranv.pages.dev/tags/runtime/"/>
+  </entry>
+  
+  <entry>
+    <title>实现一个60FPS的网易云音乐首页</title>
+    <link href="https://iknowmranv.pages.dev/2020/03/22/Implementing-a-60-frame-QQ-Music-Homepage/"/>
+    <id>https://iknowmranv.pages.dev/2020/03/22/Implementing-a-60-frame-QQ-Music-Homepage/</id>
+    <published>2020-03-22T14:53:07.000Z</published>
+    <updated>2020-03-22T14:53:07.000Z</updated>
+    <content type="html"><![CDATA[<p>前言前天3月20日，网易云音乐更新了iOS 7.0 和Android 7.0 版本，从产品的角度来看，最重要的就是首页大改版，整合了"发现"和"视频"两个重点tab。然而作为一个开发者，对新版本的关注不只是UI的变化和功能的增加，而是APP的流畅度究竟有没有提升？</p>
+<p>于是，我把旧版本（6.5.3版本）和新版本（7.0版本）的首页分别滑动了一下，录屏对比，得出一个结论，新版本虽然首页非常复杂（四个tab，几十个模块），但流畅度反而提高了。</p>]]></content>
+    <summary type="html">前言前天3月20日，网易云音乐更新了iOS 7.0 和Android 7.0 版本，从产品的角度来看，最重要的就是首页大改版，整合了"发现"和"视频"两个重点tab。然而作为一个开发者，对新版本的关注不只是UI的变化和功能的增加，而是APP的流畅度究竟有没有提升？
+于是，我把旧版本（6.5.3版本）和新版本（7.0版本）的首页分别滑动了一下，录屏对比，得出一个结论，新版本虽然首页非常复杂（四个tab，几十个模块），但流畅度反而提高了。</summary>
+    <category term="iOS" scheme="https://iknowmranv.pages.dev/categories/iOS/"/>
+    <category term="UI" scheme="https://iknowmranv.pages.dev/tags/UI/"/>
+  </entry>
+  
+  <entry>
+    <title>【开源项目】CCBanner：一个简单好用的banner UI库</title>
+    <link href="https://iknowmranv.pages.dev/2020/03/08/sheet-view-ui-libary/"/>
+    <id>https://iknowmranv.pages.dev/2020/03/08/sheet-view-ui-libary/</id>
+    <published>2020-03-08T14:01:05.000Z</published>
+    <updated>2020-03-08T14:01:05.000Z</updated>
+    <content type="html"><![CDATA[<p>前言目前小公司App的iOS开发者，能有多少时间去学习新的语言特性呢？我想说的是，如果只是疲于业务需求的开发，新的语言特性很难被使用到日常开发当中。iOS开发语言Swift，已经发展到了第5个大版本，但大家还是很少用Swift开发。我想是因为客观条件不具备，业务繁忙没时间学Swift，项目都是ObjC写的没法迁移，Swift库太少很多功能没法实现等等。我也是如此，被业务需求缠身，无法抽身去学习Swift，更别说用Swift来开发了，真是太菜了。</p>
+<p>但换个角度想一想，没有那些会限制你使用Swift的客观条件，你就会去用Swift吗？答案当然是会去用了，毕竟苹果爸爸在推。所以，让自己具备那些客观条件吧，第一个要做的就是增加自己可以自由支配的时间，从业务需求中多抽出一些时间来。</p>]]></content>
+    <summary type="html">前言目前小公司App的iOS开发者，能有多少时间去学习新的语言特性呢？我想说的是，如果只是疲于业务需求的开发，新的语言特性很难被使用到日常开发当中。iOS开发语言Swift，已经发展到了第5个大版本，但大家还是很少用Swift开发。我想是因为客观条件不具备，业务繁忙没时间学Swift，项目都是ObjC写的没法迁移，Swift库太少很多功能没法实现等等。我也是如此，被业务需求缠身，无法抽身去学习Swift，更别说用Swift来开发了，真是太菜了。
+但换个角度想一想，没有那些会限制你使用Swift的客观条件，你就会去用Swift吗？答案当然是会去用了，毕竟苹果爸爸在推。所以，让自己具备那些客观条件吧，第一个要做的就是增加自己可以自由支配的时间，从业务需求中多抽出一些时间来。</summary>
+    <category term="iOS" scheme="https://iknowmranv.pages.dev/categories/iOS/"/>
+    <category term="UI" scheme="https://iknowmranv.pages.dev/tags/UI/"/>
+    <category term="类库" scheme="https://iknowmranv.pages.dev/tags/%E7%B1%BB%E5%BA%93/"/>
+  </entry>
+  
+  <entry>
+    <title>解决嵌套UITableView里的UICollectionView的点击冲突</title>
+    <link href="https://iknowmranv.pages.dev/2020/03/05/Solve-the-click-conflicts-in-UITableView-nested-UICollectionView/"/>
+    <id>https://iknowmranv.pages.dev/2020/03/05/Solve-the-click-conflicts-in-UITableView-nested-UICollectionView/</id>
+    <published>2020-03-05T14:17:31.000Z</published>
+    <updated>2020-03-05T14:17:31.000Z</updated>
+    <content type="html"><![CDATA[<p>前言UITableView的cell里嵌套UICollectionView，这种需求相信大家都遇到过，实现起来也不复杂，无非就是在UITableViewCell里放一个UICollectionView，然后注意好两个UIScrollView的滑动手势不要冲突就好了。<br>有没有想过在UITableViewCell的<code>-tableView:didSelectRowAtIndexPath:</code>和UICollectionViewCell的<code>-collectionView:didSelectItemAtIndexPath:</code>两个点击代理方法同时存在的时候，是怎么实现的？又应该怎么避免冲突呢？本篇来探究一下这个点击冲突问题。</p>]]></content>
+    <summary type="html">前言UITableView的cell里嵌套UICollectionView，这种需求相信大家都遇到过，实现起来也不复杂，无非就是在UITableViewCell里放一个UICollectionView，然后注意好两个UIScrollView的滑动手势不要冲突就好了。
+有没有想过在UITableViewCell的-tableView:didSelectRowAtIndexPath:和UICollectionViewCell的-collectionView:didSelectItemAtIndexPath:两个点击代理方法同时存在的时候，是怎么实现的？又应该怎么避免冲突呢？本篇来探究一下这个点击冲突问题。</summary>
+    <category term="iOS" scheme="https://iknowmranv.pages.dev/categories/iOS/"/>
+    <category term="UI" scheme="https://iknowmranv.pages.dev/tags/UI/"/>
+  </entry>
+  
+  <entry>
+    <title>自己的库添加cocoapods支持</title>
+    <link href="https://iknowmranv.pages.dev/2020/02/26/add-cocoapods-support-to-your-own-libraries/"/>
+    <id>https://iknowmranv.pages.dev/2020/02/26/add-cocoapods-support-to-your-own-libraries/</id>
+    <published>2020-02-26T13:17:39.000Z</published>
+    <updated>2020-02-26T13:17:39.000Z</updated>
+    <content type="html"><![CDATA[<p>前言cocoapods作为iOS/Mac平台的包管理工具，基本上成为了第三方库的标配。大部分开发者都用过cocoapods，却很少有人为自己的开源库添加过cocoapods支持。网络上的教程大部分只是说了个大概，只看一篇很难成功。刚好最近想做的事情，都要用上cocoapods，因为它能让开发者方便地下载并集成第三方库。本篇就来实践总结一下，如何为自己的库添加cocoapods支持。</p>]]></content>
+    <summary type="html">前言cocoapods作为iOS/Mac平台的包管理工具，基本上成为了第三方库的标配。大部分开发者都用过cocoapods，却很少有人为自己的开源库添加过cocoapods支持。网络上的教程大部分只是说了个大概，只看一篇很难成功。刚好最近想做的事情，都要用上cocoapods，因为它能让开发者方便地下载并集成第三方库。本篇就来实践总结一下，如何为自己的库添加cocoapods支持。</summary>
+    <category term="iOS" scheme="https://iknowmranv.pages.dev/categories/iOS/"/>
+    <category term="类库" scheme="https://iknowmranv.pages.dev/tags/%E7%B1%BB%E5%BA%93/"/>
+  </entry>
+  
+  <entry>
+    <title>让系统的kvo也支持block</title>
+    <link href="https://iknowmranv.pages.dev/2020/02/22/2019-07-03-Let-the-system-s-kvo-also-support-block/"/>
+    <id>https://iknowmranv.pages.dev/2020/02/22/2019-07-03-Let-the-system-s-kvo-also-support-block/</id>
+    <published>2020-02-22T13:36:10.000Z</published>
+    <updated>2020-02-22T13:36:10.000Z</updated>
+    <content type="html"><![CDATA[<p>kvo是一套很方便的机制，可以在属性变化的时候执行相应的代码，比如model属性变化了之后更新UI。美中不足的是系统提供的api比较老旧，还是通过方法回调，而不是block回调。这带来一个问题，如果kvo的使用方很多，那<code>observeValueForKeyPath:ofObject:change:context:</code>方法内部就需要<code>大量的判断</code>来确定是触发了哪个kvo的回调。如果能支持block回调，把block跟keypath绑定，那在代码结构上会清晰很多。</p>]]></content>
+    <summary type="html">kvo是一套很方便的机制，可以在属性变化的时候执行相应的代码，比如model属性变化了之后更新UI。美中不足的是系统提供的api比较老旧，还是通过方法回调，而不是block回调。这带来一个问题，如果kvo的使用方很多，那observeValueForKeyPath:ofObject:change:context:方法内部就需要大量的判断来确定是触发了哪个kvo的回调。如果能支持block回调，把block跟keypath绑定，那在代码结构上会清晰很多。</summary>
+    <category term="iOS" scheme="https://iknowmranv.pages.dev/categories/iOS/"/>
+    <category term="类库" scheme="https://iknowmranv.pages.dev/tags/%E7%B1%BB%E5%BA%93/"/>
+  </entry>
+</feed>
