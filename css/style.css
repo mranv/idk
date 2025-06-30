@@ -161,12 +161,14 @@ sub {
 }
 a {
   text-decoration: none;
-  color: #b0b0b0;
+  color: #00acc1;
+  transition: color 0.3s ease;
 }
 a:hover,
 a:focus {
   outline: 0;
   text-decoration: none;
+  color: #00d4e4;
   -webkit-transition: color 0.25s, background 0.5s;
   -moz-transition: color 0.25s, background 0.5s;
   -o-transition: color 0.25s, background 0.5s;
@@ -1688,8 +1690,8 @@ section.comment {
   background: #dbdbdb;
 }
 .tagslist ul li a:hover {
-  color: #00acc1;
-  background: #e6e6e6;
+  color: #00d4e4;
+  background: #2d2d2d;
 }
 .rsspart {
   background: #00acc1;
