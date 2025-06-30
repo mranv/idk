@@ -1895,14 +1895,16 @@ section.comment {
 }
 footer {
   margin-top: 1em;
-  background: #1f1f1f;
+  background: linear-gradient(to bottom, #1a1a1a, #0d0d0d);
   padding: 0 2% 0.5em;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
 }
 #footer {
   width: 95%;
   margin: 0 auto;
   overflow: hidden;
   position: relative;
+  color: #b0b0b0;
 }
 #footer .line {
   width: 100%;
@@ -1944,6 +1946,8 @@ footer {
   -o-transition: -o-transform 2s ease-out;
   -ms-transition: -ms-transform 2s ease-out;
   transition: transform 2s ease-out;
+  border: 3px solid #00acc1;
+  box-shadow: 0 0 20px rgba(0, 172, 193, 0.3);
 }
 .author:hover {
   -webkit-transform: rotateZ(360deg);
@@ -1964,7 +1968,8 @@ footer {
   line-height: 1.65;
   width: 90%;
   margin: 0 auto;
-  color: #ffffff;
+  color: #e0e0e0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 @media only screen and (min-width: 768px) {
   .info {
@@ -1996,9 +2001,10 @@ footer {
   float: left;
   display: block;
   width: 14%;
-  color: #ffffff;
+  color: #00acc1;
   font-size: 185%;
   padding: 0.5em;
+  transition: all 0.3s ease;
 }
 @media only screen and (min-width: 1024px) {
   .social-font a {
@@ -2006,7 +2012,9 @@ footer {
   }
 }
 .social-font a:hover:before {
-  color: #00acc1;
+  color: #00d4e4;
+  text-shadow: 0 0 10px rgba(0, 172, 193, 0.5);
+  transform: scale(1.1);
 }
 .icon-weibo:before,
 .icon-github:before,
@@ -2060,8 +2068,11 @@ footer {
   font-family: "Helvetica Neue", "Helvetica", "Microsoft YaHei", "WenQuanYi Micro Hei", Arial, sans-serif;
   font-size: 0.6em;
   width: 100%;
-  color: #ffffff;
+  color: #999999;
   text-align: center;
+  padding-top: 1em;
+  border-top: 1px solid #333333;
+  margin-top: 2em;
 }
 @media only screen and (min-width: 768px) {
   .copyright {

@@ -3,12 +3,12 @@ layout: ../layouts/AboutLayout.astro
 title: "Anubhav Gain - Cybersecurity Expert & Security Engineer | TechAnv"
 description: "Anubhav Gain is a distinguished cybersecurity professional and Security Engineer at Infopercept Consulting, specializing in XDR/OXDR platforms, DevSecOps, and enterprise security solutions."
 keywords: "Anubhav Gain, cybersecurity expert, security engineer, XDR platform, OXDR, DevSecOps, enterprise security, threat detection, cybersecurity consulting, Infopercept, TechAnv, security architect"
-canonical: "https://iknowmranv.pages.dev/about/"
+canonical: "https://mranv.pages.dev/"
 og:
   title: "Anubhav Gain - Cybersecurity Expert & Security Engineer"
   description: "Distinguished cybersecurity professional specializing in XDR/OXDR platforms, enterprise security architecture, and threat detection systems."
   image: "https://iknowmranv.pages.dev/assets/mranv.png"
-  url: "https://iknowmranv.pages.dev/about/"
+  url: "https://mranv.pages.dev/"
   type: "profile"
 twitter:
   card: "summary_large_image"
