@@ -1,0 +1,531 @@
+/* Consolidated Footer Styles - All footer styling in one place */
+
+/* Base Footer Container */
+footer {
+    margin-top: 1em;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    padding: 0 2% 0.5em;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Main Footer Content Area */
+#footer {
+    width: 95%;
+    margin: 0 auto;
+    padding: 60px 0 30px;
+    position: relative;
+    color: #b0b0b0;
+    overflow: visible;
+}
+
+/* Decorative background pattern */
+#footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(circle at 20% 50%, rgba(0, 172, 193, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(0, 172, 193, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(0, 172, 193, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+/* Line decoration (from existing styles) */
+#footer .line {
+    width: 100%;
+    height: 14em;
+    margin: 0 auto;
+}
+
+@media only screen and (min-width: 768px) {
+    #footer .line {
+        width: 10em;
+        float: left;
+        position: relative;
+    }
+}
+
+#footer .line span {
+    display: block;
+    width: 0.5em;
+    height: 6.25em;
+    border-right: 0.125em solid #444444;
+    margin: 0 auto;
+}
+
+@media only screen and (min-width: 768px) {
+    #footer .line span {
+        position: absolute;
+        left: 3em;
+        margin: 0 0 1.5em;
+    }
+}
+
+/* Author div with background image (existing style) */
+.author {
+    width: 6.875em;
+    height: 6.875em;
+    margin: 0 auto;
+    background: no-repeat url("../img/author.jpg") left top;
+    -webkit-background-size: 6.875em 6.875em;
+    -moz-background-size: 6.875em 6.875em;
+    background-size: 6.875em 6.875em;
+    border-radius: 3.4375em;
+    -webkit-transition: -webkit-transform 2s ease-out;
+    -moz-transition: -moz-transform 2s ease-out;
+    -o-transition: -o-transform 2s ease-out;
+    -ms-transition: -ms-transform 2s ease-out;
+    transition: transform 2s ease-out;
+    border: 3px solid #00acc1;
+    box-shadow: 0 0 20px rgba(0, 172, 193, 0.3);
+}
+
+.author:hover {
+    -webkit-transform: rotateZ(360deg);
+    -moz-transform: rotateZ(360deg);
+    -o-transform: rotateZ(360deg);
+    -ms-transform: rotateZ(360deg);
+    transform: rotateZ(360deg);
+}
+
+@media only screen and (min-width: 768px) {
+    .author {
+        position: absolute;
+        top: 6em;
+        margin: 0 0 1.5em;
+    }
+}
+
+/* Author Section (new enhanced style) */
+.author-section {
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 1;
+}
+
+.author-section img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid #00acc1;
+    box-shadow: 
+        0 0 0 8px rgba(0, 172, 193, 0.1),
+        0 5px 25px rgba(0, 172, 193, 0.3);
+    margin-bottom: 20px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    transition: all 0.3s ease;
+}
+
+.author-section img:hover {
+    transform: scale(1.05);
+    box-shadow: 
+        0 0 0 12px rgba(0, 172, 193, 0.15),
+        0 8px 35px rgba(0, 172, 193, 0.4);
+}
+
+.author-section h3 {
+    color: #fff;
+    margin: 15px 0 10px;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.author-section p {
+    color: #00acc1;
+    font-style: normal;
+    margin: 10px 0;
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: 0.3px;
+}
+
+/* Info Section */
+.info {
+    font-family: "Helvetica Neue", "Helvetica", "Microsoft YaHei", "WenQuanYi Micro Hei", Arial, sans-serif;
+    line-height: 1.65;
+    width: 90%;
+    margin: 0 auto;
+    color: #e0e0e0;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+@media only screen and (min-width: 768px) {
+    .info {
+        margin: 4.5em 0 2em 0;
+        float: left;
+        width: 75%;
+    }
+}
+
+#footer .info {
+    text-align: center;
+    margin: 40px auto;
+    max-width: 600px;
+    position: relative;
+    z-index: 1;
+}
+
+#footer .info p {
+    color: #e0e0e0;
+    font-size: 18px;
+    margin: 15px 0;
+    font-style: italic;
+    position: relative;
+    padding: 0 20px;
+}
+
+/* Add decorative quotes */
+#footer .info p::before,
+#footer .info p::after {
+    content: '"';
+    font-size: 40px;
+    color: #00acc1;
+    opacity: 0.3;
+    position: absolute;
+    font-family: Georgia, serif;
+}
+
+#footer .info p::before {
+    top: -10px;
+    left: 0;
+}
+
+#footer .info p::after {
+    bottom: -10px;
+    right: 0;
+}
+
+/* Social Links */
+.social-font {
+    width: 100%;
+    margin: 0 auto;
+    float: left;
+    padding-left: 3%;
+}
+
+@media only screen and (min-width: 568px) {
+    .social-font {
+        padding-left: 20%;
+    }
+}
+
+@media only screen and (min-width: 768px) {
+    .social-font {
+        width: 15em;
+        position: absolute;
+        right: -2em;
+        top: 3em;
+    }
+}
+
+.social-font a {
+    float: left;
+    display: block;
+    width: 14%;
+    color: #00acc1;
+    font-size: 185%;
+    padding: 0.5em;
+    transition: all 0.3s ease;
+}
+
+@media only screen and (min-width: 1024px) {
+    .social-font a {
+        padding: 0.3em;
+    }
+}
+
+.social-font a:hover:before {
+    color: #00d4e4;
+    text-shadow: 0 0 10px rgba(0, 172, 193, 0.5);
+    transform: scale(1.1);
+}
+
+/* Enhanced social links for footer */
+#footer .social-font {
+    text-align: center;
+    margin: 30px 0;
+    position: relative;
+    z-index: 1;
+    float: none;
+    width: 100%;
+    padding: 0;
+}
+
+#footer .social-font a {
+    font-size: 24px;
+    margin: 0 15px;
+    width: 50px;
+    height: 50px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #b0b0b0;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    float: none;
+    padding: 0;
+}
+
+#footer .social-font a::before {
+    transition: all 0.3s ease;
+}
+
+#footer .social-font a::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translate(-50%, -50%);
+    transition: all 0.3s ease;
+}
+
+#footer .social-font a:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: currentColor;
+}
+
+#footer .social-font a:hover::after {
+    width: 100%;
+    height: 100%;
+}
+
+/* Social icon definitions */
+.icon-weibo:before,
+.icon-github:before,
+.icon-twitter:before,
+.icon-facebook:before,
+.icon-stack-overflow:before,
+.icon-email:before,
+.icon-google_plus:before,
+.icon-linkedin:before,
+.icon-rss:before {
+    font-family: "FontAwesome";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-weibo:before { content: "\f18a"; }
+.icon-github:before { content: "\f09b"; }
+.icon-twitter:before { content: "\f099"; }
+.icon-facebook:before { content: "\f09a"; }
+.icon-stack-overflow:before { content: "\f16c"; }
+.icon-email:before { content: "\f0e0"; }
+.icon-google_plus:before { content: "\f0d5"; }
+.icon-linkedin:before { content: "\f0e1"; }
+.icon-rss:before { content: "\f09e"; }
+
+.icon-douban:before,
+.icon-zhihu:before {
+    font-family: "fontdiao";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-douban:before { content: "\f111"; }
+.icon-zhihu:before { content: "\f142"; }
+
+/* Specific social icon colors on hover */
+#footer .icon-github:hover { 
+    color: #fff !important; 
+    border-color: #fff !important;
+}
+
+#footer .icon-twitter:hover { 
+    color: #1DA1F2 !important; 
+    border-color: #1DA1F2 !important;
+}
+
+#footer .icon-linkedin:hover { 
+    color: #0077B5 !important; 
+    border-color: #0077B5 !important;
+}
+
+#footer .icon-email:hover { 
+    color: #EA4335 !important; 
+    border-color: #EA4335 !important;
+}
+
+#footer .icon-rss:hover { 
+    color: #FF6600 !important; 
+    border-color: #FF6600 !important;
+}
+
+/* Copyright Section */
+.copyright {
+    font-family: "Helvetica Neue", "Helvetica", "Microsoft YaHei", "WenQuanYi Micro Hei", Arial, sans-serif;
+    font-size: 0.6em;
+    width: 100%;
+    color: #999999;
+    text-align: center;
+    padding-top: 1em;
+    border-top: 1px solid #333333;
+    margin-top: 2em;
+}
+
+@media only screen and (min-width: 768px) {
+    .copyright {
+        float: left;
+    }
+}
+
+.copyright a {
+    color: #00acc1;
+}
+
+.copyright a:hover {
+    color: #00acc1;
+    text-decoration: underline;
+}
+
+/* Enhanced copyright for footer */
+#footer .copyright {
+    text-align: center;
+    color: #999;
+    font-size: 14px;
+    margin-top: 50px;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    z-index: 1;
+    float: none;
+}
+
+#footer .copyright::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #00acc1, transparent);
+}
+
+#footer .copyright a {
+    color: #00acc1;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+#footer .copyright a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: #00acc1;
+    transition: width 0.3s ease;
+}
+
+#footer .copyright a:hover {
+    color: #00d4e4;
+}
+
+#footer .copyright a:hover::after {
+    width: 100%;
+}
+
+/* Heart animation */
+#footer .copyright span {
+    display: inline-block;
+    animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+    0% { transform: scale(1); }
+    10% { transform: scale(1.1); }
+    20% { transform: scale(1); }
+    30% { transform: scale(1.1); }
+    40% { transform: scale(1); }
+    100% { transform: scale(1); }
+}
+
+/* CC License */
+.cc-license {
+    width: 100%;
+    float: left;
+    text-align: center;
+}
+
+.cc-license .cc-opacity {
+    opacity: 0.7;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+    filter: alpha(opacity=70);
+    border-bottom: none;
+}
+
+.cc-license .cc-opacity:hover {
+    opacity: 0.9;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=90)";
+    filter: alpha(opacity=90);
+}
+
+.cc-license img {
+    display: inline-block;
+}
+
+/* Responsive Design */
+@media only screen and (max-width: 768px) {
+    #footer {
+        padding: 40px 20px 20px;
+    }
+    
+    .author-section img {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .author-section h3 {
+        font-size: 24px;
+    }
+    
+    #footer .social-font a {
+        font-size: 20px;
+        width: 40px;
+        height: 40px;
+        margin: 0 8px;
+    }
+    
+    #footer .info p {
+        font-size: 16px;
+    }
+    
+    #footer .info p::before,
+    #footer .info p::after {
+        font-size: 30px;
+    }
+}
+
+@media only screen and (max-width: 480px) {
+    #footer .social-font a {
+        margin: 0 5px;
+    }
+    
+    .author-section h3 {
+        font-size: 20px;
+    }
+    
+    .author-section p {
+        font-size: 14px;
+    }
+}
