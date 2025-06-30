@@ -177,32 +177,30 @@ Explanation: (1 - i) * (1 - i) = 1 + i2 - 2 * i = -2i, and you need convert it t
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Foundation</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">complexNumberMultiply</span><span class="params">(<span class="keyword">_</span> a: String, <span class="keyword">_</span> b: String)</span></span> -&gt; <span class="type">String</span> &#123;</span><br><span class="line">        <span class="comment">//去掉最后一个字符...</span></span><br><span class="line">        <span class="keyword">let</span> aArr = a[..&lt;a.index(before: a.endIndex)].<span class="built_in">split</span>(separator: <span class="string">&quot;+&quot;</span>)</span><br><span class="line">        <span class="keyword">let</span> bArr = b[..&lt;b.index(before: b.endIndex)].<span class="built_in">split</span>(separator: <span class="string">&quot;+&quot;</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">let</span> a = aArr[<span class="number">0</span>], b = aArr[<span class="number">1</span>]</span><br><span class="line">        <span class="keyword">let</span> <span class="built_in">c</span> = bArr[<span class="number">0</span>], d = bArr[<span class="number">1</span>]</span><br><span class="line">        <span class="comment">//按照复数乘法公式套进去就好了,公式我百度的.类似多项式相乘,注意 i^2=-1,这个是规定的</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;\(Int(a)! * Int(c)! - Int(b)! * Int(d)!)+\(Int(a)! * Int(d)! + Int(c)! * Int(b)!)i&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> s = <span class="type">Solution</span>()</span><br><span class="line"><span class="built_in">print</span>(s.complexNumberMultiply(<span class="string">&quot;1+-1i&quot;</span>,<span class="string">&quot;0+0i&quot;</span>))</span><br></pre></td></tr></table></figure>
 
 	</div>
-		<footer class="article-footer clearfix">
-<div class="article-catetags">
+		    <footer><div id="footer" style="padding: 30px 0; background: #2b2b2b;">
 
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/LetCode/">LetCode</a>
-</div>
-
-
-  <div class="article-tags">
-
-  <span></span> <a href="/tags/LetCode-Medium/">LetCode-Medium</a>
-  </div>
-
-</div>
-
-
-
-	<div class="article-share" id="share">
-
-	  <div data-url="https://iknowmranv.pages.dev/2017/05/18/2017-05-18-letcode-in-swift-medium/" data-title="LetCode in Swift (Medium) | Anubhav Gain" data-tsina="" class="share clearfix">
-	  </div>
-
+	<div class="author-section" style="text-align: center; margin-bottom: 20px;">
+		<img src="/img/author.jpg" alt="Anubhav Gain" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 20px rgba(255,255,255,0.3); margin-bottom: 15px;">
+		<h3 style="color: #fff; margin: 10px 0; font-size: 24px;">Anubhav Gain</h3>
+		<p style="color: #ccc; font-style: italic; margin: 10px 0;">Cybersecurity Professional & Developer</p>
 	</div>
 
+	<div class="social-font" class="clearfix" style="text-align: center; margin: 20px 0;">
+		<a href="https://github.com/mranv" target="_blank" class="icon-github" title="GitHub" style="font-size: 28px; margin: 0 10px; color: #fff; transition: color 0.3s;"></a>
+		<a href="https://twitter.com/anubhavgain" target="_blank" class="icon-twitter" title="Twitter" style="font-size: 28px; margin: 0 10px; color: #fff; transition: color 0.3s;"></a>
+		<a href="https://linkedin.com/in/anubhavgain" target="_blank" class="icon-linkedin" title="LinkedIn" style="font-size: 28px; margin: 0 10px; color: #fff; transition: color 0.3s;"></a>
+		<a href="mailto:contact@anubhavgain.com" target="_blank" class="icon-email" title="Email" style="font-size: 28px; margin: 0 10px; color: #fff; transition: color 0.3s;"></a>
+		<a href="/atom.xml" target="_blank" class="icon-rss" title="RSS Feed" style="font-size: 28px; margin: 0 10px; color: #fff; transition: color 0.3s;"></a>
+	</div>
 
+	<section class="info" style="text-align: center; margin: 20px 0;">
+		<p style="color: #ccc; font-size: 16px; margin: 10px 0;">无立足境，是方干净</p>
+	</section>
+
+	<p class="copyright" style="text-align: center; color: #888; font-size: 14px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #444;">
+		Made with <span style="color: #e74c3c;">❤</span> by <a href="/about" target="_blank" title="Anubhav Gain" style="color: #fff; text-decoration: none;">Anubhav Gain</a> © 2024
+	</p>
+</div>
 </footer>
 
 
@@ -447,43 +445,29 @@ Explanation: (1 - i) * (1 - i) = 1 + i2 - 2 * i = -2i, and you need convert it t
 </aside>
 </div>
     </div>
-    <footer><div id="footer" >
+        <footer><div id="footer" style="padding: 30px 0; background: #2b2b2b;">
 
-	<div class="line">
-		<span></span>
-		<div class="author"></div>
+	<div class="author-section" style="text-align: center; margin-bottom: 20px;">
+		<img src="/img/author.jpg" alt="Anubhav Gain" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 20px rgba(255,255,255,0.3); margin-bottom: 15px;">
+		<h3 style="color: #fff; margin: 10px 0; font-size: 24px;">Anubhav Gain</h3>
+		<p style="color: #ccc; font-style: italic; margin: 10px 0;">Cybersecurity Professional & Developer</p>
 	</div>
 
+	<div class="social-font" class="clearfix" style="text-align: center; margin: 20px 0;">
+		<a href="https://github.com/mranv" target="_blank" class="icon-github" title="GitHub" style="font-size: 28px; margin: 0 10px; color: #fff; transition: color 0.3s;"></a>
+		<a href="https://twitter.com/anubhavgain" target="_blank" class="icon-twitter" title="Twitter" style="font-size: 28px; margin: 0 10px; color: #fff; transition: color 0.3s;"></a>
+		<a href="https://linkedin.com/in/anubhavgain" target="_blank" class="icon-linkedin" title="LinkedIn" style="font-size: 28px; margin: 0 10px; color: #fff; transition: color 0.3s;"></a>
+		<a href="mailto:contact@anubhavgain.com" target="_blank" class="icon-email" title="Email" style="font-size: 28px; margin: 0 10px; color: #fff; transition: color 0.3s;"></a>
+		<a href="/atom.xml" target="_blank" class="icon-rss" title="RSS Feed" style="font-size: 28px; margin: 0 10px; color: #fff; transition: color 0.3s;"></a>
+	</div>
 
-	<section class="info">
-		<p> 无立足境，是方干净 <br/>
-			</p>
+	<section class="info" style="text-align: center; margin: 20px 0;">
+		<p style="color: #ccc; font-size: 16px; margin: 10px 0;">无立足境，是方干净</p>
 	</section>
 
-	<div class="social-font" class="clearfix">
-
-
-		<a href="https://github.com/Anubhav Gain543" target="_blank" class="icon-github" title="github"></a>
-
-
-
-
-
-
-
-
-
-	</div>
-
-
-
-		<p class="copyright">
-		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024
-
-		<a href="/about" target="_blank" title="Anubhav Gain">Anubhav Gain</a>
-
-
-		</p>
+	<p class="copyright" style="text-align: center; color: #888; font-size: 14px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #444;">
+		Made with <span style="color: #e74c3c;">❤</span> by <a href="/about" target="_blank" title="Anubhav Gain" style="color: #fff; text-decoration: none;">Anubhav Gain</a> © 2024
+	</p>
 </div>
 </footer>
     <script src="/js/responsive-enhance.js"></script>

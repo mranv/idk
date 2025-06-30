@@ -178,32 +178,30 @@ Output: return the tree root node representing the following tree:
 <h2 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h2><p>　　这是一道二叉树题目,根据题意,很容易联想”大事化小”的方法,下面采用递归算法解决问题.<br>　　先是找到最大的数字,创建节点.之后最大数字的左右两边又是两个数组,这两个数字又继续看成一个独立的数组,采用同样的方法,查找最大值,创立节点.这就是”大事化小”的思想了.<br>　　当然本题如果不采用递归算法,就需要采用栈的方式来解决,难度大一些,后期我再补充上非递归方法.</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Definition for a binary tree node.</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TreeNode</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">var</span> val: <span class="type">Int</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">var</span> <span class="keyword">left</span>: <span class="type">TreeNode?</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">var</span> <span class="keyword">right</span>: <span class="type">TreeNode?</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">init</span>(<span class="keyword">_</span> val: <span class="type">Int</span>) &#123;</span><br><span class="line">        <span class="keyword">self</span>.val = val</span><br><span class="line">        <span class="keyword">self</span>.<span class="keyword">left</span> = <span class="literal">nil</span></span><br><span class="line">        <span class="keyword">self</span>.<span class="keyword">right</span> = <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//递归算法</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">constructMaximumBinaryTree</span><span class="params">(<span class="keyword">_</span> nums: [Int])</span></span> -&gt; <span class="type">TreeNode?</span> &#123;</span><br><span class="line">        <span class="comment">//这里需要条件来判断递归终止</span></span><br><span class="line">        <span class="keyword">if</span> nums.<span class="built_in">count</span> == <span class="number">0</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">let</span> maxNums = nums.<span class="built_in">max</span>()</span><br><span class="line">        <span class="keyword">let</span> index = nums.index(of: maxNums!)</span><br><span class="line">        <span class="keyword">let</span> rootNode = <span class="type">TreeNode</span>(maxNums!)</span><br><span class="line">        rootNode.<span class="keyword">left</span> = constructMaximumBinaryTree(<span class="type">Array</span>(nums[<span class="number">0</span>..&lt;index!]))</span><br><span class="line">        rootNode.<span class="keyword">right</span> = constructMaximumBinaryTree(<span class="type">Array</span>(nums[index!+<span class="number">1</span> ..&lt; nums.<span class="built_in">count</span>]))</span><br><span class="line">        <span class="keyword">return</span> rootNode</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> s = <span class="type">Solution</span>()</span><br><span class="line"><span class="keyword">let</span> node = s.constructMaximumBinaryTree([<span class="number">3</span>,<span class="number">2</span>,<span class="number">1</span>,<span class="number">6</span>,<span class="number">0</span>,<span class="number">5</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment">//非递归算法 (后期更新)</span></span><br></pre></td></tr></table></figure>
 	</div>
-		<footer class="article-footer clearfix">
-<div class="article-catetags">
+		    <footer><div id="footer" style="padding: 30px 0; background: #2b2b2b;">
 
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/LetCode/">LetCode</a>
-</div>
-
-
-  <div class="article-tags">
-
-  <span></span> <a href="/tags/LetCode-Medium/">LetCode-Medium</a><a href="/tags/Tree/">Tree</a>
-  </div>
-
-</div>
-
-
-
-	<div class="article-share" id="share">
-
-	  <div data-url="https://iknowmranv.pages.dev/2018/03/08/2018-03-08-LetCode-in-Swift-654-Maximum-Binary-Tree/" data-title="LetCode in Swift (654-Maximum Binary Tree) | Anubhav Gain" data-tsina="" class="share clearfix">
-	  </div>
-
+	<div class="author-section" style="text-align: center; margin-bottom: 20px;">
+		<img src="/img/author.jpg" alt="Anubhav Gain" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 20px rgba(255,255,255,0.3); margin-bottom: 15px;">
+		<h3 style="color: #fff; margin: 10px 0; font-size: 24px;">Anubhav Gain</h3>
+		<p style="color: #ccc; font-style: italic; margin: 10px 0;">Cybersecurity Professional & Developer</p>
 	</div>
 
+	<div class="social-font" class="clearfix" style="text-align: center; margin: 20px 0;">
+		<a href="https://github.com/mranv" target="_blank" class="icon-github" title="GitHub" style="font-size: 28px; margin: 0 10px; color: #fff; transition: color 0.3s;"></a>
+		<a href="https://twitter.com/anubhavgain" target="_blank" class="icon-twitter" title="Twitter" style="font-size: 28px; margin: 0 10px; color: #fff; transition: color 0.3s;"></a>
+		<a href="https://linkedin.com/in/anubhavgain" target="_blank" class="icon-linkedin" title="LinkedIn" style="font-size: 28px; margin: 0 10px; color: #fff; transition: color 0.3s;"></a>
+		<a href="mailto:contact@anubhavgain.com" target="_blank" class="icon-email" title="Email" style="font-size: 28px; margin: 0 10px; color: #fff; transition: color 0.3s;"></a>
+		<a href="/atom.xml" target="_blank" class="icon-rss" title="RSS Feed" style="font-size: 28px; margin: 0 10px; color: #fff; transition: color 0.3s;"></a>
+	</div>
 
+	<section class="info" style="text-align: center; margin: 20px 0;">
+		<p style="color: #ccc; font-size: 16px; margin: 10px 0;">无立足境，是方干净</p>
+	</section>
+
+	<p class="copyright" style="text-align: center; color: #888; font-size: 14px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #444;">
+		Made with <span style="color: #e74c3c;">❤</span> by <a href="/about" target="_blank" title="Anubhav Gain" style="color: #fff; text-decoration: none;">Anubhav Gain</a> © 2024
+	</p>
+</div>
 </footer>
 
 
@@ -448,43 +446,29 @@ Output: return the tree root node representing the following tree:
 </aside>
 </div>
     </div>
-    <footer><div id="footer" >
+        <footer><div id="footer" style="padding: 30px 0; background: #2b2b2b;">
 
-	<div class="line">
-		<span></span>
-		<div class="author"></div>
+	<div class="author-section" style="text-align: center; margin-bottom: 20px;">
+		<img src="/img/author.jpg" alt="Anubhav Gain" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 20px rgba(255,255,255,0.3); margin-bottom: 15px;">
+		<h3 style="color: #fff; margin: 10px 0; font-size: 24px;">Anubhav Gain</h3>
+		<p style="color: #ccc; font-style: italic; margin: 10px 0;">Cybersecurity Professional & Developer</p>
 	</div>
 
+	<div class="social-font" class="clearfix" style="text-align: center; margin: 20px 0;">
+		<a href="https://github.com/mranv" target="_blank" class="icon-github" title="GitHub" style="font-size: 28px; margin: 0 10px; color: #fff; transition: color 0.3s;"></a>
+		<a href="https://twitter.com/anubhavgain" target="_blank" class="icon-twitter" title="Twitter" style="font-size: 28px; margin: 0 10px; color: #fff; transition: color 0.3s;"></a>
+		<a href="https://linkedin.com/in/anubhavgain" target="_blank" class="icon-linkedin" title="LinkedIn" style="font-size: 28px; margin: 0 10px; color: #fff; transition: color 0.3s;"></a>
+		<a href="mailto:contact@anubhavgain.com" target="_blank" class="icon-email" title="Email" style="font-size: 28px; margin: 0 10px; color: #fff; transition: color 0.3s;"></a>
+		<a href="/atom.xml" target="_blank" class="icon-rss" title="RSS Feed" style="font-size: 28px; margin: 0 10px; color: #fff; transition: color 0.3s;"></a>
+	</div>
 
-	<section class="info">
-		<p> 无立足境，是方干净 <br/>
-			</p>
+	<section class="info" style="text-align: center; margin: 20px 0;">
+		<p style="color: #ccc; font-size: 16px; margin: 10px 0;">无立足境，是方干净</p>
 	</section>
 
-	<div class="social-font" class="clearfix">
-
-
-		<a href="https://github.com/Anubhav Gain543" target="_blank" class="icon-github" title="github"></a>
-
-
-
-
-
-
-
-
-
-	</div>
-
-
-
-		<p class="copyright">
-		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024
-
-		<a href="/about" target="_blank" title="Anubhav Gain">Anubhav Gain</a>
-
-
-		</p>
+	<p class="copyright" style="text-align: center; color: #888; font-size: 14px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #444;">
+		Made with <span style="color: #e74c3c;">❤</span> by <a href="/about" target="_blank" title="Anubhav Gain" style="color: #fff; text-decoration: none;">Anubhav Gain</a> © 2024
+	</p>
 </div>
 </footer>
     <script src="/js/responsive-enhance.js"></script>
